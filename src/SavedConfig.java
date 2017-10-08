@@ -13,12 +13,15 @@ public class SavedConfig {
 
 	public static void init()
 	{
-		try {
-			System.setErr(new PrintStream(new FileOutputStream(new File("errorlog.txt"))));
-		} catch (Exception e1) {
-			e1.printStackTrace();
+		if(!StaticConfigs.DEBUG)
+		{
+			try {
+				System.setErr(new PrintStream(new FileOutputStream(new File("errorlog.txt"))));
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 		}
-		
+
 		File f = new File("config.txt");
 		if(f.exists())
 		{
@@ -49,12 +52,12 @@ public class SavedConfig {
 			chooser.setAcceptAllFileFilterUsed(false);
 			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) { 
 				String s = chooser.getSelectedFile().getAbsolutePath();
-				System.out.println(s);
-				if(!s.endsWith("\\"))
+				if(!s.endsWith(File.separator))
 				{
-					s = s+"\\";
+					s = s+File.separator;
 				}
 				PATH = s;
+				System.out.println(s);
 				writeOut();
 			}
 			else {
@@ -62,7 +65,7 @@ public class SavedConfig {
 			}
 		}
 	}
-	
+
 	private static void writeOut()
 	{
 		File f = new File("config.txt");

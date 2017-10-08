@@ -6,10 +6,15 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
 import com.github.sarxos.webcam.Webcam;
+
+import boofcv.alg.filter.binary.Contour;
+import georegression.struct.point.Point2D_I32;
 
 public class WebcamCanvas extends JPanel implements MouseListener{
 	private static final long serialVersionUID = 1L;
@@ -27,8 +32,12 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 	private Webcam cam;
 	private Canvas canvas;
 	private BufferedImage lastDrawn;
+	private BufferedImage buf;
 	private Rectangle recogBounds;
 	private MatchResult lastResult;
+	
+	
+	private ArrayList<CardCandidate> ccs = new ArrayList<>();
 
 	public Webcam getWebcam() {
 		return cam;
@@ -41,6 +50,11 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 	public BufferedImage lastDrawn()
 	{
 		return lastDrawn;
+	}
+	
+	public void addCandidate(CardCandidate cc)
+	{
+		ccs.add(cc);
 	}
 
 	public BufferedImage getBoundedZone()
@@ -60,7 +74,13 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 			cam.open();
 		}
 		lastDrawn = cam.getImage();
-		Graphics g = canvas.getGraphics();
+		
+		if(buf == null || buf.getHeight() != lastDrawn.getHeight() || buf.getWidth() != lastDrawn.getWidth())
+		{
+			buf = new BufferedImage(lastDrawn.getWidth(),lastDrawn.getHeight(),BufferedImage.TYPE_3BYTE_BGR);
+		}
+		Graphics gi = canvas.getGraphics();
+		Graphics g = buf.getGraphics();
 		g.drawImage(lastDrawn, 0, 0, null);
 		g.setColor(Color.WHITE);
 		g.drawRect(recogBounds.x, recogBounds.y, 
@@ -69,6 +89,34 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 		if(lastResult!=null)
 		{
 			g.drawString(lastResult.toString(), 0, 10);
+		}
+		
+		g.setColor(Color.RED);
+		
+		for(CardCandidate cc:ccs)
+		{
+			cc.draw(g,recogBounds.x,recogBounds.y);
+		}
+		ccs.clear();
+		
+		gi.drawImage(buf, 0, 0, null);
+	}
+	
+	public void drawContours(Graphics g)
+	{
+		List<Contour> contours = FindCardCandidates.getCannyContours(lastDrawn);
+		for(Contour con:contours)
+		{
+			int[] xpoint = new int[con.external.size()];
+			int[] ypoint = new int[con.external.size()];
+			int i=0;
+			for(Point2D_I32 pt:con.external)
+			{
+				xpoint[i]=pt.x;
+				ypoint[i]=pt.y;
+				i++;
+			}
+			g.drawPolygon(xpoint,ypoint,xpoint.length);
 		}
 	}
 
@@ -85,6 +133,7 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 		recogBounds.x = (int)(cam.getViewSize().getWidth()/2-recogBounds.width/2);
 		recogBounds.y = (int)(cam.getViewSize().getHeight()/2-recogBounds.height/2);
 	}
+
 
 	public void moveBox(MouseEvent a) {
 		if(lastDrawn!=null)
@@ -147,4 +196,5 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 	public void setLastResult(MatchResult lastResult) {
 		this.lastResult = lastResult;
 	}
+	
 }

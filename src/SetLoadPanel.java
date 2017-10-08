@@ -12,9 +12,9 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 	private JCheckBox[] checks;
 	private String[] names;
 	private File[] files;
-	private MultiList mlist;
+	private RecogList mlist;
 
-	public SetLoadPanel(MultiList ml)
+	public SetLoadPanel(RecogList ml)
 	{
 		super();
 		mlist = ml;
@@ -53,7 +53,7 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 		{
 			synchronized(mlist){
 				try {
-					mlist.add(new RecogList(files[i]));
+					mlist.add(new RecogList(files[i]),names[i]);
 				} catch (IOException e1) {
 					checks[i].setSelected(false);
 				}
@@ -85,20 +85,29 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 	{
 		for(int i=0;i<names.length;i++)
 		{
-			if(!checks[i].isSelected())
+			final int x = i;
+			new Thread()
 			{
-				synchronized(mlist){
-					try {
-						mlist.add(new RecogList(files[i]));
-						checks[i].setSelected(true);
-					} catch (IOException e1) {
-						checks[i].setSelected(false);
+				public void run()
+				{
+					if(!checks[x].isSelected())
+					{
+						try {
+							RecogList rl = new RecogList(files[x]);
+							synchronized(mlist){
+								mlist.add(rl,names[x]);
+							}
+							checks[x].setSelected(true);
+						} catch (IOException e1) {
+							checks[x].setSelected(false);
+						}
 					}
 				}
-			}
+			}.start();
+
 		}
 	}
-	
+
 	public void unloadAll()
 	{
 		for(int i=0;i<names.length;i++)

@@ -18,9 +18,9 @@ import com.github.sarxos.webcam.WebcamLockException;
 
 public class RecogApp extends JFrame implements KeyListener{
 	private static final long serialVersionUID = 1L;
-	public static MultiList list;
+	public static RecogList list;
 	private static WebcamCanvas wc;
-	
+
 	public static SetLoadPanel select;
 
 	public static void main(String[] args)
@@ -34,6 +34,8 @@ public class RecogApp extends JFrame implements KeyListener{
 		SavedConfig.init();
 		new RecogApp();
 	}
+	
+	
 
 	public RecogApp()
 	{
@@ -41,27 +43,10 @@ public class RecogApp extends JFrame implements KeyListener{
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 
-		list = new MultiList();
+		list = new RecogList();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		Webcam w = (Webcam) JOptionPane.showInputDialog(this, "Choose a webcam", "Select webcam", 
-				JOptionPane.PLAIN_MESSAGE, null, 
-				Webcam.getWebcams().toArray(),Webcam.getDefault());
-		if(w==null)
-		{
-			System.exit(ABORT);
-		}
-
-		Dimension d = (Dimension) JOptionPane.showInputDialog(this, "Choose a resolution", "Select resolution", 
-				JOptionPane.PLAIN_MESSAGE, null, 
-				w.getViewSizes(),w.getViewSizes()[w.getViewSizes().length-1]);
-
-		if(d == null)
-		{
-			System.exit(ABORT);
-		}
-
-		w.setViewSize(d);
+		Webcam w = WebcamUtils.chooseWebcam();
 
 		JPanel right = new JPanel();
 		right.setLayout(new GridLayout(2,1));
@@ -75,7 +60,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		add(right,BorderLayout.EAST);
 		right.add(new SettingsPanel());
 		right.add(scroll);
-		right.setPreferredSize(new Dimension(select.getBoxWidth(),wc.getHeight()));
+		right.setPreferredSize(new Dimension(300,wc.getHeight()));
 		pack();
 		setVisible(true);
 		setResizable(false);
@@ -97,12 +82,12 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 	}
 
-	public void loadFileToList(String filename, MultiList ml)
+	public void loadFileToList(String filename, RecogList ml)
 	{
 		try {
 			File f = new File(filename);
 			RecogList l = new RecogList(f);
-			ml.add(l);
+			ml.add(l,l.getName());
 		} catch (IOException e) {
 			return;
 		}
@@ -111,31 +96,40 @@ public class RecogApp extends JFrame implements KeyListener{
 	public void doRecog()
 	{
 		BufferedImage img = wc.getBoundedZone();
-		if(img!=null)
+		doRecog(img);
+	}
+
+	public static void doRecog(BufferedImage img)
+	{
+
+		if(StaticConfigs.ATTEMPT_HASH_SORT)
 		{
-			img = ImageUtil.getScaledImage(img);
-			ImageDesc id = new ImageDesc(img);
-			synchronized(list){
-				MatchResult res = list.getMatch(id, SettingsPanel.RECOG_THRESH);
-				if(res!=null){
-					wc.setLastResult(res);
-					PopoutCardWindow.setDisplay(res.scryfallId);
+			for(CardCandidate cc:FindCardCandidates.validCandidates(img))
+			{
+				wc.addCandidate(cc);
+				BufferedImage i = ImageUtil.getScaledImage(cc.getResolvedImage(img));
+				ImageDesc id = new ImageDesc(i);
+				synchronized(list){
+					MatchResult res = list.getMatchTopOnly(id, SettingsPanel.RECOG_THRESH/100f);
+					if(res!=null){
+						wc.setLastResult(res);
+						PopoutCardWindow.setDisplay(res.scryfallId,res.name);
+					}
 				}
 			}
 		}
-	}
-	
-	public static void doRecog(BufferedImage img)
-	{
-		if(img!=null)
+		else
 		{
-			img = ImageUtil.getScaledImage(img);
-			ImageDesc id = new ImageDesc(img);
-			synchronized(list){
-				MatchResult res = list.getMatch(id, SettingsPanel.RECOG_THRESH);
-				if(res!=null){
-					wc.setLastResult(res);
-					PopoutCardWindow.setDisplay(res.scryfallId);
+			if(img!=null)
+			{
+				img = ImageUtil.getScaledImage(img);
+				ImageDesc id = new ImageDesc(img);
+				synchronized(list){
+					MatchResult res = list.getMatchTopOnly(id, SettingsPanel.RECOG_THRESH/100f);
+					if(res!=null){
+						wc.setLastResult(res);
+						PopoutCardWindow.setDisplay(res.scryfallId,res.name);
+					}
 				}
 			}
 		}
