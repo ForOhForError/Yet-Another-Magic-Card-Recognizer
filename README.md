@@ -1,4 +1,4 @@
-# MTG-Card-Recognizer
-Open Source MTG Computer Vision Card Recognizer
+![YamCR Banner](readmeImages/YamCRBanner.png)
 
-Written in Java making use of the excellent BoofCV library.
+YamCR is an open-source Magic The Gathering card recognizer, written in Java and making use of the excellent BoofCV library.
+
