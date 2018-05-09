@@ -4,9 +4,8 @@ import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -18,7 +17,9 @@ import com.github.sarxos.webcam.WebcamLockException;
 
 public class RecogApp extends JFrame implements KeyListener{
 	private static final long serialVersionUID = 1L;
-	public static RecogList list;
+
+	public static RecogStrategy strat;
+
 	private static WebcamCanvas wc;
 
 	public static SetLoadPanel select;
@@ -34,18 +35,18 @@ public class RecogApp extends JFrame implements KeyListener{
 		SavedConfig.init();
 		new RecogApp();
 	}
-	
-	
 
 	public RecogApp()
 	{
-		super("Card Recognizer");
+		super("Yet Another Magic Card Recognizer");
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 
-		list = new RecogList();
+		//strat = new BSTreeList();
+		strat = new RecogList();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		Webcam w = WebcamUtils.chooseWebcam();
 
 		JPanel right = new JPanel();
@@ -53,9 +54,14 @@ public class RecogApp extends JFrame implements KeyListener{
 
 		wc = new WebcamCanvas(w);
 
+		ImageIcon ico = null;
+		ico = new ImageIcon("YamCR.png");
+		setIconImage(ico.getImage());
+
 		JScrollPane scroll = new JScrollPane();
-		select = new SetLoadPanel(list);
+		select = new SetLoadPanel(strat);
 		scroll.setViewportView(select);
+		scroll.getVerticalScrollBar().setUnitIncrement(16);
 		add(wc,BorderLayout.CENTER);
 		add(right,BorderLayout.EAST);
 		right.add(new SettingsPanel());
@@ -82,17 +88,6 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 	}
 
-	public void loadFileToList(String filename, RecogList ml)
-	{
-		try {
-			File f = new File(filename);
-			RecogList l = new RecogList(f);
-			ml.add(l,l.getName());
-		} catch (IOException e) {
-			return;
-		}
-	}
-
 	public void doRecog()
 	{
 		BufferedImage img = wc.getBoundedZone();
@@ -101,35 +96,15 @@ public class RecogApp extends JFrame implements KeyListener{
 
 	public static void doRecog(BufferedImage img)
 	{
-
-		if(StaticConfigs.ATTEMPT_HASH_SORT)
+		if(img!=null)
 		{
-			for(CardCandidate cc:FindCardCandidates.validCandidates(img))
-			{
-				wc.addCandidate(cc);
-				BufferedImage i = ImageUtil.getScaledImage(cc.getResolvedImage(img));
-				ImageDesc id = new ImageDesc(i);
-				synchronized(list){
-					MatchResult res = list.getMatchTopOnly(id, SettingsPanel.RECOG_THRESH/100f);
-					if(res!=null){
-						wc.setLastResult(res);
-						PopoutCardWindow.setDisplay(res.scryfallId,res.name);
-					}
-				}
-			}
-		}
-		else
-		{
-			if(img!=null)
-			{
-				img = ImageUtil.getScaledImage(img);
-				ImageDesc id = new ImageDesc(img);
-				synchronized(list){
-					MatchResult res = list.getMatchTopOnly(id, SettingsPanel.RECOG_THRESH/100f);
-					if(res!=null){
-						wc.setLastResult(res);
-						PopoutCardWindow.setDisplay(res.scryfallId,res.name);
-					}
+			img = ImageUtil.getScaledImage(img);
+			ImageDesc id = new ImageDesc(img);
+			synchronized(strat){
+				MatchResult res = strat.getMatch(id, SettingsPanel.RECOG_THRESH/100f);
+				if(res!=null){
+					wc.setLastResult(res);
+					PopoutCardWindow.setDisplay(res.scryfallId,res.name);
 				}
 			}
 		}

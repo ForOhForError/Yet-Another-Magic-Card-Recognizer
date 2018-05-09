@@ -1,7 +1,12 @@
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -16,8 +21,7 @@ public class SettingsPanel extends JPanel{
 	public SettingsPanel()
 	{
 		super();
-		setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
-		add(new JLabel("Settings"));
+		setLayout(new FlowLayout());
 
 		JCheckBox recog = new JCheckBox("Only trigger recognition manually",!RECOG_EVERY_FRAME);
 		recog.setToolTipText("Only trigger recognition manually");
@@ -58,7 +62,16 @@ public class SettingsPanel extends JPanel{
 		});
 		add(loadAll);
 		
-		JButton launchScreenGrab = new JButton("Launch Screen Grab");
+		JButton unloadAll = new JButton("Unload all sets");
+		unloadAll.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				RecogApp.select.unloadAll();
+			}
+		});
+		add(unloadAll);
+		
+		JButton launchScreenGrab = new JButton("Screen Grab");
 		launchScreenGrab.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -67,7 +80,7 @@ public class SettingsPanel extends JPanel{
 		});
 		add(launchScreenGrab);
 		
-		JButton launchPopout = new JButton("Launch Card Popout");
+		JButton launchPopout = new JButton("Card Preview");
 		launchPopout.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -76,7 +89,7 @@ public class SettingsPanel extends JPanel{
 		});
 		add(launchPopout);
 		
-		JButton launchSetGen = new JButton("Launch Set Generator");
+		JButton launchSetGen = new JButton("Set Generator");
 		launchSetGen.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -85,5 +98,22 @@ public class SettingsPanel extends JPanel{
 		});
 		add(launchSetGen);
 		
+		JButton launchDeckGen = new JButton("Deck Generator");
+		launchDeckGen.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new DeckGenerator();
+			}
+		});
+		add(launchDeckGen);
+		
+		JButton toggleSetPanel = new JButton("Toggle Sets/Decks Listing");
+		toggleSetPanel.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				RecogApp.select.toggle();
+			}
+		});
+		add(toggleSetPanel);
 	}
 }

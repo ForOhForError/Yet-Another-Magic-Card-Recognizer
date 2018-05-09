@@ -79,4 +79,8 @@ public class SavedConfig {
 			e.printStackTrace();
 		}
 	}
+	
+	public static String getDecksPath(){
+		return PATH+"decks"+File.separator;
+	}
 }

@@ -19,6 +19,7 @@ import boofcv.struct.feature.BrightFeature;
 public class ImageDesc {
 	static DetectDescribePoint<GrayF32, BrightFeature> detDesc = 
 			FactoryDetectDescribe.surfStable(StaticConfigs.getHessianConf(), null,null, GrayF32.class);
+	
 	static ScoreAssociation<BrightFeature> scorer = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
 	static AssociateDescription<BrightFeature> associate = FactoryAssociation.greedy(scorer, Double.MAX_VALUE, true);
 	
@@ -46,8 +47,14 @@ public class ImageDesc {
 	
 	public void writeOut(DataOutputStream out) throws IOException
 	{
-		out.writeInt(desc.data.length);
-		for(BrightFeature ft:desc.data)
+		writeDescOut(out,desc);
+		hash.writeOut(out);
+	}
+	
+	public void writeDescOut(DataOutputStream out, FastQueue<BrightFeature> d) throws IOException
+	{
+		out.writeInt(d.data.length);
+		for(BrightFeature ft:d.data)
 		{
 			out.writeInt(ft.value.length);
 			for(double val:ft.value)
@@ -55,12 +62,18 @@ public class ImageDesc {
 				out.writeDouble(val);
 			}
 		}
-		hash.writeOut(out);
 	}
 	
 	public static ImageDesc readIn(ByteBuffer buf)
 	{
-		FastQueue<BrightFeature> des = UtilFeature.createQueue(detDesc,0);
+		FastQueue<BrightFeature> d = readDescIn(buf,detDesc);
+		AverageHash h = AverageHash.readIn(buf);
+		return new ImageDesc(d,h);
+	}
+	
+	public static FastQueue<BrightFeature> readDescIn(ByteBuffer buf,DetectDescribePoint<GrayF32,BrightFeature> ddp)
+	{
+		FastQueue<BrightFeature> d = UtilFeature.createQueue(ddp,0);
 		int dts = buf.getInt();
 		for(int i=0;i<dts;i++)
 		{
@@ -72,10 +85,9 @@ public class ImageDesc {
 				vls[j]=buf.getDouble();
 			}
 			f.set(vls);
-			des.add(f);
+			d.add(f);
 		}
-		AverageHash h = AverageHash.readIn(buf);
-		return new ImageDesc(des,h);
+		return d;
 	}
 	
 	public static void describeImage(GrayF32 input, FastQueue<BrightFeature> descs) {

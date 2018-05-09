@@ -1,21 +1,18 @@
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import forohfor.scryfall.api.Card;
-import forohfor.scryfall.api.CardFace;
 import forohfor.scryfall.api.MTGCardQuery;
 import forohfor.scryfall.api.Set;
 
@@ -53,12 +50,16 @@ public class SetGenerator extends JFrame{
 	private Thread genSets;
 
 	private static volatile boolean runThread = true;
-
-	private static final String ART_FORMAT = "normal";
+	private static boolean isOut = false;
 
 	public SetGenerator()
 	{
 		super("Set generator");
+		if(isOut)
+		{
+			return;
+		}
+		isOut=true;
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		gen = new JButton("Generate sets");
 		typeBox = new JComboBox<>(setTypes);
@@ -86,13 +87,18 @@ public class SetGenerator extends JFrame{
 				genSets.start();
 			}
 		});
+		
+		JPanel bot = new JPanel();
+		bot.setLayout(new BorderLayout());
+		
 		jt=new JTextArea(10,50);
 		jt.setEditable(false);
 		scroll.setViewportView(jt);
 		setLayout(new BorderLayout());
-		add(scroll,BorderLayout.NORTH);
-		add(typeBox,BorderLayout.CENTER);
-		add(gen,BorderLayout.SOUTH);
+		add(scroll,BorderLayout.CENTER);
+		bot.add(typeBox,BorderLayout.CENTER);
+		bot.add(gen,BorderLayout.SOUTH);
+		add(bot,BorderLayout.SOUTH);
 		pack();
 		setVisible(true);
 	}
@@ -101,6 +107,7 @@ public class SetGenerator extends JFrame{
 	{
 		runThread = false;
 		super.dispose();
+		isOut=false;
 	}
 
 	public void writeSet(Set set, String path, boolean ignoreBasics)
@@ -146,47 +153,7 @@ public class SetGenerator extends JFrame{
 
 		for(Card card:cards)
 		{
-			boolean skip = false;
-			if(card.getTypeLine()!=null)
-			{
-				if(ignoreBasics)
-				{
-					skip = card.getTypeLine().toLowerCase().contains("basic");
-				}
-			}
-			if(!skip)
-			{
-				if(card.isMultifaced())
-				{
-					for(CardFace face:card.getFaces())
-					{
-						BufferedImage i = getImage(face,ART_FORMAT);
-						if(i!=null)
-						{
-							String key = face.getName()+"|"+card.getSetCode()+"|"+card.getScryfallUUID();
-							r.addPair(new ImageDesc(ImageUtil.getScaledImage(i)), key);
-						}
-						else
-						{
-							jt.append("Couldn't find card art for card face: "+face.getName()+
-									" from "+card.toString()+"\n");
-						}
-					}
-				}
-				else
-				{
-					BufferedImage i = getImage(card,ART_FORMAT);
-					if(i!=null)
-					{
-						String key = card.getName()+"|"+card.getSetCode()+"|"+card.getScryfallUUID();
-						r.addPair(new ImageDesc(ImageUtil.getScaledImage(i)), key);
-					}
-					else
-					{
-						jt.append("Couldn't find card art for card: "+card.toString()+"\n");
-					}
-				}
-			}
+			r.addFromCard(card);
 		}
 
 		try {
@@ -195,37 +162,6 @@ public class SetGenerator extends JFrame{
 			jt.append("Write failed.\n");
 		}
 	}
-
-	private BufferedImage getImage(Card c,String format)
-	{
-		try
-		{
-			return ImageIO.read(new URL(getImageURI(c,format)));
-		}
-		catch(Exception e)
-		{
-			return null;
-		}
-	}
-
-	private BufferedImage getImage(CardFace c,String format)
-	{
-		try
-		{
-			return ImageIO.read(new URL(c.getImageURI(format)));
-		}
-		catch(Exception e)
-		{
-			return null;
-		}
-	}
-
-	private String getImageURI(Card c,String format)
-	{
-		if(c.isMultifaced())
-		{
-			return c.getFaces().get(0).getImageURI(format);
-		}
-		return c.getImageURI(format);
-	}
+	
+	
 }

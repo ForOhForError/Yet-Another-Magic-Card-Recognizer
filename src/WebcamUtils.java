@@ -27,15 +27,33 @@ public class WebcamUtils {
 	{
 		registerAllIPCams("ipcams.txt");
 		Webcam.setDriver(new CompositeDriver());
+		
 		Webcam w = (Webcam) JOptionPane.showInputDialog(null, "Choose a webcam", "Select webcam", 
 				JOptionPane.PLAIN_MESSAGE, null, 
 				Webcam.getWebcams().toArray(),Webcam.getDefault());
+		
 		if(w==null)
 		{
 			System.exit(1);
 		}
-
-		PrettyDimension[] dims = new PrettyDimension[w.getViewSizes().length];
+		PrettyDimension[] dims;
+		
+		//kill the program if the ip cam isn't up
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				try {
+					Thread.sleep(1000);
+					System.exit(1);
+				} catch (InterruptedException e) {
+					return;
+				}
+			}
+		};
+		t.start();
+		dims = new PrettyDimension[w.getViewSizes().length];
+		t.interrupt();
 		for(int i=0;i<dims.length;i++)
 		{
 			dims[i] = new PrettyDimension(w.getViewSizes()[i]);

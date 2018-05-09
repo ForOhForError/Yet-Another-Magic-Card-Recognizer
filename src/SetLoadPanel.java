@@ -2,23 +2,70 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 
 public class SetLoadPanel extends JPanel implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	private JCheckBox[] checks;
 	private String[] names;
 	private File[] files;
-	private RecogList mlist;
+	private RecogStrategy strat;
+	
+	private boolean loaded = false;
+	
+	private int dir = 0;
+	private String[] dirs;
 
-	public SetLoadPanel(RecogList ml)
+	public SetLoadPanel(RecogStrategy st)
 	{
 		super();
-		mlist = ml;
+		strat = st;
 		File folder = new File(SavedConfig.PATH);
+		loadListFromPath(folder);
+		dirs = new String[2];
+		dirs[0] = SavedConfig.PATH;
+		dirs[1] = SavedConfig.getDecksPath();
+	}
+
+	public void actionPerformed(ActionEvent arg0) {
+		int i = Integer.parseInt(((JCheckBox)arg0.getSource()).getName());
+		if(checks[i].isSelected())
+		{
+			checks[i].setEnabled(false);
+			synchronized(strat){
+				try {
+					strat.addFromFile(files[i]);
+				} catch (Exception e1) {
+					checks[i].setSelected(false);
+				}
+			}
+		}
+	}
+
+	public int getBoxWidth()
+	{
+		int max = 0;
+		for(JCheckBox c:checks)
+		{
+			int w=c.getText().length()*7;
+			if(w>max)
+			{
+				max=w;
+			}
+		}
+		return max;
+	}
+
+	public void loadListFromPath(File folder)
+	{
+		if(loaded)
+		{
+			removeAll();
+			unloadAll();
+		}
 		File[] flist = folder.listFiles();
 		ArrayList<File> good = new ArrayList<>();
 		int size = 0;
@@ -44,45 +91,17 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 			checks[i].setName(i+"");
 			i++;
 		}
-
-	}
-
-	public void actionPerformed(ActionEvent arg0) {
-		int i = Integer.parseInt(((JCheckBox)arg0.getSource()).getName());
-		if(checks[i].isSelected())
+		loaded=true;
+		if(this.getRootPane()!=null)
 		{
-			synchronized(mlist){
-				try {
-					mlist.add(new RecogList(files[i]),names[i]);
-				} catch (IOException e1) {
-					checks[i].setSelected(false);
-				}
-			}
-		}
-		else
-		{
-			synchronized(mlist){
-				mlist.remove(names[i]);
-			}
+			this.getRootPane().validate();
 		}
 	}
-
-	public int getBoxWidth()
-	{
-		int max = 0;
-		for(JCheckBox c:checks)
-		{
-			int w=c.getText().length()*7;
-			if(w>max)
-			{
-				max=w;
-			}
-		}
-		return max;
-	}
-
+	
+	
 	public void loadAll()
 	{
+		Counter c = new Counter();
 		for(int i=0;i<names.length;i++)
 		{
 			final int x = i;
@@ -93,13 +112,23 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 					if(!checks[x].isSelected())
 					{
 						try {
-							RecogList rl = new RecogList(files[x]);
-							synchronized(mlist){
-								mlist.add(rl,names[x]);
+							checks[x].setEnabled(false);
+							synchronized(strat)
+							{
+								strat.addFromFile(files[x]);
+								synchronized(c)
+								{
+									c.count = c.count+1;
+									if(c.count==names.length)
+									{
+										strat.finalizeLoad();
+									}
+								}
 							}
 							checks[x].setSelected(true);
-						} catch (IOException e1) {
+						} catch (Exception e1) {
 							checks[x].setSelected(false);
+							checks[x].setEnabled(true);
 						}
 					}
 				}
@@ -108,11 +137,19 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 		}
 	}
 
+	public void toggle()
+	{
+		dir = (dir+1)%dirs.length;
+		loadListFromPath(new File(dirs[dir]));
+	}
+	
 	public void unloadAll()
 	{
-		for(int i=0;i<names.length;i++)
+		strat.clear();
+		for(int i=0;i<checks.length;i++)
 		{
-			mlist.remove(names[i]);
+			checks[i].setSelected(false);
+			checks[i].setEnabled(true);
 		}
 	}
 }

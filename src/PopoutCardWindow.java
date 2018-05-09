@@ -23,16 +23,24 @@ public class PopoutCardWindow extends JFrame implements ActionListener{
 
 	private static Image img;
 	private static Card card;
-	
+
 	private static String cardId = "";
 	private static String cardName = "";
 
 	private static boolean init = false;
 	Timer timer;
 
+	private static boolean isOut = false;
+
 	public PopoutCardWindow()
 	{
-		super("Card Popout");
+		super("Card Preview");
+
+		if(isOut)
+		{
+			return;
+		}
+
 		this.setLayout(new BorderLayout());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		if(!init)
@@ -57,12 +65,14 @@ public class PopoutCardWindow extends JFrame implements ActionListener{
 		card=null;
 		timer = new Timer(40,this);
 		timer.start();
+		isOut = true;
 	}
-	
+
 	public void dispose()
 	{
 		timer.stop();
 		super.dispose();
+		isOut=false;
 	}
 
 	public static void clear()
@@ -78,34 +88,37 @@ public class PopoutCardWindow extends JFrame implements ActionListener{
 
 	public static void setDisplay(String id,String name)
 	{
-		if(!isDisplayingCardId(id,name))
+		if(isOut)
 		{
-			try {
-				System.out.println(id);
-				card = MTGCardQuery.getCardByScryfallId(id);
-				cardId = card.getScryfallUUID();
-				boolean found = false;
-				if(card.isMultifaced())
-				{
-					for(CardFace face:card.getFaces())
+			if(!isDisplayingCardId(id,name))
+			{
+				try {
+					System.out.println(id);
+					card = MTGCardQuery.getCardByScryfallId(id);
+					cardId = card.getScryfallUUID();
+					boolean found = false;
+					if(card.isMultifaced())
 					{
-						if(face.getName().equals(name))
+						for(CardFace face:card.getFaces())
 						{
-							img = face.getCannonicalImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
-							cardName = face.getName();
-							found = true;
+							if(face.getName().equals(name))
+							{
+								img = face.getCannonicalImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
+								cardName = face.getName();
+								found = true;
+							}
 						}
 					}
+					if((!card.isMultifaced())||found==false)
+					{
+						cardName = card.getName();
+						img = card.getCannonicalImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
+					}
+					ImageIcon icon = new ImageIcon(img);
+					display.setIcon(icon);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-				if((!card.isMultifaced())||found==false)
-				{
-					cardName = card.getName();
-					img = card.getCannonicalImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
-				}
-				ImageIcon icon = new ImageIcon(img);
-				display.setIcon(icon);
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 	}

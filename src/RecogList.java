@@ -7,102 +7,57 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
-public class RecogList {
+public class RecogList extends RecogStrategy{
 	public ArrayList<DescContainer> desc;
 	private String name = "";
-	
-	private long setTrack=0;
-	private HashMap<String,Long> names;
-	
+
 	private int sizeOfSet=0;
-	
+
 	public RecogList()
 	{
 		desc = new ArrayList<>();
-		names = new HashMap<>();
 	}
-	
+
 	public RecogList(String name)
 	{
 		desc = new ArrayList<>();
-		names = new HashMap<>();
-		names.put(name, setTrack);
-		setTrack++;
 		this.name = name;
 	}
-	
+
 	public RecogList(File f) throws IOException
 	{
 		desc = new ArrayList<>();
 		ByteBuffer buf = BufferUtils.getBuffer(f);
-		names = new HashMap<>();
-		String name = BufferUtils.readUTF8(buf);
-		names.put(name,setTrack);
+		BufferUtils.readUTF8(buf);
 		sizeOfSet = buf.getInt();
 		int rec = buf.getInt();
 		for(int i=0;i<rec;i++)
 		{
 			String s = BufferUtils.readUTF8(buf);
 			ImageDesc id = ImageDesc.readIn(buf);
-			desc.add(new DescContainer(id,s,setTrack));
+			desc.add(new DescContainer(id,s));
 		}
-		setTrack++;
 	}
-	
-	public void remove(String set)
+
+	public synchronized boolean add(RecogList l)
 	{
-		if(names.containsKey(set))
+		for(int i=0;i<l.desc.size();i++)
 		{
-			long l = names.get(set);
-			int i = 0;
-			while(i<desc.size())
-			{
-				long l2 = desc.get(i).setNo;
-				if(l2==l)
-				{
-					desc.remove(i);
-				}
-				else
-				{
-					i++;
-				}
-			}
+			desc.add(l.desc.get(i));
 		}
+		return true;
 	}
-	
-	public boolean add(RecogList l, String n)
-	{
-		if(names.containsKey(n))
-		{
-			return false;
-		}
-		else
-		{
-			names.put(n, setTrack);
-			for(int i=0;i<l.desc.size();i++)
-			{
-				DescContainer c = new DescContainer(l.desc.get(i));
-				c.setNo = setTrack;
-				desc.add(c);
-			}
-			setTrack++;
-			return true;
-		}
-	}
-	
-	
-	
-	public void clear()
+
+
+
+	public synchronized void clear()
 	{
 		desc.clear();
-		names.clear();
-		setTrack=0;
 		name = "";
 	}
-	
-	public void writeOut(File f) throws IOException
+
+	public synchronized void writeOut(File f) throws IOException
 	{
 		DataOutputStream out = new DataOutputStream(new FileOutputStream(f));
 		out.writeUTF(name);
@@ -115,21 +70,21 @@ public class RecogList {
 		}
 		out.close();
 	}
-	
-	public void addPair(ImageDesc id, String str)
+
+	public synchronized void add(DescContainer dc)
 	{
-		desc.add(new DescContainer(id,str,setTrack));
+		desc.add(dc);
 	}
-	
-	public void printStringData()
+
+	public synchronized void printStringData()
 	{
 		for(int i=0;i<desc.size();i++)
 		{
 			System.out.println(desc.get(i).stringData);
 		}
 	}
-	
-	public MatchResult getMatch(ImageDesc in, double threshhold)
+
+	public synchronized MatchResult getMatch(ImageDesc in, double threshhold)
 	{
 		int ix = 0;
 		double max = 0;
@@ -148,14 +103,14 @@ public class RecogList {
 		}
 		return null;
 	}
-	
-	public MatchResult getMatchTopOnly(ImageDesc in, double threshhold)
+
+	public synchronized MatchResult getMatchTopOnly(ImageDesc in, double threshhold)
 	{
 		sortByHash(in);
 		int ix = 0;
 		double max = 0;
 		int size = Math.min(desc.size(),StaticConfigs.LIMIT_TO_TOP_N_HASH_MATCH);
-		
+
 		for(int i=0;i<size;i++)
 		{
 			double score = in.compareSURF(desc.get(i).descData);
@@ -171,8 +126,8 @@ public class RecogList {
 		}
 		return null;
 	}
-	
-	public void sortByHash(ImageDesc id)
+
+	public synchronized void sortByHash(ImageDesc id)
 	{
 		for(int i=0;i<desc.size();i++)
 		{
@@ -181,15 +136,15 @@ public class RecogList {
 		}
 		Collections.sort(desc);
 	}
-	
-	public void shuffle()
+
+	public synchronized void shuffle()
 	{
 		Collections.shuffle(desc);
 	}
 	public String getName() {
 		return name;
 	}
-	
+
 	public static String getNameFromFile(File f)
 	{
 		try
@@ -204,7 +159,7 @@ public class RecogList {
 			return null;
 		}
 	}
-	
+
 	public static int getSizeFromFile(File f)
 	{
 		try
@@ -220,9 +175,15 @@ public class RecogList {
 			return -1;
 		}
 	}
-	
+
 	public void setSizeOfSet(int i)
 	{
 		sizeOfSet = i;
+	}
+	
+	public synchronized void finalizeLoad(){}
+
+	public synchronized int size() {
+		return desc.size();
 	}
 }

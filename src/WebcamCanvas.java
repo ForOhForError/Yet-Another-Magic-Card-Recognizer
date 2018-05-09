@@ -19,6 +19,8 @@ import georegression.struct.point.Point2D_I32;
 public class WebcamCanvas extends JPanel implements MouseListener{
 	private static final long serialVersionUID = 1L;
 
+	BufferedImage baseline;
+
 	public WebcamCanvas(Webcam w) {
 		super();
 		cam = w;
@@ -35,8 +37,8 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 	private BufferedImage buf;
 	private Rectangle recogBounds;
 	private MatchResult lastResult;
-	
-	
+
+
 	private ArrayList<CardCandidate> ccs = new ArrayList<>();
 
 	public Webcam getWebcam() {
@@ -51,7 +53,7 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 	{
 		return lastDrawn;
 	}
-	
+
 	public void addCandidate(CardCandidate cc)
 	{
 		ccs.add(cc);
@@ -74,7 +76,11 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 			cam.open();
 		}
 		lastDrawn = cam.getImage();
-		
+		if(baseline==null)
+		{
+			baseline=lastDrawn;
+		}
+
 		if(buf == null || buf.getHeight() != lastDrawn.getHeight() || buf.getWidth() != lastDrawn.getWidth())
 		{
 			buf = new BufferedImage(lastDrawn.getWidth(),lastDrawn.getHeight(),BufferedImage.TYPE_3BYTE_BGR);
@@ -90,18 +96,19 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 		{
 			g.drawString(lastResult.toString(), 0, 10);
 		}
-		
+
 		g.setColor(Color.RED);
-		
+
 		for(CardCandidate cc:ccs)
 		{
 			cc.draw(g,recogBounds.x,recogBounds.y);
 		}
 		ccs.clear();
-		
+
 		gi.drawImage(buf, 0, 0, null);
+		
 	}
-	
+
 	public void drawContours(Graphics g)
 	{
 		List<Contour> contours = FindCardCandidates.getCannyContours(lastDrawn);
@@ -196,5 +203,5 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 	public void setLastResult(MatchResult lastResult) {
 		this.lastResult = lastResult;
 	}
-	
+
 }
