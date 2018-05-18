@@ -112,7 +112,7 @@ public class SetGenerator extends JFrame{
 
 	public void writeSet(Set set, String path, boolean ignoreBasics)
 	{
-		RecogList r = new RecogList(set.getName());
+		ListRecogStrat r = new ListRecogStrat(set.getName());
 		r.setSizeOfSet(set.getCardCount());
 		File f = new File(path+set.getCode()+".dat");
 
@@ -138,7 +138,7 @@ public class SetGenerator extends JFrame{
 		
 		if((f.exists() && f.isFile()))
 		{
-			int size=RecogList.getSizeFromFile(f);
+			int size=ListRecogStrat.getSizeFromFile(f);
 			if(size==set.getCardCount())
 			{
 				jt.append("Set exists. Skipping.\n");

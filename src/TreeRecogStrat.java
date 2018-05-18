@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class TreeRecogStrat extends RecogStrategy{
@@ -8,8 +6,6 @@ public class TreeRecogStrat extends RecogStrategy{
 	private ConcurrentLinkedQueue<DescContainer> lq = new ConcurrentLinkedQueue<>();
 	
 	private int size=0;
-
-	private static final int BRANCH_FACTOR = 2;
 
 
 	public synchronized void clear()
@@ -36,9 +32,9 @@ public class TreeRecogStrat extends RecogStrategy{
 
 		for(;;)
 		{
-			if(current.next.size() < BRANCH_FACTOR)
+			if(!current.full())
 			{
-				current.next.add(new Node(id));
+				current.add(new Node(id));
 				return;
 			}
 			else
@@ -61,27 +57,14 @@ public class TreeRecogStrat extends RecogStrategy{
 			{
 				break;
 			}
-
-			if(current == root)
+			
+			double score = in.compareSURF(current.d.descData);
+			if(score>max)
 			{
-				double score = in.compareSURF(current.d.descData);
-				if(score>max)
-				{
-					max=score;
-					maxn=current;
-				}
+				max=score;
+				maxn=current;
 			}
 
-			if(current.next.size()==0)
-			{
-				double score = in.compareSURF(current.d.descData);
-				if(score>max)
-				{
-					max=score;
-					maxn=current;
-				}
-				break;
-			}
 			else
 			{
 				Node n = current.max(in);
@@ -93,64 +76,11 @@ public class TreeRecogStrat extends RecogStrategy{
 				current = n;
 			}
 		}
-		//		if(max>threshhold)
-		//		{
-		//			System.out.println(i);
-		//			return new MatchResult(maxn.d.stringData,max);
-		//		}
-		if(root!=null)
+		if(max>threshhold)
 		{
-			ArrayList<DescContainer> sim = getSimilar(maxn.d.descData,root,0.85);
-			DescContainer d = mostSimilar(maxn.d.descData,sim);
-
-
-
-			if(d!=null&&d.match>threshhold)
-			{
-				return new MatchResult(d.stringData,d.match);
-			}
+			return new MatchResult(maxn.d.stringData,max);
 		}
 		return null;
-	}
-
-	public synchronized DescContainer mostSimilar(ImageDesc i, ArrayList<DescContainer> sim)
-	{
-		double max = 0;
-		DescContainer m = null;
-		for(DescContainer d:sim)
-		{
-			double score = d.descData.compareSURF(i);
-			if(score>max)
-			{
-				max=score;
-				m=d;
-			}
-		}
-		if(m!=null)
-		{
-			m.match=max;
-		}
-		return m;
-	}
-
-	public synchronized ArrayList<DescContainer> getSimilar(ImageDesc i,Node r,double thresh)
-	{
-		ArrayList<DescContainer> sim = new ArrayList<DescContainer>();
-		if(r.next.size()==0)
-		{
-			if(i.compareHash(r.d.descData)>=thresh)
-			{
-				sim.add(r.d);
-			}
-		}
-		else
-		{
-			for(Node next:r.next)
-			{
-				sim.addAll(getSimilar(i,next,thresh));
-			}
-		}
-		return sim;
 	}
 
 	public synchronized void finalizeLoad()
@@ -158,6 +88,10 @@ public class TreeRecogStrat extends RecogStrategy{
 		System.out.println("loading");
 		while(lq.size()>0)
 		{
+			if(lq.size()%100==0)
+			{
+				System.out.println(lq.size());
+			}
 			process(lq.remove());
 		}
 		System.out.println("loaded!");
@@ -166,27 +100,58 @@ public class TreeRecogStrat extends RecogStrategy{
 	private class Node
 	{
 		DescContainer d;
-		LinkedList<Node> next;
+		Node left;
+		Node right;
 		double s;
 
 		public Node(DescContainer d)
 		{
 			this.d = d;
-			next = new LinkedList<>();
 		}
 
+		public boolean full()
+		{
+			if(left==null || right==null)
+			{
+				return false;
+			}
+			return true;
+		}
+		
+		public void add(Node n)
+		{
+			if(left==null)
+			{
+				left=n;
+			}
+			else if(right==null)
+			{
+				right=n;
+			}
+		}
+		
 		public Node max(ImageDesc d)
 		{
 			Node m = null;
 			double max = 0;
 
-			for(Node n:next)
+			if(left != null)
 			{
-				double score = d.compareSURF(n.d.descData);
+				double score = d.compareSURF(left.d.descData);
 				if(score>max)
 				{
 					max=score;
-					m = n;
+					m = left;
+				}
+			}
+			
+			if(right != null)
+			{
+				double score = d.compareSURF(right.d.descData);
+				if(score>max)
+				{
+					max=score;
+					m = right;
 				}
 			}
 
@@ -199,15 +164,26 @@ public class TreeRecogStrat extends RecogStrategy{
 			Node m = null;
 			double max = 0;
 
-			for(Node n:next)
+			if(left != null)
 			{
-				double score = d.compareHash(n.d.descData);
+				double score = d.compareHash(left.d.descData);
 				if(score>max)
 				{
 					max=score;
-					m = n;
+					m = left;
 				}
 			}
+			
+			if(right != null)
+			{
+				double score = d.compareHash(right.d.descData);
+				if(score>max)
+				{
+					max=score;
+					m = right;
+				}
+			}
+
 			s = max;
 			return m;
 		}

@@ -107,7 +107,7 @@ public class DeckGenerator extends JFrame{
 
 	public void writeDeck(String path)
 	{
-		RecogList r = new RecogList(namebox.getText());
+		ListRecogStrat r = new ListRecogStrat(namebox.getText());
 		
 		String deckspath = SavedConfig.getDecksPath();
 		File dir = new File(deckspath);

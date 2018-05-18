@@ -42,11 +42,11 @@ public class RecogApp extends JFrame implements KeyListener{
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 
-		//strat = new BSTreeList();
-		strat = new RecogList();
+		strat = new TreeRecogStrat();
+		//strat = new RecogList();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		Webcam w = WebcamUtils.chooseWebcam();
 
 		JPanel right = new JPanel();

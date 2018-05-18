@@ -16,7 +16,7 @@ public class SettingsPanel extends JPanel{
 	public static boolean RECOG_EVERY_FRAME = true;
 	public static boolean LOCK_BOUNDS = false;
 
-	public static int RECOG_THRESH = 25;
+	public static int RECOG_THRESH = 27;
 
 	public SettingsPanel()
 	{

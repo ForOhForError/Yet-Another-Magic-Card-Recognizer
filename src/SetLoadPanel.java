@@ -38,6 +38,7 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 			synchronized(strat){
 				try {
 					strat.addFromFile(files[i]);
+					strat.finalizeLoad();
 				} catch (Exception e1) {
 					checks[i].setSelected(false);
 				}
@@ -82,7 +83,7 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 		int i=0;
 		for(File f:good)
 		{
-			String name = RecogList.getNameFromFile(f);
+			String name = ListRecogStrat.getNameFromFile(f);
 			names[i]=name;
 			checks[i]=new JCheckBox(name);
 			files[i]=f;

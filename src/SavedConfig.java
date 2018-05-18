@@ -10,18 +10,11 @@ import javax.swing.JOptionPane;
 
 public class SavedConfig {
 	public static String PATH;
-
+	public static boolean DEBUG;
+	
+	
 	public static void init()
 	{
-		if(!StaticConfigs.DEBUG)
-		{
-			try {
-				System.setErr(new PrintStream(new FileOutputStream(new File("errorlog.txt"))));
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-		}
-
 		File f = new File("config.txt");
 		if(f.exists())
 		{
@@ -34,6 +27,17 @@ public class SavedConfig {
 					{
 						PATH = l.substring(5);
 					}
+					if(l.startsWith("debug:"))
+					{
+						String st = l.substring(6).trim().toLowerCase();
+						if(st.equals("true")){
+							DEBUG = true;
+						}
+						else
+						{
+							DEBUG = false;
+						}
+					}
 				}
 				s.close();
 			} 
@@ -45,8 +49,8 @@ public class SavedConfig {
 		{
 			JOptionPane.showMessageDialog(null, "Config file not found; doing initial setup.");
 			JOptionPane.showMessageDialog(null, "You will be prompted for a directory to save set data to.");
-			JFileChooser chooser = new JFileChooser(); 
-			chooser.setCurrentDirectory(new java.io.File("."));
+			JFileChooser chooser = new JFileChooser();
+			chooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 			chooser.setDialogTitle("Select a directory to save set data to");
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			chooser.setAcceptAllFileFilterUsed(false);
@@ -57,11 +61,20 @@ public class SavedConfig {
 					s = s+File.separator;
 				}
 				PATH = s;
-				System.out.println(s);
+				DEBUG=false;
 				writeOut();
 			}
 			else {
 				System.exit(0);
+			}
+		}
+		
+		if(!DEBUG)
+		{
+			try {
+				System.setErr(new PrintStream(new FileOutputStream(new File("errorlog.txt"))));
+			} catch (Exception e1) {
+				e1.printStackTrace();
 			}
 		}
 	}
@@ -72,7 +85,8 @@ public class SavedConfig {
 		FileOutputStream out;
 		try {
 			out = new FileOutputStream(f);
-			out.write(("path:"+PATH).getBytes());
+			out.write(("path:"+PATH+System.lineSeparator()).getBytes());
+			out.write(("debug:"+DEBUG+System.lineSeparator()).getBytes());
 			out.flush();
 			out.close();
 		} catch (IOException e) {

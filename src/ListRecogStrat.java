@@ -8,24 +8,24 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class RecogList extends RecogStrategy{
+public class ListRecogStrat extends RecogStrategy{
 	public ArrayList<DescContainer> desc;
 	private String name = "";
 
 	private int sizeOfSet=0;
 
-	public RecogList()
+	public ListRecogStrat()
 	{
 		desc = new ArrayList<>();
 	}
 
-	public RecogList(String name)
+	public ListRecogStrat(String name)
 	{
 		desc = new ArrayList<>();
 		this.name = name;
 	}
 
-	public RecogList(File f) throws IOException
+	public ListRecogStrat(File f) throws IOException
 	{
 		desc = new ArrayList<>();
 		ByteBuffer buf = BufferUtils.getBuffer(f);
@@ -40,7 +40,7 @@ public class RecogList extends RecogStrategy{
 		}
 	}
 
-	public synchronized boolean add(RecogList l)
+	public synchronized boolean add(ListRecogStrat l)
 	{
 		for(int i=0;i<l.desc.size();i++)
 		{
