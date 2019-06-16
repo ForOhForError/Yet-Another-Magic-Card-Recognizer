@@ -112,22 +112,21 @@ public class DeckGenerator extends JFrame{
 		String deckspath = SavedConfig.getDecksPath();
 		File dir = new File(deckspath);
 		dir.mkdirs();
-		File f = new File(deckspath+"decks/"+namebox.getText().replace(" ", "_")+".dat");
+		File f = new File(deckspath+namebox.getText().replace(" ", "_")+".dat");
 
 		ArrayList<String> names = getCardNames();
 		ArrayList<Card> cards = MTGCardQuery.toCardList(names, true);
-		
 		for(Card card:cards)
 		{
 			r.addFromCard(card);
 		}
-
 		try {
 			r.writeOut(f);
 			JOptionPane.showMessageDialog(null, 
 					"Deck saved with "+r.size()+" unique cards from "+names.size()+" card names.", 
 					"Deck Saved", JOptionPane.INFORMATION_MESSAGE, null);
 		} catch (IOException e) {
+			e.printStackTrace();
 			System.err.println("Write failed.\n");
 		}
 	}

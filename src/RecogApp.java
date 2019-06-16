@@ -24,6 +24,8 @@ public class RecogApp extends JFrame implements KeyListener{
 
 	public static SetLoadPanel select;
 
+	public static RecogApp INSTANCE;
+
 	public static void main(String[] args)
 	{
 		try {
@@ -39,15 +41,21 @@ public class RecogApp extends JFrame implements KeyListener{
 	public RecogApp()
 	{
 		super("Yet Another Magic Card Recognizer");
+		INSTANCE = this;
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 
-		strat = new TreeRecogStrat();
-		//strat = new RecogList();
+		//strat = new TreeRecogStrat();
+		strat = new ListRecogStrat();
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		Webcam w = WebcamUtils.chooseWebcam();
+
+		if(w==null)
+		{
+			System.exit(1);
+		}
 
 		JPanel right = new JPanel();
 		right.setLayout(new GridLayout(2,1));
@@ -88,10 +96,26 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 	}
 
+	public void doSetWebcam()
+	{
+		synchronized(wc)
+		{
+			Webcam w = WebcamUtils.chooseWebcam();
+			if(w != null)
+			{
+				wc.setWebcam(w);
+				pack();
+			}
+		}
+	}
+
 	public void doRecog()
 	{
-		BufferedImage img = wc.getBoundedZone();
-		doRecog(img);
+		synchronized(wc)
+		{
+			BufferedImage img = wc.getBoundedZone();
+			doRecog(img);
+		}
 	}
 
 	public static void doRecog(BufferedImage img)

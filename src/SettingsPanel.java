@@ -53,6 +53,15 @@ public class SettingsPanel extends JPanel{
 		add(score);
 		add(thresh);
 
+		JButton selectCam = new JButton("Reselect webcam");
+		selectCam.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				RecogApp.INSTANCE.doSetWebcam();
+			}
+		});
+		add(selectCam);
+		
 		JButton loadAll = new JButton("Load all sets");
 		loadAll.addActionListener(new ActionListener(){
 			@Override

@@ -38,6 +38,15 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 	private Rectangle recogBounds;
 	private MatchResult lastResult;
 
+	public void setWebcam(Webcam w)
+	{
+		cam.close();
+		cam = w;
+		setSize(w.getViewSize());
+		canvas.setSize(w.getViewSize());
+		add(canvas);
+		initBox();
+	}
 
 	private ArrayList<CardCandidate> ccs = new ArrayList<>();
 
@@ -63,8 +72,15 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 	{
 		if(lastDrawn!=null && recogBounds!=null)
 		{
-			return lastDrawn.getSubimage(recogBounds.x, recogBounds.y,
-					recogBounds.width, recogBounds.height);
+			try
+			{
+				return lastDrawn.getSubimage(recogBounds.x, recogBounds.y,
+						recogBounds.width, recogBounds.height);
+			}
+			catch(Exception e)
+			{
+				return null;
+			}
 		}
 		return null;
 	}
@@ -106,7 +122,7 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 		ccs.clear();
 
 		gi.drawImage(buf, 0, 0, null);
-		
+
 	}
 
 	public void drawContours(Graphics g)

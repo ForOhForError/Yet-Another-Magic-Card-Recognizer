@@ -23,18 +23,23 @@ public class WebcamUtils {
 		}
 	}
 	
+	private static boolean INIT = false;
+	
 	public static Webcam chooseWebcam()
 	{
-		registerAllIPCams("ipcams.txt");
-		Webcam.setDriver(new CompositeDriver());
-		
+		if(!INIT)
+		{
+			registerAllIPCams("ipcams.txt");
+			Webcam.setDriver(new CompositeDriver());
+			INIT = true;
+		}
 		Webcam w = (Webcam) JOptionPane.showInputDialog(null, "Choose a webcam", "Select webcam", 
 				JOptionPane.PLAIN_MESSAGE, null, 
 				Webcam.getWebcams().toArray(),Webcam.getDefault());
 		
 		if(w==null)
 		{
-			System.exit(1);
+			return null;
 		}
 		PrettyDimension[] dims;
 		
@@ -65,7 +70,7 @@ public class WebcamUtils {
 		
 		if(d == null)
 		{
-			System.exit(1);
+			return null;
 		}
 
 		w.setViewSize(d);

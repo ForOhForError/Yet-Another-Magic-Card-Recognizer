@@ -9,10 +9,14 @@ import boofcv.abst.feature.associate.AssociateDescription;
 import boofcv.abst.feature.associate.ScoreAssociation;
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
 import boofcv.alg.descriptor.UtilFeature;
+import boofcv.alg.enhance.EnhanceImageOps;
+import boofcv.alg.misc.ImageStatistics;
+import boofcv.core.image.ConvertImage;
 import boofcv.factory.feature.associate.FactoryAssociation;
 import boofcv.factory.feature.detdesc.FactoryDetectDescribe;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.GrayU8;
 import boofcv.struct.feature.BrightFeature;
 
 
@@ -34,9 +38,17 @@ public class ImageDesc {
 			AverageHash.init(2, 2);
 		}
 		hash = AverageHash.avgHash(in,2,2);
-		GrayF32 img = ConvertBufferedImage.convertFromSingle(in, null, GrayF32.class);
+		int histogram[] = new int[256];
+		int transform[] = new int[256];
+		GrayU8 img = ConvertBufferedImage.convertFromSingle(in, null, GrayU8.class);
+		GrayU8 norm = img.createSameShape();
+		ImageStatistics.histogram(img,histogram);
+		EnhanceImageOps.equalize(histogram, transform);
+		EnhanceImageOps.applyTransform(img, transform, norm);
+		GrayF32 normf = new GrayF32(img.width,img.height);
+		ConvertImage.convert(norm, normf);
 		desc.reset();
-		describeImage(img,desc);
+		describeImage(normf,desc);
 	}
 	
 	public ImageDesc(FastQueue<BrightFeature> d, AverageHash h)
