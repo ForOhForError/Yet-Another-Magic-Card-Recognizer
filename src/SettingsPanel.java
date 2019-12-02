@@ -62,16 +62,25 @@ public class SettingsPanel extends JPanel{
 		});
 		add(selectCam);
 		
-		JButton loadAll = new JButton("Load all sets");
-		loadAll.addActionListener(new ActionListener(){
+		JButton loadSelected = new JButton("Load Selected");
+		loadSelected.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				RecogApp.select.loadAll();
+				RecogApp.select.loadSelected();
 			}
 		});
-		add(loadAll);
+		add(loadSelected);
 		
-		JButton unloadAll = new JButton("Unload all sets");
+		JButton genSelected = new JButton("Generate Selected");
+		genSelected.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				RecogApp.select.downloadSelected();
+			}
+		});
+		add(genSelected);
+		
+		JButton unloadAll = new JButton("Unload all");
 		unloadAll.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -116,11 +125,11 @@ public class SettingsPanel extends JPanel{
 		});
 		add(launchDeckGen);
 		
-		JButton toggleSetPanel = new JButton("Toggle Sets/Decks Listing");
+		JButton toggleSetPanel = new JButton("Refresh Set Listing");
 		toggleSetPanel.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				RecogApp.select.toggle();
+				RecogApp.select.refresh();
 			}
 		});
 		add(toggleSetPanel);

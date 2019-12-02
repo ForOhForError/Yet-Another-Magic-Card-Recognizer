@@ -74,7 +74,7 @@ public class SetGenerator extends JFrame{
 						gen.setEnabled(false);
 						ArrayList<Set> sets = MTGCardQuery.getSets();
 						for(Set s:sets){
-							writeSet(s,SavedConfig.PATH,true);
+							writeSet(s,true);
 							if(!runThread){
 								System.out.println("stopped");
 								return;
@@ -110,11 +110,12 @@ public class SetGenerator extends JFrame{
 		isOut=false;
 	}
 
-	public void writeSet(Set set, String path, boolean ignoreBasics)
+	public void writeSet(Set set, boolean ignoreBasics)
 	{
+		String path = SavedConfig.getSetPath(set.getCode()); 
 		ListRecogStrat r = new ListRecogStrat(set.getName());
 		r.setSizeOfSet(set.getCardCount());
-		File f = new File(path+set.getCode()+".dat");
+		File f = new File(path);
 
 		String setType = set.getSetType();
 		String selectedType = (String)typeBox.getSelectedItem();
@@ -160,6 +161,29 @@ public class SetGenerator extends JFrame{
 			r.writeOut(f);
 		} catch (IOException e) {
 			jt.append("Write failed.\n");
+		}
+	}
+	
+	public static boolean generateSet(Set set)
+	{
+		String path = SavedConfig.getSetPath(set.getCode()); 
+		ListRecogStrat r = new ListRecogStrat(set.getName());
+		r.setSizeOfSet(set.getCardCount());
+		File f = new File(path);
+		
+		ArrayList<Card> cards = MTGCardQuery.getCardsFromURI(set.getSearchUri());
+
+		for(Card card:cards)
+		{
+			r.addFromCard(card);
+		}
+
+		try {
+			r.writeOut(f);
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 	

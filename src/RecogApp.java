@@ -48,9 +48,11 @@ public class RecogApp extends JFrame implements KeyListener{
 		//strat = new TreeRecogStrat();
 		strat = new ListRecogStrat();
 
+		SetListing.init();
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		Webcam w = WebcamUtils.chooseWebcam();
+		Webcam w = WebcamUtils.getPreferredElseChooseWebcam();
 
 		if(w==null)
 		{

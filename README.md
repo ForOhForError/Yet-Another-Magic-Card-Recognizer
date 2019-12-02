@@ -20,14 +20,15 @@ The first time the program launches, it will prompt you to select a path to save
 
 ### Webcam selection
 
-Currently, the YamCR needs to recieve webcam input to function. You will be prompted to choose a webcam device and resolution each time the program is launched.
+Currently, the YamCR needs to recieve webcam input to function. You will be prompted to choose a webcam device and resolution when the program first launches. The program may
+repeat this prompt if the last used camera cannot be found, but it will attempt to respect your previous selection.
 
-The program also supports "IP" webcams. Configuration for these is specified in the file "ipcams.txt".
+The program also supports "IP" webcams. Configuration for these is specified in the ```ip_cams``` section of the programs config.json file.
 
-If features of the program need to be used without a webcam present, the following line can be inserted into ipcams.txt to create a "dummy" webcam:
+If features of the program need to be used without a webcam present, the following entry can be inserted into config.json to use a 'Dummy' webcam.
 
 ```
-Dummy|https://raw.githubusercontent.com/ForOhForError/Yet-Another-Magic-Card-Recognizer/master/readmeImages/YamCRBanner.png
+"ip_cams":[{"mode":"pull","address":"https:\/\/img.scryfall.com\/cards\/large\/front\/0\/a\/0a426922-5e96-48f3-b696-f5dc99258943.jpg?1562135149","name":"Sample IP Webcam"}]}}
 ```
 
 ### Generating sets and decklists
@@ -43,13 +44,13 @@ deck name. The decklist supports many of the plaintext formats exported from dec
 
 ### Loading sets and decklists
 
-Any sets and decklists can be seen in the settings pane, in the area below the function buttons. To switch this display from showing sets to showing decks (or vice versa), press the "Toggle Sets/Decks Listing" button.
+Any sets and decklists can be seen in the settings pane, in the area below the function buttons.
 
-Toggling the display in this way will also refresh the listings, and is useful to display generated sets wiothout re-launching the program.
+Sets marked with a red X icon are available to be generated. These can be generated with the 'generate sets' option, or by selecting them in the selection pane and pressing 'generate selected'. 
 
-Check the checkmark next to a set's name to load it for recognition. Sets can be unloaded by pressing the "Unload all sets" button, unloading all sets at once.
+Sets and decks can be unloaded by pressing the "Unload all" button, unloading all sets at once.
 
-All sets can be loaded at once by pressing the "Load all sets" button. This may take some time. Additionally, since recognition time scales as the number of loaded sets increase, this is not a recommended use case at the moment.
+Multiple sets can be loaded at once by pressing the "Load Selected" button. This loads the selected set, as well as any sub-sets. For example, using this feature on the "Sets" folder icon will load all sets recursively. Depending on the amount being loaded, this may take some time. Additionally, since recognition time scales as the number of loaded sets increase, this is not a recommended use case at the moment.
 
 ### Recognition
 

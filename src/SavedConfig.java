@@ -1,47 +1,44 @@
+import java.awt.Dimension;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Scanner;
+import java.nio.file.Paths;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import com.github.sarxos.webcam.Webcam;
+
+import forohfor.scryfall.api.JSONUtil;
 
 public class SavedConfig {
 	public static String PATH;
 	public static boolean DEBUG;
 	
+	private static JSONObject CONF_OBJECT;
 	
 	public static void init()
 	{
-		File f = new File("config.txt");
+		JSONParser parse = new JSONParser();
+		
+		File f = new File("config.json");
 		if(f.exists())
 		{
 			try {
-				Scanner s = new Scanner(f);
-				while(s.hasNextLine())
-				{
-					String l = s.nextLine();
-					if(l.startsWith("path:"))
-					{
-						PATH = l.substring(5);
-					}
-					if(l.startsWith("debug:"))
-					{
-						String st = l.substring(6).trim().toLowerCase();
-						if(st.equals("true")){
-							DEBUG = true;
-						}
-						else
-						{
-							DEBUG = false;
-						}
-					}
-				}
-				s.close();
+				JSONObject root = (JSONObject) parse.parse(new FileReader(f));
+				CONF_OBJECT = root;
+				PATH = JSONUtil.getStringData(root, "path");
+				DEBUG = JSONUtil.getBoolData(root, "debug");
+				WebcamUtils.loadSettings((JSONObject)root.get("webcam_settings"));
 			} 
-			catch (FileNotFoundException e)
+			catch (Exception err)
 			{
 			}
 		}
@@ -60,8 +57,7 @@ public class SavedConfig {
 				{
 					s = s+File.separator;
 				}
-				PATH = s;
-				DEBUG=false;
+				generateNewConfig(s);
 				writeOut();
 			}
 			else {
@@ -79,14 +75,39 @@ public class SavedConfig {
 		}
 	}
 
-	private static void writeOut()
+	@SuppressWarnings("unchecked")
+	private static void generateNewConfig(String path)
 	{
-		File f = new File("config.txt");
-		FileOutputStream out;
+		PATH = path;
+		DEBUG = false;
+		CONF_OBJECT = new JSONObject();
+		CONF_OBJECT.put("path", path);
+		CONF_OBJECT.put("debug", false);
+		JSONObject camconf = new JSONObject();
+		camconf.put("cam_name", "");
+		camconf.put("cam_resolution_w", -1);
+		camconf.put("cam_resolution_h", -1);
+		camconf.put("ip_cams", new JSONArray());
+		CONF_OBJECT.put("webcam_settings",camconf);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void updateWebcamPrefs(Webcam cam, Dimension dim)
+	{
+		JSONObject camconf = (JSONObject)CONF_OBJECT.get("webcam_settings");
+		camconf.put("cam_name", cam.getName());
+		camconf.put("cam_resolution_w", dim.width);
+		camconf.put("cam_resolution_h", dim.height);
+		CONF_OBJECT.put("webcam_settings",camconf);
+	}
+	
+	public static void writeOut()
+	{
+		File f = new File("config.json");
+		FileWriter out;
 		try {
-			out = new FileOutputStream(f);
-			out.write(("path:"+PATH+System.lineSeparator()).getBytes());
-			out.write(("debug:"+DEBUG+System.lineSeparator()).getBytes());
+			out = new FileWriter(f);
+			out.write(CONF_OBJECT.toJSONString());
 			out.flush();
 			out.close();
 		} catch (IOException e) {
@@ -95,6 +116,15 @@ public class SavedConfig {
 	}
 	
 	public static String getDecksPath(){
-		return PATH+"decks"+File.separator;
+		return Paths.get(PATH, "decks").toString();
+	}
+	
+	public static String getDeckPath(String deckName)
+	{
+		return Paths.get(PATH, "decks",deckName.replace(" ", "_")+".dat").toString();
+	}
+	
+	public static String getSetPath(String setCode){
+		return Paths.get(PATH, setCode+".dat").toString();
 	}
 }

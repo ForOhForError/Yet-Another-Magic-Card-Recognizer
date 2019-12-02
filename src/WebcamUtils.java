@@ -1,10 +1,11 @@
 import java.awt.Dimension;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
-import java.util.Scanner;
+import java.util.LinkedList;
 
 import javax.swing.JOptionPane;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamCompositeDriver;
@@ -13,6 +14,8 @@ import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDeviceRegistry;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDriver;
 import com.github.sarxos.webcam.ds.ipcam.IpCamMode;
+
+import forohfor.scryfall.api.JSONUtil;
 
 public class WebcamUtils {
 	public static class CompositeDriver extends WebcamCompositeDriver {
@@ -25,17 +28,22 @@ public class WebcamUtils {
 	
 	private static boolean INIT = false;
 	
+	private static String prefCamName = "";
+	private static Dimension prefCamRes = null;
+	
 	public static Webcam chooseWebcam()
 	{
-		if(!INIT)
+		LinkedList<PrettyWebcam> pcams = new LinkedList<PrettyWebcam>();
+		for(Webcam cam:Webcam.getWebcams())
 		{
-			registerAllIPCams("ipcams.txt");
-			Webcam.setDriver(new CompositeDriver());
-			INIT = true;
+			pcams.add(new PrettyWebcam(cam));
 		}
-		Webcam w = (Webcam) JOptionPane.showInputDialog(null, "Choose a webcam", "Select webcam", 
+		
+		PrettyWebcam pw = (PrettyWebcam) JOptionPane.showInputDialog(null, "Choose a webcam", "Select webcam", 
 				JOptionPane.PLAIN_MESSAGE, null, 
-				Webcam.getWebcams().toArray(),Webcam.getDefault());
+				pcams.toArray(),Webcam.getDefault());
+		
+		Webcam w = pw.get();
 		
 		if(w==null)
 		{
@@ -75,51 +83,52 @@ public class WebcamUtils {
 
 		w.setViewSize(d);
 		
+		SavedConfig.updateWebcamPrefs(w,d);
+		SavedConfig.writeOut();
+		
 		return w;
+	}
+	
+	public static Webcam getPreferredElseChooseWebcam()
+	{
+		if(!prefCamName.equals("") && prefCamRes.height > 0 && prefCamRes.width > 0)
+		{
+			for(Webcam cam:Webcam.getWebcams())
+			{
+				if(cam.getName().equals(prefCamName))
+				{
+					cam.setViewSize(prefCamRes);
+					return cam;
+				}
+			}
+		}
+		return chooseWebcam();
 	}
 	
 	public static void clearIPCams()
 	{
 		IpCamDeviceRegistry.unregisterAll();
 	}
-	
-	public static void registerAllIPCams(String fname)
+
+	public static void loadSettings(JSONObject obj)
 	{
-		File f = new File(fname);
-		if(f.exists()&&f.isFile())
+		if(!INIT)
 		{
-			try {
-				Scanner scan = new Scanner(f);
-				while(scan.hasNextLine())
-				{
-					registerIPCam(scan.nextLine());
-				}
-				scan.close();
-			} catch (FileNotFoundException e) {
-			}
+			Webcam.setDriver(new CompositeDriver());
+			INIT = true;
 		}
-	}
-	
-	public static boolean registerIPCam(String line)
-	{
-		if(line.startsWith("#"))
+		JSONArray jarr = (JSONArray) obj.get("ip_cams");
+		prefCamName = JSONUtil.getStringData(obj, "cam_name");
+		prefCamRes = new Dimension(
+				JSONUtil.getIntData(obj, "cam_resolution_w"),
+				JSONUtil.getIntData(obj, "cam_resolution_h")
+				);
+		for(Object o:jarr.toArray())
 		{
-			return false;
+			JSONObject entry = (JSONObject)o;
+			registerIPCam(JSONUtil.getStringData(entry, "name"),JSONUtil.getStringData(entry, "address"),JSONUtil.getStringData(entry, "mode"));
 		}
 		
-		String[] split = line.trim().split("\\|");
-		if(split.length==2)
-		{
-			return registerIPCam(split[0],split[1],"pull");
-		}
-		else if(split.length>=3)
-		{
-			return registerIPCam(split[0],split[1],split[2]);
-		}
-		else
-		{
-			return false;
-		}
 	}
 	
 	public static boolean registerIPCam(String name, String address, String mode)

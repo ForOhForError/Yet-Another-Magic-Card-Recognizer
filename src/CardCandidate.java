@@ -119,7 +119,6 @@ public class CardCandidate {
 								) ){
 			return null;
 		}
-
 		Planar<GrayF32> output = removePerspective.getOutput();
 		return ConvertBufferedImage.convertTo_F32(output,null,true);
 	}

@@ -1,136 +1,214 @@
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 
-import javax.swing.JCheckBox;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 
-public class SetLoadPanel extends JPanel implements ActionListener{
+import forohfor.scryfall.api.Set;
+
+
+public class SetLoadPanel extends JPanel implements TreeSelectionListener{
 	private static final long serialVersionUID = 1L;
-	private JCheckBox[] checks;
-	private String[] names;
-	private File[] files;
+
 	private RecogStrategy strat;
-	
-	private boolean loaded = false;
-	
-	private int dir = 0;
-	private String[] dirs;
+
+	private JTree tree;
+	private DefaultMutableTreeNode root;
+
+	private ImageIcon loaded = new ImageIcon("res/Loaded.png");
+	private ImageIcon unloaded = new ImageIcon("res/Unloaded.png");
+	private ImageIcon notdown = new ImageIcon("res/NotDownloaded.png");
+
+	private ArrayList<SetSelectNode> allNodes = new ArrayList<SetSelectNode>();
+
 
 	public SetLoadPanel(RecogStrategy st)
 	{
 		super();
+		setLayout(new GridLayout(0, 1));
 		strat = st;
-		File folder = new File(SavedConfig.PATH);
-		loadListFromPath(folder);
-		dirs = new String[2];
-		dirs[0] = SavedConfig.PATH;
-		dirs[1] = SavedConfig.getDecksPath();
+
+		root = new DefaultMutableTreeNode("root");
+		tree = new JTree(root);
+		tree.setRootVisible(false);
+		tree.getSelectionModel().addTreeSelectionListener(this);
+		tree.setCellRenderer(new SetSelectTreeRenderer());
+		add(tree);
+
+		buildDisplayTree();
 	}
 
-	public void actionPerformed(ActionEvent arg0) {
-		int i = Integer.parseInt(((JCheckBox)arg0.getSource()).getName());
-		if(checks[i].isSelected())
+	@Override
+	public void valueChanged(TreeSelectionEvent event) {
+		Object sel = tree.getLastSelectedPathComponent();
+		if(sel instanceof SetSelectNode)
 		{
-			checks[i].setEnabled(false);
-			synchronized(strat){
-				try {
-					strat.addFromFile(files[i]);
+			SetSelectNode node = (SetSelectNode) tree.getLastSelectedPathComponent();
+			if(!node.isLoaded() && node.fileExists())
+			{
+				synchronized(strat){
+					strat.addFromFile(node.getFilePath());
 					strat.finalizeLoad();
-				} catch (Exception e1) {
-					checks[i].setSelected(false);
+					node.setLoaded(true);
 				}
 			}
 		}
 	}
 
-	public int getBoxWidth()
-	{
-		int max = 0;
-		for(JCheckBox c:checks)
-		{
-			int w=c.getText().length()*7;
-			if(w>max)
-			{
-				max=w;
-			}
-		}
-		return max;
+	public void actionPerformed(ActionEvent arg0) {
+
+		System.out.println(arg0);
 	}
 
-	public void loadListFromPath(File folder)
+	public int getBoxWidth()
 	{
-		if(loaded)
-		{
-			removeAll();
-			unloadAll();
-		}
-		File[] flist = folder.listFiles();
-		ArrayList<File> good = new ArrayList<>();
-		int size = 0;
-		for(int i = 0; i < flist.length; i++){
-			if(flist[i].isFile() && flist[i].getName().endsWith(".dat")) {
-				good.add(flist[i]);
-				size++;
-			}
-		}
-		files = new File[size];
-		names = new String[size];
-		checks = new JCheckBox[size];
-		setLayout(new GridLayout(size,1));
-		int i=0;
-		for(File f:good)
-		{
-			String name = ListRecogStrat.getNameFromFile(f);
-			names[i]=name;
-			checks[i]=new JCheckBox(name);
-			files[i]=f;
-			add(checks[i]);
-			checks[i].addActionListener(this);
-			checks[i].setName(i+"");
-			i++;
-		}
-		loaded=true;
+		return 50;
+	}
+
+	public void buildDisplayTree()
+	{
+		allNodes.clear();
+		root.removeAllChildren();
+
+		root.add(buildSetSubtree());
+		root.add(buildDeckSubtree());
+
+		((DefaultTreeModel)tree.getModel()).reload();
 		if(this.getRootPane()!=null)
 		{
 			this.getRootPane().validate();
 		}
 	}
-	
-	
-	public void loadAll()
+
+	private DefaultMutableTreeNode buildSetSubtree()
 	{
-		Counter c = new Counter();
-		for(int i=0;i<names.length;i++)
+		DefaultMutableTreeNode subtree = new DefaultMutableTreeNode("Sets");
+
+		ArrayList<SetSelectNode> nodes = new ArrayList<SetSelectNode>();
+		HashMap<String,SetSelectNode> bySetCode = new HashMap<String,SetSelectNode>();
+
+		ArrayList<Set> allSets = SetListing.getSets();
+
+		for(Set set:allSets)
 		{
-			final int x = i;
+			SetSelectNode node = new SetSelectNode(set);
+			nodes.add(node);
+			allNodes.add(node);
+			bySetCode.put(set.getCode(), node);
+		}
+		Collections.sort(nodes);
+
+		for(Set set:allSets)
+		{
+			String parent = set.getParentSetCode();
+			if(parent != null)
+			{
+				bySetCode.get(set.getCode()).setParent(bySetCode.get(parent));
+			}
+		}
+
+		for(SetSelectNode node:nodes)
+		{
+			if(!node.hasParent())
+			{
+				subtree.add(node);
+			}
+		}
+
+		return subtree;
+	}
+
+	public DefaultMutableTreeNode buildDeckSubtree()
+	{
+		DefaultMutableTreeNode subtree = new DefaultMutableTreeNode("Decks");
+		try
+		{
+			File[] flist = new File(SavedConfig.getDecksPath()).listFiles();
+
+			ArrayList<File> good = new ArrayList<>();
+			for(int i = 0; i < flist.length; i++){
+				if(flist[i].isFile() && flist[i].getName().endsWith(".dat")) {
+					good.add(flist[i]);
+				}
+			}
+			for(File f:good)
+			{
+				SetSelectNode node = new SetSelectNode(f);
+				subtree.add(node);
+				allNodes.add(node);
+			}
+		}
+		catch(Exception e)
+		{
+
+		}
+
+		return subtree;
+	}
+
+	public void loadSelected()
+	{
+		DefaultMutableTreeNode selected = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+		ArrayList<SetSelectNode> toLoad = new ArrayList<SetSelectNode>();
+
+		if(selected != null)
+		{
+			@SuppressWarnings("unchecked")
+			Enumeration<DefaultMutableTreeNode> nodes = selected.breadthFirstEnumeration();
+
+			while(nodes.hasMoreElements())
+			{
+				DefaultMutableTreeNode node = nodes.nextElement();
+				if(node instanceof SetSelectNode)
+				{
+					SetSelectNode snode = (SetSelectNode)node;
+					if(snode.fileExists() && !snode.isLoaded())
+					{
+						toLoad.add(snode);
+					}
+				}
+			}
+		}
+
+		Counter c = new Counter();
+		for(final SetSelectNode node:toLoad)
+		{
 			new Thread()
 			{
 				public void run()
 				{
-					if(!checks[x].isSelected())
-					{
-						try {
-							checks[x].setEnabled(false);
-							synchronized(strat)
+					try {
+						synchronized(strat)
+						{
+							strat.addFromFile(node.getFilePath());
+							synchronized(c)
 							{
-								strat.addFromFile(files[x]);
-								synchronized(c)
+								c.count += 1;
+								if(c.count==toLoad.size())
 								{
-									c.count = c.count+1;
-									if(c.count==names.length)
-									{
-										strat.finalizeLoad();
-									}
+									strat.finalizeLoad();
 								}
 							}
-							checks[x].setSelected(true);
-						} catch (Exception e1) {
-							checks[x].setSelected(false);
-							checks[x].setEnabled(true);
 						}
+						node.setLoaded(true);
+						tree.repaint();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+						node.setLoaded(false);
 					}
 				}
 			}.start();
@@ -138,19 +216,106 @@ public class SetLoadPanel extends JPanel implements ActionListener{
 		}
 	}
 
-	public void toggle()
+	public void downloadSelected()
 	{
-		dir = (dir+1)%dirs.length;
-		loadListFromPath(new File(dirs[dir]));
+		DefaultMutableTreeNode selected = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+		ArrayList<SetSelectNode> toDownload = new ArrayList<SetSelectNode>();
+
+		if(selected != null)
+		{
+			@SuppressWarnings("unchecked")
+			Enumeration<DefaultMutableTreeNode> nodes = selected.breadthFirstEnumeration();
+
+			while(nodes.hasMoreElements())
+			{
+				DefaultMutableTreeNode node = nodes.nextElement();
+				if(node instanceof SetSelectNode)
+				{
+					SetSelectNode snode = (SetSelectNode)node;
+					if(!snode.fileExists() && snode.isSet())
+					{
+						toDownload.add(snode);
+					}
+				}
+			}
+		}
+		int confirm = JOptionPane.YES_OPTION;
+		if(toDownload.size() > 3)
+		{
+			confirm = JOptionPane.showConfirmDialog(null, 
+					"You are trying to generate "+toDownload.size()+" sets in the background. Generating "
+							+ "multiple sets is a time-intensive operation. Continue?", "Confirm multiple set generation", 
+							JOptionPane.YES_NO_OPTION, 
+							JOptionPane.PLAIN_MESSAGE, null);
+		}
+
+		if(confirm == JOptionPane.YES_OPTION)
+		{
+			for(final SetSelectNode node:toDownload)
+			{
+				new Thread()
+				{
+					public void run()
+					{
+						boolean downloaded = node.download();
+						if(downloaded)
+						{
+							tree.repaint();
+						}
+					}
+				}.start();
+			}
+		}
 	}
-	
+
+	public void refresh()
+	{
+		unloadAll();
+		buildDisplayTree();
+	}
+
 	public void unloadAll()
 	{
 		strat.clear();
-		for(int i=0;i<checks.length;i++)
+		for(SetSelectNode node : allNodes)
 		{
-			checks[i].setSelected(false);
-			checks[i].setEnabled(true);
+			node.setLoaded(false);
+		}
+		tree.repaint();
+	}
+
+	@SuppressWarnings("serial")
+	class SetSelectTreeRenderer extends DefaultTreeCellRenderer
+	{
+		@Override
+		public Component getTreeCellRendererComponent(
+				JTree tree, Object value, boolean sel, 
+				boolean expanded, boolean leaf, 
+				int row, boolean hasFocus
+				) 
+		{
+			JLabel label = (JLabel)super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+			if(value instanceof SetSelectNode)
+			{
+				SetSelectNode node = (SetSelectNode)value;
+
+				if(node.fileExists())
+				{
+					if(node.isLoaded())
+					{
+						label.setIcon(loaded);
+					}
+					else
+					{
+						label.setIcon(unloaded);
+					}
+				}
+				else
+				{
+					label.setIcon(notdown);
+				}
+			}
+			return label;
 		}
 	}
 }
