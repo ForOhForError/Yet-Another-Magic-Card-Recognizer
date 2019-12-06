@@ -1,0 +1,7 @@
+config.json
+.project
+.classpath
+.settings
+.vscode
+target
+errorlog.txt

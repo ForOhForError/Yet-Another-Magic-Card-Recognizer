@@ -17,6 +17,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 
 import forohfor.scryfall.api.Set;
 
@@ -167,12 +168,11 @@ public class SetLoadPanel extends JPanel implements TreeSelectionListener{
 
 		if(selected != null)
 		{
-			@SuppressWarnings("unchecked")
-			Enumeration<DefaultMutableTreeNode> nodes = selected.breadthFirstEnumeration();
+			Enumeration<TreeNode> nodes = selected.breadthFirstEnumeration();
 
 			while(nodes.hasMoreElements())
 			{
-				DefaultMutableTreeNode node = nodes.nextElement();
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode)nodes.nextElement();
 				if(node instanceof SetSelectNode)
 				{
 					SetSelectNode snode = (SetSelectNode)node;
@@ -223,12 +223,11 @@ public class SetLoadPanel extends JPanel implements TreeSelectionListener{
 
 		if(selected != null)
 		{
-			@SuppressWarnings("unchecked")
-			Enumeration<DefaultMutableTreeNode> nodes = selected.breadthFirstEnumeration();
+			Enumeration<TreeNode> nodes = selected.breadthFirstEnumeration();
 
 			while(nodes.hasMoreElements())
 			{
-				DefaultMutableTreeNode node = nodes.nextElement();
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodes.nextElement();
 				if(node instanceof SetSelectNode)
 				{
 					SetSelectNode snode = (SetSelectNode)node;
