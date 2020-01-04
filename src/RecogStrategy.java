@@ -30,7 +30,9 @@ public abstract class RecogStrategy {
 	
 	public void addFromCard(Card card)
 	{
-		if(card.isMultifaced())
+		System.out.println(card.getName());
+		BufferedImage top_img = card.getImage(StaticConfigs.DEFAULT_ART_FORMAT);
+		if(top_img==null && card.isMultifaced())
 		{
 			for(CardFace face:card.getFaces())
 			{
@@ -56,13 +58,12 @@ public abstract class RecogStrategy {
 		}
 		else
 		{
-			BufferedImage i = card.getImage(StaticConfigs.DEFAULT_ART_FORMAT);
-			if(i!=null)
+			if(top_img!=null)
 			{
 				String key = card.getName()+"|"+card.getSetCode()+"|"+card.getScryfallUUID();
 				try
 				{
-					add(new DescContainer(new ImageDesc(ImageUtil.getScaledImage(i)), key));
+					add(new DescContainer(new ImageDesc(ImageUtil.getScaledImage(top_img)), key));
 				}
 				catch(Exception e)
 				{
