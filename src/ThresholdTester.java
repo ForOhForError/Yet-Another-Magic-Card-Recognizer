@@ -27,9 +27,9 @@ public class ThresholdTester {
 		float thresh = 200;
 		
 		BufferedImage img = ImageUtil.getScaledImage(
-				MTGCardQuery.getCardByScryfallId("51f724db-0427-44f9-963d-ae2356c928f4").getCannonicalImage());
+				MTGCardQuery.getCardByScryfallId("51f724db-0427-44f9-963d-ae2356c928f4").getImage("small"));
 		BufferedImage img2 = ImageUtil.getScaledImage(
-				MTGCardQuery.getCardByScryfallId("82caa4d5-ef9f-4903-98a7-134c984da663").getCannonicalImage());
+				MTGCardQuery.getCardByScryfallId("82caa4d5-ef9f-4903-98a7-134c984da663").getImage("small"));
 		
 		
 		doTest(thresh,img);

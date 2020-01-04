@@ -74,6 +74,7 @@ public class SetGenerator extends JFrame{
 						gen.setEnabled(false);
 						ArrayList<Set> sets = MTGCardQuery.getSets();
 						for(Set s:sets){
+							System.out.println("set "+s.getName());
 							writeSet(s,true);
 							if(!runThread){
 								System.out.println("stopped");
@@ -154,6 +155,7 @@ public class SetGenerator extends JFrame{
 
 		for(Card card:cards)
 		{
+			System.out.println(card.getName());
 			r.addFromCard(card);
 		}
 

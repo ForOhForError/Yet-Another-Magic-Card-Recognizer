@@ -103,7 +103,7 @@ public class PopoutCardWindow extends JFrame implements ActionListener{
 						{
 							if(face.getName().equals(name))
 							{
-								img = face.getCannonicalImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
+								img = face.getImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
 								cardName = face.getName();
 								found = true;
 							}
@@ -112,7 +112,7 @@ public class PopoutCardWindow extends JFrame implements ActionListener{
 					if((!card.isMultifaced())||found==false)
 					{
 						cardName = card.getName();
-						img = card.getCannonicalImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
+						img = card.getImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
 					}
 					ImageIcon icon = new ImageIcon(img);
 					display.setIcon(icon);

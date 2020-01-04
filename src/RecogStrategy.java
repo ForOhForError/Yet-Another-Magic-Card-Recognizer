@@ -34,7 +34,7 @@ public abstract class RecogStrategy {
 		{
 			for(CardFace face:card.getFaces())
 			{
-				BufferedImage i = CardUtil.getImage(face,StaticConfigs.DEFAULT_ART_FORMAT);
+				BufferedImage i = face.getImage(StaticConfigs.DEFAULT_ART_FORMAT);
 				if(i!=null)
 				{
 					String key = face.getName()+"|"+card.getSetCode()+"|"+card.getScryfallUUID();
@@ -56,7 +56,7 @@ public abstract class RecogStrategy {
 		}
 		else
 		{
-			BufferedImage i = CardUtil.getImage(card,StaticConfigs.DEFAULT_ART_FORMAT);
+			BufferedImage i = card.getImage(StaticConfigs.DEFAULT_ART_FORMAT);
 			if(i!=null)
 			{
 				String key = card.getName()+"|"+card.getSetCode()+"|"+card.getScryfallUUID();
