@@ -2,21 +2,26 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputListener;
 
 import com.github.sarxos.webcam.Webcam;
 
+import boofcv.alg.distort.RemovePerspectiveDistortion;
 import boofcv.alg.filter.binary.Contour;
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.ImageType;
+import boofcv.struct.image.Planar;
+import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point2D_I32;
 
-public class WebcamCanvas extends JPanel implements MouseListener{
+public class WebcamCanvas extends JPanel implements MouseInputListener{
 	private static final long serialVersionUID = 1L;
 
 	BufferedImage baseline;
@@ -30,13 +35,17 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 		add(canvas);
 		initBox();
 		canvas.addMouseListener(this);
+		canvas.addMouseMotionListener(this);
 	}
 	private Webcam cam;
 	private Canvas canvas;
 	private BufferedImage lastDrawn;
 	private BufferedImage buf;
-	private Rectangle recogBounds;
+	private Point2D_I32[] points = new Point2D_I32[4];
+	private boolean pointsValid = false;
 	private MatchResult lastResult;
+
+	private int draggingPoint = -1;
 
 	public void setWebcam(Webcam w)
 	{
@@ -70,12 +79,25 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 
 	public BufferedImage getBoundedZone()
 	{
-		if(lastDrawn!=null && recogBounds!=null)
+		if( lastDrawn!=null && pointsValid )
 		{
 			try
 			{
-				return lastDrawn.getSubimage(recogBounds.x, recogBounds.y,
-						recogBounds.width, recogBounds.height);
+				Planar<GrayF32> input = ConvertBufferedImage.convertFromMulti(lastDrawn, null, true, GrayF32.class);
+
+				RemovePerspectiveDistortion<Planar<GrayF32>> removePerspective =
+						new RemovePerspectiveDistortion<>(672, 936, ImageType.pl(3, GrayF32.class));
+
+				if( !removePerspective.apply(input,
+						new Point2D_F64(points[0].x,points[0].y),
+						new Point2D_F64(points[1].x,points[1].y),
+						new Point2D_F64(points[2].x,points[2].y),
+						new Point2D_F64(points[3].x,points[3].y)
+										) ){
+					return null;
+				}
+				Planar<GrayF32> output = removePerspective.getOutput();
+				return ConvertBufferedImage.convertTo_F32(output,null,true);
 			}
 			catch(Exception e)
 			{
@@ -104,9 +126,7 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 		Graphics gi = canvas.getGraphics();
 		Graphics g = buf.getGraphics();
 		g.drawImage(lastDrawn, 0, 0, null);
-		g.setColor(Color.WHITE);
-		g.drawRect(recogBounds.x, recogBounds.y, 
-				recogBounds.width, recogBounds.height);
+		drawBounds(g,0,0);
 		g.setColor(Color.RED);
 		if(lastResult!=null)
 		{
@@ -115,14 +135,45 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 
 		g.setColor(Color.RED);
 
+		/**
 		for(CardCandidate cc:ccs)
 		{
 			cc.draw(g,recogBounds.x,recogBounds.y);
 		}
 		ccs.clear();
+		*/
 
 		gi.drawImage(buf, 0, 0, null);
 
+	}
+
+	public void drawBounds(Graphics g,int offx, int offy)
+	{
+		g.setColor(Color.GREEN);
+		g.drawLine(points[0].x+offx,points[0].y+offy,points[1].x+offx,points[1].y+offy);
+		g.setColor(Color.WHITE);
+		g.drawLine(points[1].x+offx,points[1].y+offy,points[2].x+offx,points[2].y+offy);
+		g.drawLine(points[2].x+offx,points[2].y+offy,points[3].x+offx,points[3].y+offy);
+		g.drawLine(points[3].x+offx,points[3].y+offy,points[0].x+offx,points[0].y+offy);
+		for(int i=0;i<4;i++){
+			Point2D_I32 p = points[i];
+			if(draggingPoint == i)
+			{
+				g.setColor(Color.RED);
+			}
+			else
+			{
+				g.setColor(Color.WHITE);
+			}
+			if(i==0)
+			{
+				g.fillOval(p.x-4, p.y-4, 9, 9);
+			}
+			else
+			{
+				g.fillOval(p.x-2, p.y-2, 5, 5);
+			}
+		}
 	}
 
 	public void drawContours(Graphics g)
@@ -150,46 +201,16 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 
 	public void initBox()
 	{
-		recogBounds = new Rectangle(0,0,0,0);
-		recogBounds.height = (int)(cam.getViewSize().getHeight()*8/10);
-		recogBounds.width = recogBounds.height*63/88;
-		recogBounds.x = (int)(cam.getViewSize().getWidth()/2-recogBounds.width/2);
-		recogBounds.y = (int)(cam.getViewSize().getHeight()/2-recogBounds.height/2);
-	}
+		int height = (int)(cam.getViewSize().getHeight()*8/10);
+		int width = height*63/88;
+		int x = (int)(cam.getViewSize().getWidth()/2-width/2);
+		int y = (int)(cam.getViewSize().getHeight()/2-height/2);
 
-
-	public void moveBox(MouseEvent a) {
-		if(lastDrawn!=null)
-		{
-			Point b = a.getPoint();
-			int w = lastDrawn.getWidth();
-			int h = lastDrawn.getHeight();
-			int w2 = recogBounds.width/2;
-			int h2 = recogBounds.height/2;
-			int x = (int)b.getX();
-			int y = (int)b.getY();
-
-			if(x>w-w2)
-			{
-				x=w-w2;
-			}
-			else if(x<w2)
-			{
-				x=w2;
-			}
-
-			if(y>h-h2)
-			{
-				y=h-h2;
-			}
-			else if(y<h2)
-			{
-				y=h2;
-			}
-
-			recogBounds.x = x-w2;
-			recogBounds.y = y-h2;
-		}
+		points[0] = new Point2D_I32(x,y);
+		points[1] = new Point2D_I32(x+width,y);
+		points[2] = new Point2D_I32(x+width,y+height);
+		points[3] = new Point2D_I32(x,y+height);
+		pointsValid = true;
 	}
 
 	@Override
@@ -206,18 +227,45 @@ public class WebcamCanvas extends JPanel implements MouseListener{
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
-		if(!SettingsPanel.LOCK_BOUNDS)
-		{
-			moveBox(arg0);
+		Point p = arg0.getPoint();
+		for(int i=0;i<4;i++){
+			Point2D_I32 pt = points[i];
+			if(Math.abs(p.x-pt.x)<=3 && Math.abs(p.y-pt.y)<=3)
+			{
+				draggingPoint = i;
+				return;
+			}
 		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
+		draggingPoint = -1;
 	}
 
 	public void setLastResult(MatchResult lastResult) {
 		this.lastResult = lastResult;
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		if(draggingPoint != -1)
+		{
+			Point p = e.getPoint();
+			if(p.x >= 0 && p.x <= cam.getViewSize().getWidth())
+			{
+				points[draggingPoint].x = p.x;
+			}
+			if(p.y >= 0 && p.y <= cam.getViewSize().getHeight())
+			{
+				points[draggingPoint].y = p.y;
+			}
+		}
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		
 	}
 
 }

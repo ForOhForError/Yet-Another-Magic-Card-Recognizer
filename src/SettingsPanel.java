@@ -14,7 +14,6 @@ public class SettingsPanel extends JPanel{
 	private static final long serialVersionUID = 1L;
 
 	public static boolean RECOG_EVERY_FRAME = true;
-	public static boolean LOCK_BOUNDS = false;
 
 	public static int RECOG_THRESH = 27;
 
@@ -31,15 +30,6 @@ public class SettingsPanel extends JPanel{
 			}
 		});
 		add(recog);
-
-		JCheckBox lock = new JCheckBox("Lock Recognition Bounds",LOCK_BOUNDS);
-		lock.setToolTipText("Lock Recognition Bounds");
-		lock.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				LOCK_BOUNDS = lock.isSelected();
-			}
-		});
-		add(lock);
 
 		JSlider thresh = new JSlider(JSlider.HORIZONTAL, 0, 100, RECOG_THRESH);
 		JLabel score = new JLabel("Score Threshold: "+RECOG_THRESH);

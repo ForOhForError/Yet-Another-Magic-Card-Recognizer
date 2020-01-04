@@ -57,7 +57,9 @@ Multiple sets can be loaded at once by pressing the "Load Selected" button. This
 Card recognition begins automatically when any number of sets or decks are loaded. The area within the white border on the webcam feed is processed. If a matching card is found, its name will display
 in red text on the upper left of the webcam feed. 
 
-The recognition area can be moved by clicking on the webcam feed. The area can be locked into place by checking the "Lock Recognition Bounds" checkbox.
+The recognition area can be moved by clicking and dragging on the corners of the recognition area. For the best results, ensure the larger corner point is located at the top-left of your card area, and the green line is the top edge of the area. Below is an example image:
+
+![Example Capture Area](readmeImages/CaptureAreaExample.png)
 
 The sidebar provides some options for refining recognition behavior:
 - The "Only trigger recognition manually" checkbox can be used to disable automatic recognition. Instead, recognition will only be attempted when pressing any keyboard key after clicking the webcam area.

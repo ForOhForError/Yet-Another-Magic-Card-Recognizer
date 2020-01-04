@@ -65,7 +65,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		wc = new WebcamCanvas(w);
 
 		ImageIcon ico = null;
-		ico = new ImageIcon("YamCR.png");
+		ico = new ImageIcon("res/YamCR.png");
 		setIconImage(ico.getImage());
 
 		JScrollPane scroll = new JScrollPane();
