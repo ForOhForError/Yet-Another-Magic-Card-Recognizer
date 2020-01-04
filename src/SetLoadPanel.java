@@ -12,17 +12,17 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTree;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.MouseInputListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
+import java.awt.event.MouseEvent;
+
 import forohfor.scryfall.api.Set;
 
-
-public class SetLoadPanel extends JPanel implements TreeSelectionListener{
+public class SetLoadPanel extends JPanel implements MouseInputListener {
 	private static final long serialVersionUID = 1L;
 
 	private RecogStrategy strat;
@@ -45,22 +45,22 @@ public class SetLoadPanel extends JPanel implements TreeSelectionListener{
 
 		root = new DefaultMutableTreeNode("root");
 		tree = new JTree(root);
+		tree.addMouseListener(this);
 		tree.setRootVisible(false);
-		tree.getSelectionModel().addTreeSelectionListener(this);
 		tree.setCellRenderer(new SetSelectTreeRenderer());
 		add(tree);
 
 		buildDisplayTree();
 	}
 
-	@Override
-	public void valueChanged(TreeSelectionEvent event) {
+	public void mousePressed(MouseEvent e) {
 		Object sel = tree.getLastSelectedPathComponent();
 		if(sel instanceof SetSelectNode)
 		{
 			SetSelectNode node = (SetSelectNode) tree.getLastSelectedPathComponent();
-			if(!node.isLoaded() && node.fileExists())
+			if(e.getClickCount() == 2 && !e.isConsumed() && !node.isLoaded() && node.fileExists())
 			{
+				e.consume();
 				synchronized(strat){
 					strat.addFromFile(node.getFilePath());
 					strat.finalizeLoad();
@@ -316,5 +316,29 @@ public class SetLoadPanel extends JPanel implements TreeSelectionListener{
 			}
 			return label;
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
 	}
 }
