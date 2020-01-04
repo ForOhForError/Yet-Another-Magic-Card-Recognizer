@@ -177,7 +177,10 @@ public class SetGenerator extends JFrame{
 
 		for(Card card:cards)
 		{
-			r.addFromCard(card);
+			if( SavedConfig.WRITE_BASICS_TO_SETS || (!CardUtils.isEssentialBasic(card.getName())) )
+			{
+				r.addFromCard(card);
+			}
 		}
 
 		try {

@@ -24,13 +24,16 @@ public abstract class RecogStrategy {
 		{
 			String s = BufferUtils.readUTF8(buf);
 			ImageDesc id = ImageDesc.readIn(buf);
-			add(new DescContainer(id,s));
+			DescContainer dc = new DescContainer(id,s);
+			if( SavedConfig.LOAD_BASICS || (!CardUtils.isEssentialBasic(dc.getName())) )
+			{
+				add(dc);
+			}
 		}
 	}
 	
 	public void addFromCard(Card card)
 	{
-		System.out.println(card.getName());
 		BufferedImage top_img = card.getImage(StaticConfigs.DEFAULT_ART_FORMAT);
 		if(top_img==null && card.isMultifaced())
 		{

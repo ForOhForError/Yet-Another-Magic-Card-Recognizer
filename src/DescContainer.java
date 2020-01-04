@@ -22,4 +22,8 @@ public class DescContainer implements Comparable<DescContainer>{
 		return Double.compare(arg0.match,this.match);
 	}
 	
+	public String getName()
+	{
+		return stringData.split("|")[0];
+	}
 }

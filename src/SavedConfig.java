@@ -21,25 +21,31 @@ import forohfor.scryfall.api.JSONUtil;
 public class SavedConfig {
 	public static String PATH;
 	public static boolean DEBUG;
+	public static boolean WRITE_BASICS_TO_SETS=false;
+	public static boolean LOAD_BASICS=false;
 	
 	private static JSONObject CONF_OBJECT;
 	
+	@SuppressWarnings("unchecked")
 	public static void init()
 	{
+		generateNewConfig("");
 		JSONParser parse = new JSONParser();
-		
 		File f = new File("config.json");
 		if(f.exists())
 		{
 			try {
 				JSONObject root = (JSONObject) parse.parse(new FileReader(f));
-				CONF_OBJECT = root;
+				CONF_OBJECT.putAll(root);
 				PATH = JSONUtil.getStringData(root, "path");
 				DEBUG = JSONUtil.getBoolData(root, "debug");
+				WRITE_BASICS_TO_SETS = JSONUtil.getBoolData(root, "write_basics_to_sets");
+				LOAD_BASICS = JSONUtil.getBoolData(root, "load_basics");
 				WebcamUtils.loadSettings((JSONObject)root.get("webcam_settings"));
 			} 
 			catch (Exception err)
 			{
+				err.printStackTrace();
 			}
 		}
 		else
@@ -58,7 +64,6 @@ public class SavedConfig {
 					s = s+File.separator;
 				}
 				generateNewConfig(s);
-				writeOut();
 			}
 			else {
 				System.exit(0);
@@ -73,6 +78,8 @@ public class SavedConfig {
 				e1.printStackTrace();
 			}
 		}
+
+		writeOut();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -83,6 +90,8 @@ public class SavedConfig {
 		CONF_OBJECT = new JSONObject();
 		CONF_OBJECT.put("path", path);
 		CONF_OBJECT.put("debug", false);
+		CONF_OBJECT.put("load_basics", false);
+		CONF_OBJECT.put("write_basics_to_sets", false);
 		JSONObject camconf = new JSONObject();
 		camconf.put("cam_name", "");
 		camconf.put("cam_resolution_w", -1);
