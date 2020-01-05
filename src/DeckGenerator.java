@@ -53,7 +53,7 @@ public class DeckGenerator extends JFrame{
 				cardname = cardname.split("\t")[1];
 			}
 
-			if (!added.contains(cardname)) {
+			if (!added.contains(cardname) && !ignore.contains(cardname.toLowerCase())) {
 				added.add(cardname);
 			}
 		}
@@ -109,7 +109,7 @@ public class DeckGenerator extends JFrame{
 	{
 		ListRecogStrat r = new ListRecogStrat(namebox.getText());
 		
-		new File(SavedConfig.getDecksPath()).mkdirs();;
+		new File(SavedConfig.getDecksPath()).mkdirs();
 		File f = new File(SavedConfig.getDeckPath(namebox.getText()));
 
 		ArrayList<String> names = getCardNames();
