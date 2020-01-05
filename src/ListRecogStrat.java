@@ -8,11 +8,21 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class ListRecogStrat extends RecogStrategy{
+public class ListRecogStrat extends RecognitionStrategy{
 	public ArrayList<DescContainer> desc;
 	private String name = "";
 
 	private int sizeOfSet=0;
+
+	public String getStratName()
+	{
+		return "Full Scan";
+	}
+
+	public String getStratDisplayName()
+	{
+		return "Full Scan (Stable, Slow)";
+	}
 
 	public ListRecogStrat()
 	{

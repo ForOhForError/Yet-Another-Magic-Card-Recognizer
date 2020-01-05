@@ -82,6 +82,11 @@ public class SavedConfig {
 		writeOut();
 	}
 
+	public static RecognitionStrategy getStrat()
+	{
+		return StrategySelect.getStrat(CONF_OBJECT.get("recognition_strategy").toString());
+	}
+
 	@SuppressWarnings("unchecked")
 	private static void generateNewConfig(String path)
 	{
@@ -92,6 +97,7 @@ public class SavedConfig {
 		CONF_OBJECT.put("debug", false);
 		CONF_OBJECT.put("load_basics", false);
 		CONF_OBJECT.put("write_basics_to_sets", false);
+		CONF_OBJECT.put("recognition_strategy", new ListRecogStrat().getStratName());
 		JSONObject camconf = new JSONObject();
 		camconf.put("cam_name", "");
 		camconf.put("cam_resolution_w", -1);

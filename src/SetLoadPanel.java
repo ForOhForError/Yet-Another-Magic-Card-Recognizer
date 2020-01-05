@@ -25,7 +25,7 @@ import forohfor.scryfall.api.Set;
 public class SetLoadPanel extends JPanel implements MouseInputListener {
 	private static final long serialVersionUID = 1L;
 
-	private RecogStrategy strat;
+	private RecognitionStrategy strat;
 
 	private JTree tree;
 	private DefaultMutableTreeNode root;
@@ -37,7 +37,7 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 	private ArrayList<SetSelectNode> allNodes = new ArrayList<SetSelectNode>();
 
 
-	public SetLoadPanel(RecogStrategy st)
+	public SetLoadPanel(RecognitionStrategy st)
 	{
 		super();
 		setLayout(new GridLayout(0, 1));

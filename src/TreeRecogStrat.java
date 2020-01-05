@@ -1,12 +1,20 @@
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class TreeRecogStrat extends RecogStrategy{
+public class TreeRecogStrat extends RecognitionStrategy{
 
 	private Node root;
 	private ConcurrentLinkedQueue<DescContainer> lq = new ConcurrentLinkedQueue<>();
-	
 	private int size=0;
 
+	public String getStratName()
+	{
+		return "Tree Traversal";
+	}
+
+	public String getStratDisplayName()
+	{
+		return "Tree Traversal (Fast/Inaccurate/Experimental)";
+	}
 
 	public synchronized void clear()
 	{

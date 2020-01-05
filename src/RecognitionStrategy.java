@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import forohfor.scryfall.api.Card;
 import forohfor.scryfall.api.CardFace;
 
-public abstract class RecogStrategy {
+public abstract class RecognitionStrategy {
 	public abstract void finalizeLoad();
 	public abstract void clear();
 	public void addFromFile(File handle)
@@ -80,7 +80,17 @@ public abstract class RecogStrategy {
 		}
 	}
 	public abstract void add(DescContainer dc);
+
 	public abstract MatchResult getMatch(ImageDesc id, double thresh);
-	
+
 	public abstract int size();
+
+	public abstract String getStratName();
+
+	public abstract String getStratDisplayName();
+
+	public String toString()
+	{
+		return getStratDisplayName();
+	}
 }

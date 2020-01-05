@@ -38,6 +38,7 @@ public class WebcamUtils {
 		{
 			pcams.add(new PrettyWebcam(cam));
 		}
+		pcams.add(new PrettyWebcam(new DummyWebcam()));
 		
 		PrettyWebcam pw = (PrettyWebcam) JOptionPane.showInputDialog(null, "Choose a webcam", "Select webcam", 
 				JOptionPane.PLAIN_MESSAGE, null, 

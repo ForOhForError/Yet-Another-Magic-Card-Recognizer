@@ -18,7 +18,7 @@ import com.github.sarxos.webcam.WebcamLockException;
 public class RecogApp extends JFrame implements KeyListener{
 	private static final long serialVersionUID = 1L;
 
-	public static RecogStrategy strat;
+	public static RecognitionStrategy strat;
 
 	private static WebcamCanvas wc;
 
@@ -45,8 +45,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		BorderLayout bl = new BorderLayout();
 		setLayout(bl);
 
-		//strat = new TreeRecogStrat();
-		strat = new ListRecogStrat();
+		strat = SavedConfig.getStrat();
 
 		SetListing.init();
 		
@@ -81,7 +80,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		setVisible(true);
 		setResizable(false);
 		try{
-			w.open();
+			w.open(true);
 		}catch(WebcamLockException e)
 		{
 			JOptionPane.showMessageDialog(null, "Webcam already in use. Exiting.");
