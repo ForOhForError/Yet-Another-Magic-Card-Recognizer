@@ -1,6 +1,8 @@
 import java.awt.Dimension;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -94,7 +96,9 @@ public class WebcamUtils {
 	{
 		if(!prefCamName.equals("") && prefCamRes.height > 0 && prefCamRes.width > 0)
 		{
-			for(Webcam cam:Webcam.getWebcams())
+			List<Webcam> cams = new ArrayList<Webcam>(Webcam.getWebcams());
+			cams.add(new DummyWebcam());
+			for(Webcam cam:cams)
 			{
 				if(cam.getName().equals(prefCamName))
 				{
