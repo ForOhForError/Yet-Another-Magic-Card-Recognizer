@@ -88,6 +88,13 @@ public class SavedConfig {
 	}
 
 	@SuppressWarnings("unchecked")
+	public static void setPreferredStrat(RecognitionStrategy strat)
+	{
+		CONF_OBJECT.put("recognition_strategy", strat.getStratName());
+		writeOut();
+	}
+
+	@SuppressWarnings("unchecked")
 	private static void generateNewConfig(String path)
 	{
 		PATH = path;

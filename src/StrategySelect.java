@@ -27,4 +27,9 @@ class StrategySelect
         }
         return null;
     }
+
+    public static RecognitionStrategy[] getStrats()
+    {
+        return strats.toArray(new RecognitionStrategy[2]);
+    }
 }

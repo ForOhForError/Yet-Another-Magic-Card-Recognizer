@@ -97,6 +97,16 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 	}
 
+	public void doSetStrat(RecognitionStrategy strategy)
+	{
+		synchronized(strat)
+		{
+			strat.clear();
+			strat = strategy;
+			SavedConfig.setPreferredStrat(strat);
+		}
+	}
+
 	public void doSetWebcam()
 	{
 		synchronized(wc)

@@ -4,6 +4,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -42,6 +43,20 @@ public class SettingsPanel extends JPanel{
 		});
 		add(score);
 		add(thresh);
+
+		JComboBox<RecognitionStrategy> stratSelect = 
+			new JComboBox<RecognitionStrategy>(StrategySelect.getStrats());
+		stratSelect.setSelectedIndex(0);
+		stratSelect.addActionListener(new ActionListener()
+		{
+			@SuppressWarnings("unchecked")
+			public void actionPerformed(ActionEvent e) {
+				JComboBox<RecognitionStrategy> cb = 
+					(JComboBox<RecognitionStrategy>)e.getSource();
+				RecogApp.INSTANCE.doSetStrat(cb.getItemAt(cb.getSelectedIndex()));
+			}
+		});
+		add(stratSelect);
 
 		JButton selectCam = new JButton("Reselect webcam");
 		selectCam.addActionListener(new ActionListener(){
