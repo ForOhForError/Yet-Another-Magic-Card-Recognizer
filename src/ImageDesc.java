@@ -42,7 +42,7 @@ public class ImageDesc {
 		int transform[] = new int[256];
 		GrayU8 img = ConvertBufferedImage.convertFromSingle(in, null, GrayU8.class);
 		GrayU8 norm = img.createSameShape();
-		ImageStatistics.histogram(img,histogram);
+		ImageStatistics.histogram(img,0,histogram);
 		EnhanceImageOps.equalize(histogram, transform);
 		EnhanceImageOps.applyTransform(img, transform, norm);
 		GrayF32 normf = new GrayF32(img.width,img.height);

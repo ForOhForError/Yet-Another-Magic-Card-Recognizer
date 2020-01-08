@@ -51,77 +51,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.boofcv</groupId>
-			<artifactId>ip</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>geo</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>visualize</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>sfm</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>recognition</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>openkinect</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>learning</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>jcodec</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>javacv</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>io</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>feature</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.boofcv</groupId>
-			<artifactId>calibration</artifactId>
-			<version>0.24.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.26</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.26</version>
-			<scope>runtime</scope>
+			<artifactId>boofcv-core</artifactId>
+			<version>0.35</version>
 		</dependency>
 		<dependency>
 	    	<groupId>io.github.forohforerror</groupId>

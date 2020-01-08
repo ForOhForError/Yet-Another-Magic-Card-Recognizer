@@ -83,7 +83,7 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 		{
 			try
 			{
-				Planar<GrayF32> input = ConvertBufferedImage.convertFromMulti(lastDrawn, null, true, GrayF32.class);
+				Planar<GrayF32> input = ConvertBufferedImage.convertFromPlanar(lastDrawn, null, true, GrayF32.class);
 
 				RemovePerspectiveDistortion<Planar<GrayF32>> removePerspective =
 						new RemovePerspectiveDistortion<>(672, 936, ImageType.pl(3, GrayF32.class));

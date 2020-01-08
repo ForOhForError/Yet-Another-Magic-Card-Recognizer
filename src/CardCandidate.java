@@ -106,7 +106,7 @@ public class CardCandidate {
 	
 	public BufferedImage getResolvedImage(BufferedImage src)
 	{
-		Planar<GrayF32> input = ConvertBufferedImage.convertFromMulti(src, null, true, GrayF32.class);
+		Planar<GrayF32> input = ConvertBufferedImage.convertFromPlanar(src, null, true, GrayF32.class);
 
 		RemovePerspectiveDistortion<Planar<GrayF32>> removePerspective =
 				new RemovePerspectiveDistortion<>(300, 300, ImageType.pl(3, GrayF32.class));
