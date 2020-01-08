@@ -4,8 +4,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
@@ -13,7 +11,6 @@ import javax.swing.event.MouseInputListener;
 import com.github.sarxos.webcam.Webcam;
 
 import boofcv.alg.distort.RemovePerspectiveDistortion;
-import boofcv.alg.filter.binary.Contour;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
@@ -37,6 +34,7 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 		canvas.addMouseListener(this);
 		canvas.addMouseMotionListener(this);
 	}
+
 	private Webcam cam;
 	private Canvas canvas;
 	private BufferedImage lastDrawn;
@@ -44,7 +42,6 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 	private Point2D_I32[] points = new Point2D_I32[4];
 	private boolean pointsValid = false;
 	private MatchResult lastResult;
-
 	private int draggingPoint = -1;
 
 	public void setWebcam(Webcam w)
@@ -57,8 +54,6 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 		initBox();
 	}
 
-	private ArrayList<CardCandidate> ccs = new ArrayList<>();
-
 	public Webcam getWebcam() {
 		return cam;
 	}
@@ -70,11 +65,6 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 	public BufferedImage lastDrawn()
 	{
 		return lastDrawn;
-	}
-
-	public void addCandidate(CardCandidate cc)
-	{
-		ccs.add(cc);
 	}
 
 	public BufferedImage getBoundedZone()
@@ -125,6 +115,7 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 		}
 		Graphics gi = canvas.getGraphics();
 		Graphics g = buf.getGraphics();
+
 		g.drawImage(lastDrawn, 0, 0, null);
 		drawBounds(g,0,0);
 		g.setColor(Color.RED);
@@ -132,19 +123,7 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 		{
 			g.drawString(lastResult.toString(), 0, 10);
 		}
-
-		g.setColor(Color.RED);
-
-		/**
-		for(CardCandidate cc:ccs)
-		{
-			cc.draw(g,recogBounds.x,recogBounds.y);
-		}
-		ccs.clear();
-		*/
-
 		gi.drawImage(buf, 0, 0, null);
-
 	}
 
 	public void drawBounds(Graphics g,int offx, int offy)
@@ -173,24 +152,6 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 			{
 				g.fillOval(p.x-2, p.y-2, 5, 5);
 			}
-		}
-	}
-
-	public void drawContours(Graphics g)
-	{
-		List<Contour> contours = FindCardCandidates.getCannyContours(lastDrawn);
-		for(Contour con:contours)
-		{
-			int[] xpoint = new int[con.external.size()];
-			int[] ypoint = new int[con.external.size()];
-			int i=0;
-			for(Point2D_I32 pt:con.external)
-			{
-				xpoint[i]=pt.x;
-				ypoint[i]=pt.y;
-				i++;
-			}
-			g.drawPolygon(xpoint,ypoint,xpoint.length);
 		}
 	}
 
