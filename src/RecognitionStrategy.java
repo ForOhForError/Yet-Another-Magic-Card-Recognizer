@@ -7,28 +7,33 @@ import forohfor.scryfall.api.Card;
 import forohfor.scryfall.api.CardFace;
 
 public abstract class RecognitionStrategy {
-	public abstract void finalizeLoad();
-	public abstract void clear();
 	public void addFromFile(File handle)
 	{
-		ByteBuffer buf;
-		try {
-			buf = BufferUtils.getBuffer(handle);
-		} catch (IOException e) {
-			return;
-		}
-		BufferUtils.readUTF8(buf);
-		buf.getInt();
-		int rec = buf.getInt();
-		for(int i=0;i<rec;i++)
+		try
 		{
-			String s = BufferUtils.readUTF8(buf);
-			ImageDesc id = ImageDesc.readIn(buf);
-			DescContainer dc = new DescContainer(id,s);
-			if( SavedConfig.LOAD_BASICS || (!CardUtils.isEssentialBasic(dc.getName())) )
-			{
-				add(dc);
+			ByteBuffer buf;
+			try {
+				buf = BufferUtils.getBuffer(handle);
+			} catch (IOException e) {
+				return;
 			}
+			BufferUtils.readUTF8(buf);
+			buf.getInt();
+			int rec = buf.getInt();
+			for(int i=0;i<rec;i++)
+			{
+				String s = BufferUtils.readUTF8(buf);
+				ImageDesc id = ImageDesc.readIn(buf);
+				DescContainer dc = new DescContainer(id,s);
+				if( SavedConfig.LOAD_BASICS || (!CardUtils.isEssentialBasic(dc.getName())) )
+				{
+					add(dc);
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			return;
 		}
 	}
 	
@@ -79,6 +84,11 @@ public abstract class RecognitionStrategy {
 			}
 		}
 	}
+
+	public abstract void finalizeLoad();
+
+	public abstract void clear();
+
 	public abstract void add(DescContainer dc);
 
 	public abstract MatchResult getMatch(ImageDesc id, double thresh);

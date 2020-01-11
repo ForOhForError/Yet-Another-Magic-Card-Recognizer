@@ -20,8 +20,6 @@ public class DeckGenerator extends JFrame{
 
 	private static final long serialVersionUID = 1L;
 	private static ArrayList<String> ignore = new ArrayList<>();
-
-	private static boolean isOut = false;
 	
 	static
 	{
@@ -71,14 +69,6 @@ public class DeckGenerator extends JFrame{
 	public DeckGenerator()
 	{
 		super("Deck generator");
-		
-		if(isOut)
-		{
-			return;
-		}
-		isOut=true;
-		
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		gen = new JButton("Generate Deck");
 		namebox = new JTextField("Enter Deck Name");
 		JScrollPane scroll = new JScrollPane();
@@ -108,31 +98,38 @@ public class DeckGenerator extends JFrame{
 	public void writeDeck(String path)
 	{
 		ListRecogStrat r = new ListRecogStrat(namebox.getText());
-		
 		new File(SavedConfig.getDecksPath()).mkdirs();
 		File f = new File(SavedConfig.getDeckPath(namebox.getText()));
 
 		ArrayList<String> names = getCardNames();
 		ArrayList<Card> cards = MTGCardQuery.toCardList(names, true);
-		for(Card card:cards)
+		final OperationBar bar = RecogApp.INSTANCE.getOpBar();
+		if(bar.setTask("Generating Deck...",cards.size()))
 		{
-			r.addFromCard(card);
+			new Thread()
+			{
+				public void run()
+				{
+					for(Card card:cards)
+					{
+						bar.setSubtaskName(String.format("%s (%s)", card.getName(), card.getSetCode()));
+						r.addFromCard(card);
+						bar.progressTask();
+					}
+					try {
+						r.writeOut(f);
+						JOptionPane.showMessageDialog(null, 
+								"Deck saved with "+r.size()+" unique cards from "+names.size()+" card names.", 
+								"Deck Saved", JOptionPane.INFORMATION_MESSAGE, null);
+					} catch (IOException e) {
+						e.printStackTrace();
+						JOptionPane.showMessageDialog(null, 
+								"Deck couldn't be saved", 
+								"Error", JOptionPane.ERROR_MESSAGE, null);
+					}
+				}
+			}.start();
 		}
-		try {
-			r.writeOut(f);
-			JOptionPane.showMessageDialog(null, 
-					"Deck saved with "+r.size()+" unique cards from "+names.size()+" card names.", 
-					"Deck Saved", JOptionPane.INFORMATION_MESSAGE, null);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("Write failed.\n");
-		}
-	}
-	
-	public void dispose()
-	{
-		super.dispose();
-		isOut=false;
 	}
 
 }
