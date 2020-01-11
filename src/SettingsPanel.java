@@ -76,15 +76,6 @@ public class SettingsPanel extends JPanel{
 		});
 		add(loadSelected);
 		
-		JButton genSelected = new JButton("Generate Selected");
-		genSelected.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				RecogApp.select.downloadSelected();
-			}
-		});
-		add(genSelected);
-		
 		JButton unloadAll = new JButton("Unload all");
 		unloadAll.addActionListener(new ActionListener(){
 			@Override
@@ -93,15 +84,6 @@ public class SettingsPanel extends JPanel{
 			}
 		});
 		add(unloadAll);
-		
-		JButton launchScreenGrab = new JButton("Screen Grab");
-		launchScreenGrab.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ScreenRegionGrab.init();
-			}
-		});
-		add(launchScreenGrab);
 		
 		JButton launchPopout = new JButton("Card Preview");
 		launchPopout.addActionListener(new ActionListener(){
@@ -112,11 +94,11 @@ public class SettingsPanel extends JPanel{
 		});
 		add(launchPopout);
 		
-		JButton launchSetGen = new JButton("Set Generator");
+		JButton launchSetGen = new JButton("Bulk Generate Sets");
 		launchSetGen.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new SetGenerator();
+				SetGenerator.bulkGenSets();
 			}
 		});
 		add(launchSetGen);

@@ -1,23 +1,15 @@
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JOptionPane;
 
 import forohfor.scryfall.api.Card;
 import forohfor.scryfall.api.MTGCardQuery;
 import forohfor.scryfall.api.Set;
 
-public class SetGenerator extends JFrame{
-	private static final long serialVersionUID = 1L;
+public class SetGenerator{
 
 	private static final String[] setTypes = 
 		{ 
@@ -43,126 +35,81 @@ public class SetGenerator extends JFrame{
 				""
 		};
 
-	private JTextArea jt;
-	private JButton gen;
-	private JComboBox<String> typeBox;
-
-	private Thread genSets;
-
-	private static volatile boolean runThread = true;
-	private static boolean isOut = false;
-
-	public SetGenerator()
+	public static void bulkGenSets()
 	{
-		super("Set generator");
-		if(isOut)
+		String selectedType = (String) JOptionPane.showInputDialog(null, 
+			"Choose set types to pregen", 
+			"Bulk Generate Sets", 
+			JOptionPane.PLAIN_MESSAGE, null, 
+			setTypes,"all"
+		);
+		
+		if(selectedType == null)
 		{
 			return;
 		}
-		isOut=true;
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		gen = new JButton("Generate sets");
-		typeBox = new JComboBox<>(setTypes);
-		JScrollPane scroll = new JScrollPane();
-		gen.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				runThread = true;
-				genSets = new Thread(){
-					public void run()
-					{
-						typeBox.setEnabled(false);
-						gen.setEnabled(false);
-						ArrayList<Set> sets = MTGCardQuery.getSets();
-						for(Set s:sets){
-							System.out.println("set "+s.getName());
-							writeSet(s,true);
-							if(!runThread){
-								System.out.println("stopped");
-								return;
-							}
-						}
-						gen.setEnabled(true);
-						typeBox.setEnabled(true);
-					}
-				};
-				genSets.start();
+		
+		new Thread(){
+			public void run()
+			{
+				writeSets(selectedType);
 			}
-		});
-		
-		JPanel bot = new JPanel();
-		bot.setLayout(new BorderLayout());
-		
-		jt=new JTextArea(10,50);
-		jt.setEditable(false);
-		scroll.setViewportView(jt);
-		setLayout(new BorderLayout());
-		add(scroll,BorderLayout.CENTER);
-		bot.add(typeBox,BorderLayout.CENTER);
-		bot.add(gen,BorderLayout.SOUTH);
-		add(bot,BorderLayout.SOUTH);
-		pack();
-		setVisible(true);
+		}.start();
 	}
 
-	public void dispose()
+	private static void writeSets(String selectedType)
 	{
-		runThread = false;
-		super.dispose();
-		isOut=false;
-	}
+		ArrayList<Set> sets = MTGCardQuery.getSets();
+		ArrayList<Set> toGenerate = new ArrayList<Set>();
 
-	public void writeSet(Set set, boolean ignoreBasics)
-	{
-		String path = SavedConfig.getSetPath(set.getCode()); 
-		ListRecogStrat r = new ListRecogStrat(set.getName());
-		r.setSizeOfSet(set.getCardCount());
-		File f = new File(path);
+		for(Set set:sets)
+		{
+			String setType = set.getSetType();
+			if("expansion+core".equals(selectedType))
+			{
+				if(!(setType.equals("core")||setType.equals("expansion")))
+				{
+					continue;
+				}
+			}
+			else if(!selectedType.equals("all"))
+			{
+				if(!setType.equals(selectedType))
+				{
+					continue;
+				}
+			}
+			
+			String path = SavedConfig.getSetPath(set.getCode()); 
+			File f = new File(path);
 
-		String setType = set.getSetType();
-		String selectedType = (String)typeBox.getSelectedItem();
-		
-		if("expansion+core".equals(selectedType))
-		{
-			if(!(setType.equals("core")||setType.equals("expansion")))
+			if((f.exists() && f.isFile()))
 			{
-				return;
-			}
-		}
-		else if(!selectedType.equals("all"))
-		{
-			if(!setType.equals(selectedType))
-			{
-				return;
-			}
-		}
-		
-		jt.append(set.getName()+"..."+"\n");
-		
-		if((f.exists() && f.isFile()))
-		{
-			int size=ListRecogStrat.getSizeFromFile(f);
-			if(size==set.getCardCount())
-			{
-				jt.append("Set exists. Skipping.\n");
-				return;
+				int size=ListRecogStrat.getSizeFromFile(f);
+				if(size != set.getCardCount())
+				{
+					toGenerate.add(set);
+				}
 			}
 			else
 			{
-				jt.append("Outdated set file. Updating.\n");
+				toGenerate.add(set);
 			}
 		}
-		ArrayList<Card> cards = MTGCardQuery.getCardsFromURI(set.getSearchUri());
+		generateSets(toGenerate);
+	}
 
-		for(Card card:cards)
+	public static void generateSets(List<Set> sets)
+	{
+		OperationBar bar = RecogApp.INSTANCE.getOpBar();
+		if(bar.setTask("Generating Sets", sets.size()))
 		{
-			System.out.println(card.getName());
-			r.addFromCard(card);
-		}
-
-		try {
-			r.writeOut(f);
-		} catch (IOException e) {
-			jt.append("Write failed.\n");
+			for(Set set:sets)
+			{
+				bar.setSubtaskName(set.getName());
+				generateSet(set);
+				bar.progressTask();
+			}
 		}
 	}
 	

@@ -69,6 +69,11 @@ class SetSelectNode extends DefaultMutableTreeNode implements Comparable<SetSele
 		hasParent = true;
 	}
 	
+	public Set getSet()
+	{
+		return set;
+	}
+
 	public boolean download()
 	{
 		if(isSet() && !exists)

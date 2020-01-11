@@ -58,13 +58,25 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 		if(sel instanceof SetSelectNode)
 		{
 			SetSelectNode node = (SetSelectNode) tree.getLastSelectedPathComponent();
-			if(e.getClickCount() == 2 && !e.isConsumed() && !node.isLoaded() && node.fileExists())
+			if(e.getClickCount() == 2 && !e.isConsumed() && !node.isLoaded())
 			{
 				e.consume();
-				synchronized(strat){
-					strat.addFromFile(node.getFilePath());
-					strat.finalizeLoad();
-					node.setLoaded(true);
+				if(node.fileExists())
+				{
+					OperationBar bar = RecogApp.INSTANCE.getOpBar();
+					if(bar.setTask("Loading Sets",1))
+					{
+						synchronized(strat){
+							strat.addFromFile(node.getFilePath());
+							strat.finalizeLoad();
+							node.setLoaded(true);
+							bar.progressTask();
+						}
+					}
+				}
+				else
+				{
+					downloadNode(node);
 				}
 			}
 		}
@@ -185,82 +197,71 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 		}
 
 		Counter c = new Counter();
-		for(final SetSelectNode node:toLoad)
+		final OperationBar bar = RecogApp.INSTANCE.getOpBar();
+		if(bar.setTask("Loading Sets", toLoad.size()+1))
 		{
-			new Thread()
-			{
-				public void run()
-				{
-					try {
-						synchronized(strat)
-						{
-							strat.addFromFile(node.getFilePath());
-							synchronized(c)
-							{
-								c.count += 1;
-								if(c.count==toLoad.size())
-								{
-									strat.finalizeLoad();
-								}
-							}
-						}
-						node.setLoaded(true);
-						tree.repaint();
-					} catch (Exception e1) {
-						e1.printStackTrace();
-						node.setLoaded(false);
-					}
-				}
-			}.start();
-
-		}
-	}
-
-	public void downloadSelected()
-	{
-		DefaultMutableTreeNode selected = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-		ArrayList<SetSelectNode> toDownload = new ArrayList<SetSelectNode>();
-
-		if(selected != null)
-		{
-			Enumeration<TreeNode> nodes = selected.breadthFirstEnumeration();
-
-			while(nodes.hasMoreElements())
-			{
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodes.nextElement();
-				if(node instanceof SetSelectNode)
-				{
-					SetSelectNode snode = (SetSelectNode)node;
-					if(!snode.fileExists() && snode.isSet())
-					{
-						toDownload.add(snode);
-					}
-				}
-			}
-		}
-		int confirm = JOptionPane.YES_OPTION;
-		if(toDownload.size() > 3)
-		{
-			confirm = JOptionPane.showConfirmDialog(null, 
-					"You are trying to generate "+toDownload.size()+" sets in the background. Generating "
-							+ "multiple sets is a time-intensive operation. Continue?", "Confirm multiple set generation", 
-							JOptionPane.YES_NO_OPTION, 
-							JOptionPane.PLAIN_MESSAGE, null);
-		}
-
-		if(confirm == JOptionPane.YES_OPTION)
-		{
-			for(final SetSelectNode node:toDownload)
+			for(final SetSelectNode node:toLoad)
 			{
 				new Thread()
 				{
 					public void run()
 					{
-						boolean downloaded = node.download();
+						try {
+							synchronized(strat)
+							{
+								strat.addFromFile(node.getFilePath());
+								synchronized(c)
+								{
+									c.count += 1;
+									bar.progressTask();
+									if(c.count==toLoad.size())
+									{
+										strat.finalizeLoad();
+										bar.progressTask();
+									}
+								}
+							}
+							node.setLoaded(true);
+							tree.repaint();
+						} catch (Exception e1) {
+							e1.printStackTrace();
+							node.setLoaded(false);
+							bar.progressTask();
+						}
+					}
+				}.start();
+
+			}
+		}
+	}
+
+	public void downloadNode(SetSelectNode n)
+	{
+		int confirm = JOptionPane.showConfirmDialog(
+			null, 
+			"Download set? This is time intensive and will halt recognition "+
+			"until the operation completes.", "Confirm set generation", 
+			JOptionPane.YES_NO_OPTION, 
+			JOptionPane.PLAIN_MESSAGE,
+			null
+		);
+
+		if(confirm == JOptionPane.YES_OPTION)
+		{
+			final OperationBar bar = RecogApp.INSTANCE.getOpBar();
+			if(bar.setTask("Downloading Set",1))
+			{
+				new Thread()
+				{
+					public void run()
+					{
+						bar.setSubtaskName(n.getSet().getName());
+						boolean downloaded = n.download();
 						if(downloaded)
 						{
 							tree.repaint();
 						}
+						bar.progressTask();
 					}
 				}.start();
 			}
@@ -269,18 +270,27 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 
 	public void refresh()
 	{
-		unloadAll();
-		buildDisplayTree();
+		if(unloadAll())
+		{
+			buildDisplayTree();
+		}
 	}
 
-	public void unloadAll()
+	public boolean unloadAll()
 	{
-		strat.clear();
-		for(SetSelectNode node : allNodes)
+		OperationBar bar = RecogApp.INSTANCE.getOpBar();
+		if(bar.setTask("Unloading Sets",1))
 		{
-			node.setLoaded(false);
+			strat.clear();
+			for(SetSelectNode node : allNodes)
+			{
+				node.setLoaded(false);
+			}
+			bar.progressTask();
+			tree.repaint();
+			return true;
 		}
-		tree.repaint();
+		return false;
 	}
 
 	@SuppressWarnings("serial")

@@ -17,21 +17,18 @@ import com.github.sarxos.webcam.WebcamLockException;
 
 public class RecogApp extends JFrame implements KeyListener{
 	private static final long serialVersionUID = 1L;
-
 	public static RecognitionStrategy strat;
-
 	private static WebcamCanvas wc;
-
 	public static SetLoadPanel select;
-
 	public static RecogApp INSTANCE;
+	public static OperationBar task;
 
 	public static void main(String[] args)
 	{
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} 
-		catch (Exception e) {
+		catch (final Exception e) {
 			System.err.println(e.getMessage());
 		}
 		SavedConfig.init();
@@ -42,23 +39,23 @@ public class RecogApp extends JFrame implements KeyListener{
 	{
 		super("Yet Another Magic Card Recognizer");
 		INSTANCE = this;
-		BorderLayout bl = new BorderLayout();
+		final BorderLayout bl = new BorderLayout();
 		setLayout(bl);
-
+		task = new OperationBar();
 		strat = SavedConfig.getStrat();
 
 		SetListing.init();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		Webcam w = WebcamUtils.getPreferredElseChooseWebcam();
+		final Webcam w = WebcamUtils.getPreferredElseChooseWebcam();
 
 		if(w==null)
 		{
 			System.exit(1);
 		}
 
-		JPanel right = new JPanel();
+		final JPanel right = new JPanel();
 		right.setLayout(new GridLayout(2,1));
 
 		wc = new WebcamCanvas(w);
@@ -67,12 +64,13 @@ public class RecogApp extends JFrame implements KeyListener{
 		ico = new ImageIcon("res/YamCR.png");
 		setIconImage(ico.getImage());
 
-		JScrollPane scroll = new JScrollPane();
+		final JScrollPane scroll = new JScrollPane();
 		select = new SetLoadPanel(strat);
 		scroll.setViewportView(select);
 		scroll.getVerticalScrollBar().setUnitIncrement(16);
 		add(wc,BorderLayout.CENTER);
 		add(right,BorderLayout.EAST);
+		add(task,BorderLayout.SOUTH);
 		right.add(new SettingsPanel());
 		right.add(scroll);
 		right.setPreferredSize(new Dimension(300,wc.getHeight()));
@@ -81,7 +79,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		setResizable(false);
 		try{
 			w.open(true);
-		}catch(WebcamLockException e)
+		}catch(final WebcamLockException e)
 		{
 			JOptionPane.showMessageDialog(null, "Webcam already in use. Exiting.");
 			System.exit(0);
@@ -90,6 +88,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		while(true)
 		{
 			wc.draw();
+			task.repaint();
 			if(SettingsPanel.RECOG_EVERY_FRAME)
 			{
 				doRecog();
@@ -97,7 +96,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 	}
 
-	public void doSetStrat(RecognitionStrategy strategy)
+	public void doSetStrat(final RecognitionStrategy strategy)
 	{
 		synchronized(strat)
 		{
@@ -111,7 +110,7 @@ public class RecogApp extends JFrame implements KeyListener{
 	{
 		synchronized(wc)
 		{
-			Webcam w = WebcamUtils.chooseWebcam();
+			final Webcam w = WebcamUtils.chooseWebcam();
 			if(w != null)
 			{
 				wc.setWebcam(w);
@@ -124,37 +123,45 @@ public class RecogApp extends JFrame implements KeyListener{
 	{
 		synchronized(wc)
 		{
-			BufferedImage img = wc.getBoundedZone();
+			final BufferedImage img = wc.getBoundedZone();
 			doRecog(img);
 		}
 	}
 
 	public static void doRecog(BufferedImage img)
 	{
-		if(img!=null)
+		if(!task.isOperating())
 		{
-			img = ImageUtil.getScaledImage(img);
-			ImageDesc id = new ImageDesc(img);
-			synchronized(strat){
-				MatchResult res = strat.getMatch(id, SettingsPanel.RECOG_THRESH/100f);
-				if(res!=null){
-					wc.setLastResult(res);
-					PopoutCardWindow.setDisplay(res.scryfallId,res.name);
+			if(img!=null)
+			{
+				img = ImageUtil.getScaledImage(img);
+				final ImageDesc id = new ImageDesc(img);
+				synchronized(strat){
+					final MatchResult res = strat.getMatch(id, SettingsPanel.RECOG_THRESH/100f);
+					if(res!=null){
+						wc.setLastResult(res);
+						PopoutCardWindow.setDisplay(res.scryfallId,res.name);
+					}
 				}
 			}
 		}
 	}
 
+	public OperationBar getOpBar()
+	{
+		return task;
+	}
+
 	@Override
-	public void keyPressed(KeyEvent arg0) {
+	public void keyPressed(final KeyEvent arg0) {
 		doRecog();
 	}
 
 	@Override
-	public void keyReleased(KeyEvent arg0) {
+	public void keyReleased(final KeyEvent arg0) {
 	}
 
 	@Override
-	public void keyTyped(KeyEvent arg0) {
+	public void keyTyped(final KeyEvent arg0) {
 	}
 }
