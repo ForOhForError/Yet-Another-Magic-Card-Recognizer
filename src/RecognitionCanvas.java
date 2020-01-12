@@ -18,12 +18,10 @@ import boofcv.struct.image.Planar;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point2D_I32;
 
-public class WebcamCanvas extends JPanel implements MouseInputListener{
+public class RecognitionCanvas extends JPanel implements MouseInputListener{
 	private static final long serialVersionUID = 1L;
 
-	BufferedImage baseline;
-
-	public WebcamCanvas(Webcam w) {
+	public RecognitionCanvas(Webcam w) {
 		super();
 		cam = w;
 		canvas = new Canvas();
@@ -104,10 +102,6 @@ public class WebcamCanvas extends JPanel implements MouseInputListener{
 			cam.open();
 		}
 		lastDrawn = cam.getImage();
-		if(baseline==null)
-		{
-			baseline=lastDrawn;
-		}
 
 		if(buf == null || buf.getHeight() != lastDrawn.getHeight() || buf.getWidth() != lastDrawn.getWidth())
 		{

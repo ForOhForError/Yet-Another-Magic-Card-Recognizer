@@ -18,7 +18,7 @@ import com.github.sarxos.webcam.WebcamLockException;
 public class RecogApp extends JFrame implements KeyListener{
 	private static final long serialVersionUID = 1L;
 	public static RecognitionStrategy strat;
-	private static WebcamCanvas wc;
+	private static RecognitionCanvas canvas;
 	public static SetLoadPanel select;
 	public static RecogApp INSTANCE;
 	public static OperationBar task;
@@ -58,7 +58,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		final JPanel right = new JPanel();
 		right.setLayout(new GridLayout(2,1));
 
-		wc = new WebcamCanvas(w);
+		canvas = new RecognitionCanvas(w);
 
 		ImageIcon ico = null;
 		ico = new ImageIcon("res/YamCR.png");
@@ -68,12 +68,12 @@ public class RecogApp extends JFrame implements KeyListener{
 		select = new SetLoadPanel(strat);
 		scroll.setViewportView(select);
 		scroll.getVerticalScrollBar().setUnitIncrement(16);
-		add(wc,BorderLayout.CENTER);
+		add(canvas,BorderLayout.CENTER);
 		add(right,BorderLayout.EAST);
 		add(task,BorderLayout.SOUTH);
 		right.add(new SettingsPanel());
 		right.add(scroll);
-		right.setPreferredSize(new Dimension(300,wc.getHeight()));
+		right.setPreferredSize(new Dimension(300,canvas.getHeight()));
 		pack();
 		setVisible(true);
 		setResizable(false);
@@ -84,10 +84,10 @@ public class RecogApp extends JFrame implements KeyListener{
 			JOptionPane.showMessageDialog(null, "Webcam already in use. Exiting.");
 			System.exit(0);
 		}
-		wc.getCanvas().addKeyListener(this);
+		canvas.getCanvas().addKeyListener(this);
 		while(true)
 		{
-			wc.draw();
+			canvas.draw();
 			task.repaint();
 			if(SettingsPanel.RECOG_EVERY_FRAME)
 			{
@@ -108,12 +108,12 @@ public class RecogApp extends JFrame implements KeyListener{
 
 	public void doSetWebcam()
 	{
-		synchronized(wc)
+		synchronized(canvas)
 		{
 			final Webcam w = WebcamUtils.chooseWebcam();
 			if(w != null)
 			{
-				wc.setWebcam(w);
+				canvas.setWebcam(w);
 				pack();
 			}
 		}
@@ -121,9 +121,9 @@ public class RecogApp extends JFrame implements KeyListener{
 
 	public void doRecog()
 	{
-		synchronized(wc)
+		synchronized(canvas)
 		{
-			final BufferedImage img = wc.getBoundedZone();
+			final BufferedImage img = canvas.getBoundedZone();
 			doRecog(img);
 		}
 	}
@@ -139,7 +139,7 @@ public class RecogApp extends JFrame implements KeyListener{
 				synchronized(strat){
 					final MatchResult res = strat.getMatch(id, SettingsPanel.RECOG_THRESH/100f);
 					if(res!=null){
-						wc.setLastResult(res);
+						canvas.setLastResult(res);
 						PopoutCardWindow.setDisplay(res.scryfallId,res.name);
 					}
 				}
