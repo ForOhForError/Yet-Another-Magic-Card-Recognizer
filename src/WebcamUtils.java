@@ -149,7 +149,7 @@ public class WebcamUtils {
 			}
 			return true;
 		} catch (MalformedURLException e) {
-			System.out.println(address);
+			e.printStackTrace();
 			return false;
 		}
 	}

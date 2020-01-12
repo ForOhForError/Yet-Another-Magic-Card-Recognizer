@@ -83,8 +83,6 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-
-		System.out.println(arg0);
 	}
 
 	public int getBoxWidth()

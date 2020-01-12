@@ -93,7 +93,6 @@ public class PopoutCardWindow extends JFrame implements ActionListener{
 			if(!isDisplayingCardId(id,name))
 			{
 				try {
-					System.out.println(id);
 					card = MTGCardQuery.getCardByScryfallId(id);
 					cardId = card.getScryfallUUID();
 					boolean found = false;

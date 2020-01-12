@@ -93,16 +93,10 @@ public class TreeRecogStrat extends RecognitionStrategy{
 
 	public synchronized void finalizeLoad()
 	{
-		System.out.println("loading");
 		while(lq.size()>0)
 		{
-			if(lq.size()%100==0)
-			{
-				System.out.println(lq.size());
-			}
 			process(lq.remove());
 		}
-		System.out.println("loaded!");
 	}
 
 	private class Node
