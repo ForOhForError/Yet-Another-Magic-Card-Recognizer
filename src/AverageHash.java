@@ -41,7 +41,41 @@ public class AverageHash {
 		}
 		return d;
 	}
+
+	public static AverageHash flipped(AverageHash in)
+	{
+		AverageHash d = new AverageHash();
+		d.digest = new long[in.digest.length];
+		d.width = in.width;
+		d.height = in.height;
+		
+		int orig = 0;
+		int ix = in.digest.length-1;
+		for(int i=0;i<d.width;i++)
+		{
+			for(int j=0;j<d.height;j++)
+			{
+				d.digest[ix] = flipChunk(in.digest[orig]);
+				orig++;
+				ix--;
+			}
+		}
+		return d;
+	}
 	
+	private static long flipChunk(long in)
+	{
+		long hash = 0;
+		long mask = 0x8000000000000000l;
+		for(int i=0;i<64;i++)
+		{
+			long inter = (in&mask)>>>63;
+			hash |= inter;
+			hash<<=1;
+		}
+		return hash;
+	}
+
 	private static long hashChunk(BufferedImage chunk)
 	{
 		WritableRaster r = chunk.getRaster();

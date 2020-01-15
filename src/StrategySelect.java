@@ -8,6 +8,7 @@ class StrategySelect
     {
         strats = new ArrayList<RecognitionStrategy>(2);
         registerStrategy(new ListRecogStrat());
+        registerStrategy(new HashNarrowedRecogStrat());
         registerStrategy(new TreeRecogStrat());
     }
 
@@ -31,5 +32,10 @@ class StrategySelect
     public static RecognitionStrategy[] getStrats()
     {
         return strats.toArray(new RecognitionStrategy[2]);
+    }
+
+    public static int indexOf(RecognitionStrategy strat)
+    {
+        return strats.indexOf(strat);
     }
 }

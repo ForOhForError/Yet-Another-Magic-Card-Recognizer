@@ -18,6 +18,8 @@ public class SettingsPanel extends JPanel{
 
 	public static int RECOG_THRESH = 27;
 
+	private JComboBox<RecognitionStrategy> stratSelect;
+
 	public SettingsPanel()
 	{
 		super();
@@ -44,9 +46,8 @@ public class SettingsPanel extends JPanel{
 		add(score);
 		add(thresh);
 
-		JComboBox<RecognitionStrategy> stratSelect = 
-			new JComboBox<RecognitionStrategy>(StrategySelect.getStrats());
-		stratSelect.setSelectedIndex(0);
+		stratSelect = new JComboBox<RecognitionStrategy>(StrategySelect.getStrats());
+		stratSelect.setSelectedIndex(StrategySelect.indexOf(SavedConfig.getStrat()));
 		stratSelect.addActionListener(new ActionListener()
 		{
 			@SuppressWarnings("unchecked")

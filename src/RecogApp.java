@@ -43,6 +43,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		setLayout(bl);
 		task = new OperationBar();
 		strat = SavedConfig.getStrat();
+		
 
 		SetListing.init();
 		

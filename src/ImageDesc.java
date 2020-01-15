@@ -28,6 +28,7 @@ public class ImageDesc {
 	static AssociateDescription<BrightFeature> associate = FactoryAssociation.greedy(scorer, Double.MAX_VALUE, true);
 	
 	private AverageHash hash;
+	private AverageHash flipped;
 	private FastQueue<BrightFeature> desc = UtilFeature.createQueue(detDesc,0);
 	
 
@@ -128,5 +129,14 @@ public class ImageDesc {
 	public double compareHash(ImageDesc i2)
 	{
 		return hash.match(i2.hash);
+	}
+
+	public double compareHashWithFlip(ImageDesc i2)
+	{
+		if(flipped == null)
+		{
+			flipped = AverageHash.flipped(hash);
+		}
+		return Math.max(hash.match(i2.hash), flipped.match(i2.hash));
 	}
 }
