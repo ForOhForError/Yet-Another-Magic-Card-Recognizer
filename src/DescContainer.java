@@ -24,6 +24,6 @@ public class DescContainer implements Comparable<DescContainer>{
 	
 	public String getName()
 	{
-		return stringData.split("|")[0];
+		return stringData.split("\\|")[0];
 	}
 }
