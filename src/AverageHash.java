@@ -66,12 +66,15 @@ public class AverageHash {
 	private static long flipChunk(long in)
 	{
 		long hash = 0;
-		long mask = 0x8000000000000000l;
 		for(int i=0;i<64;i++)
 		{
-			long inter = (in&mask)>>>63;
+			long inter = in&0x1;
 			hash |= inter;
-			hash<<=1;
+			if(i!=63)
+			{
+				hash <<= 1;
+				in >>>= 1;
+			}
 		}
 		return hash;
 	}
