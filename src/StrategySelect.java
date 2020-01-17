@@ -33,9 +33,4 @@ class StrategySelect
     {
         return strats.toArray(new RecognitionStrategy[2]);
     }
-
-    public static int indexOf(RecognitionStrategy strat)
-    {
-        return strats.indexOf(strat);
-    }
 }

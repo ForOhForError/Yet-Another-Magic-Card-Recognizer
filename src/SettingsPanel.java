@@ -47,7 +47,7 @@ public class SettingsPanel extends JPanel{
 		add(thresh);
 
 		stratSelect = new JComboBox<RecognitionStrategy>(StrategySelect.getStrats());
-		stratSelect.setSelectedIndex(StrategySelect.indexOf(SavedConfig.getStrat()));
+		stratSelect.setSelectedItem(SavedConfig.getStrat());
 		stratSelect.addActionListener(new ActionListener()
 		{
 			@SuppressWarnings("unchecked")
@@ -72,7 +72,7 @@ public class SettingsPanel extends JPanel{
 		loadSelected.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				RecogApp.select.loadSelected();
+				RecogApp.INSTANCE.getLoader().loadSelected();
 			}
 		});
 		add(loadSelected);
@@ -81,7 +81,7 @@ public class SettingsPanel extends JPanel{
 		unloadAll.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				RecogApp.select.unloadAll();
+				RecogApp.INSTANCE.getLoader().unloadAll();
 			}
 		});
 		add(unloadAll);
@@ -117,9 +117,14 @@ public class SettingsPanel extends JPanel{
 		toggleSetPanel.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				RecogApp.select.refresh();
+				RecogApp.INSTANCE.getLoader().refresh();
 			}
 		});
 		add(toggleSetPanel);
+	}
+
+	public void resetStratSelector(RecognitionStrategy strat)
+	{
+		stratSelect.setSelectedItem(strat);
 	}
 }
