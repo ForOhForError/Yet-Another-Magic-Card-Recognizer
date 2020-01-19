@@ -80,7 +80,7 @@ public class SetListing {
 			setObj.put("id", set.getId());
 			setObj.put("code", set.getCode());
 			setObj.put("name",set.getName());
-			setObj.put("search_uri", set.getSearchUri());
+			setObj.put("search_uri", set.getSearchURI());
 			setObj.put("block_code",set.getBlockCode());
 			setObj.put("block_name",set.getBlockName());
 			setObj.put("card_count",set.getCardCount());

@@ -94,11 +94,11 @@ public class PopoutCardWindow extends JFrame implements ActionListener{
 			{
 				try {
 					card = MTGCardQuery.getCardByScryfallId(id);
-					cardId = card.getScryfallUUID();
+					cardId = card.getScryfallUUID().toString();
 					boolean found = false;
 					if(card.isMultifaced())
 					{
-						for(CardFace face:card.getFaces())
+						for(CardFace face:card.getCardFaces())
 						{
 							if(face.getName().equals(name))
 							{

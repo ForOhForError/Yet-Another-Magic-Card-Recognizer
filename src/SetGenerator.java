@@ -120,7 +120,7 @@ public class SetGenerator{
 		r.setSizeOfSet(set.getCardCount());
 		File f = new File(path);
 		
-		ArrayList<Card> cards = MTGCardQuery.getCardsFromURI(set.getSearchUri());
+		ArrayList<Card> cards = MTGCardQuery.getCardsFromURI(set.getSearchURI());
 
 		for(Card card:cards)
 		{

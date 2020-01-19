@@ -42,7 +42,7 @@ public abstract class RecognitionStrategy {
 		BufferedImage top_img = card.getImage(StaticConfigs.DEFAULT_ART_FORMAT);
 		if(top_img==null && card.isMultifaced())
 		{
-			for(CardFace face:card.getFaces())
+			for(CardFace face:card.getCardFaces())
 			{
 				BufferedImage i = face.getImage(StaticConfigs.DEFAULT_ART_FORMAT);
 				if(i!=null)
