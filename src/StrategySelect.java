@@ -3,6 +3,7 @@ import java.util.ArrayList;
 class StrategySelect
 {
     private static ArrayList<RecognitionStrategy> strats;
+    private static ArrayList<AreaRecognitionStrategy> areaStrats;
 
     static
     {
@@ -10,11 +11,19 @@ class StrategySelect
         registerStrategy(new ListRecogStrat());
         registerStrategy(new HashNarrowedRecogStrat());
         registerStrategy(new TreeRecogStrat());
+
+        areaStrats = new ArrayList<AreaRecognitionStrategy>(2);
+        registerAreaStrategy(new AutoDetectAreaStrat());
     }
 
     public static void registerStrategy(RecognitionStrategy strat) 
     {
         strats.add(strat);
+    }
+
+    public static void registerAreaStrategy(AreaRecognitionStrategy strat) 
+    {
+        areaStrats.add(strat);
     }
 
     public static RecognitionStrategy getStrat(String id) 
@@ -29,8 +38,25 @@ class StrategySelect
         return null;
     }
 
+    public static AreaRecognitionStrategy getAreaStrat(String id) 
+    {
+        for(AreaRecognitionStrategy strat : areaStrats)
+        {
+            if(strat.getStratName().equals(id))
+            {
+                return strat;
+            }
+        }
+        return null;
+    }
+
     public static RecognitionStrategy[] getStrats()
     {
         return strats.toArray(new RecognitionStrategy[2]);
+    }
+
+    public static AreaRecognitionStrategy[] getAreaStrats()
+    {
+        return areaStrats.toArray(new AreaRecognitionStrategy[2]);
     }
 }
