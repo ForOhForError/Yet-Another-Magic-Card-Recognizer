@@ -171,6 +171,7 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 		return subtree;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void loadSelected()
 	{
 		DefaultMutableTreeNode selected = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
