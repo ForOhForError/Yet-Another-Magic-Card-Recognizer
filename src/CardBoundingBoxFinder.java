@@ -31,10 +31,9 @@ class CardBoundingBoxFinder
             if(size > 0 && size < 3)
             {
                 ContourBoundingBox bb = new ContourBoundingBox(contour.external);
-                if(bb.area()>1000 && bb.isRoughlyRecttangular())
+                if(bb.area()>1000)
                 {
                     bounds.add(bb);
-                    bb.draw(RecogApp.INSTANCE.getCanvasGraphics());
                 }
             }
         }

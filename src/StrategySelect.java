@@ -13,6 +13,7 @@ class StrategySelect
         registerStrategy(new TreeRecogStrat());
 
         areaStrats = new ArrayList<AreaRecognitionStrategy>(2);
+        registerAreaStrategy(new ManualAreaStrat());
         registerAreaStrategy(new AutoDetectAreaStrat());
     }
 

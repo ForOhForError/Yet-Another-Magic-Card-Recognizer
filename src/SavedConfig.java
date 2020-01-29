@@ -87,6 +87,11 @@ public class SavedConfig {
 		return StrategySelect.getStrat(CONF_OBJECT.get("recognition_strategy").toString());
 	}
 
+	public static AreaRecognitionStrategy getAreaStrat()
+	{
+		return StrategySelect.getAreaStrat(CONF_OBJECT.get("area_recognition_strategy").toString());
+	}
+
 	@SuppressWarnings("unchecked")
 	public static void setPreferredStrat(RecognitionStrategy strat)
 	{
@@ -112,7 +117,7 @@ public class SavedConfig {
 		CONF_OBJECT.put("load_basics", false);
 		CONF_OBJECT.put("write_basics_to_sets", false);
 		CONF_OBJECT.put("recognition_strategy", new ListRecogStrat().getStratName());
-		CONF_OBJECT.put("area_recognition_strategy", new AutoDetectAreaStrat().getStratName());
+		CONF_OBJECT.put("area_recognition_strategy", new ManualAreaStrat().getStratName());
 		JSONObject camconf = new JSONObject();
 		camconf.put("cam_name", "");
 		camconf.put("cam_resolution_w", -1);

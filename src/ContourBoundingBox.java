@@ -40,11 +40,13 @@ class ContourBoundingBox
             RemovePerspectiveDistortion<Planar<GrayF32>> removePerspective =
                     new RemovePerspectiveDistortion<>(672, 936, ImageType.pl(3, GrayF32.class));
 
+            int start = longEdge();
+
             if( !removePerspective.apply(input,
-                    new Point2D_F64(corners[0].x,corners[0].y),
-                    new Point2D_F64(corners[1].x,corners[1].y),
-                    new Point2D_F64(corners[2].x,corners[2].y),
-                    new Point2D_F64(corners[3].x,corners[3].y)
+                    new Point2D_F64(corners[start].x,corners[start].y),
+                    new Point2D_F64(corners[start+1].x,corners[start+1].y),
+                    new Point2D_F64(corners[start+2].x,corners[start+2].y),
+                    new Point2D_F64(corners[(start+3)%4].x,corners[(start+3)%4].y)
                                     ) ){
                 return null;
             }
@@ -94,6 +96,13 @@ class ContourBoundingBox
             );
             slopes[i] = slope(corners[i],corners[j]);
         }
+    }
+
+    public int longEdge()
+    {
+        double d1 = midpoints[0].distance(midpoints[2]);
+        double d2 = midpoints[0].distance(midpoints[2]);
+        return d1 > d2 ? 1 : 0;
     }
 
     public double area()

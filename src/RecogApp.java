@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -63,7 +64,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		JPanel right = new JPanel();
 		right.setLayout(new GridLayout(2,1));
 
-		canvas = new RecognitionCanvas(w);
+		canvas = new RecognitionCanvas(w,SavedConfig.getAreaStrat());
 
 		ImageIcon ico = null;
 		ico = new ImageIcon("res/YamCR.png");
@@ -132,7 +133,7 @@ public class RecogApp extends JFrame implements KeyListener{
 	{
 		synchronized(canvas)
 		{
-			BufferedImage img = canvas.getBoundedZone();
+			BufferedImage img = canvas.lastDrawn();
 			doRecog(img);
 		}
 	}
@@ -143,13 +144,10 @@ public class RecogApp extends JFrame implements KeyListener{
 		{
 			if(img!=null)
 			{
-				img = ImageUtil.getScaledImage(img);
-				ImageDesc id = new ImageDesc(img);
 				synchronized(strat){
-					//AreaRecognitionStrategy areaStrat = StrategySelect.getAreaStrats()[0];
-					//ArrayList<MatchResult> matches = areaStrat.recognize(img, strat);
-					//MatchResult res = matches.size() > 0 ? matches.get(0):null;
-					MatchResult res = strat.getMatch(id, SettingsPanel.RECOG_THRESH/100f);
+					AreaRecognitionStrategy areaStrat = SavedConfig.getAreaStrat();
+					ArrayList<MatchResult> matches = areaStrat.recognize(canvas.lastDrawn(), strat);
+					MatchResult res = matches.size() > 0 ? matches.get(0):null;
 					if(res!=null){
 						canvas.setLastResult(res);
 						PopoutCardWindow.setDisplay(res.scryfallId,res.name);
