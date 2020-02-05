@@ -12,16 +12,13 @@ class AutoDetectAreaStrat extends AreaRecognitionStrategy {
     public ArrayList<MatchResult> recognize(BufferedImage in, RecognitionStrategy strat) {
         results.clear();
         bounds = CardBoundingBoxFinder.process(in);
-        System.out.println(bounds.size());
         for (ContourBoundingBox bound : bounds) {
-            System.out.println(bound);
-            ImageDesc i = new ImageDesc(bound.getTransformedImage(in));
-            MatchResult mr = strat.getMatch(i, SettingsPanel.RECOG_THRESH);
+            ImageDesc i = new ImageDesc(ImageUtil.getScaledImage(bound.getTransformedImage(in)));
+            MatchResult mr = strat.getMatch(i, SettingsPanel.RECOG_THRESH/100.0);
             if (mr != null) {
                 results.add(mr);
             }
         }
-
         return results;
     }
 
@@ -67,7 +64,7 @@ class AutoDetectAreaStrat extends AreaRecognitionStrategy {
     public void draw(Graphics g) {
         for(ContourBoundingBox bb : bounds)
         {
-            bb.draw(RecogApp.INSTANCE.getCanvasGraphics());
+            bb.draw(g);
         }
     }
 

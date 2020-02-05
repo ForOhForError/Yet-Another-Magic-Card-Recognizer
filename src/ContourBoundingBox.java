@@ -39,6 +39,7 @@ class ContourBoundingBox
 
             RemovePerspectiveDistortion<Planar<GrayF32>> removePerspective =
                     new RemovePerspectiveDistortion<>(672, 936, ImageType.pl(3, GrayF32.class));
+                    //new RemovePerspectiveDistortion<>(400, 400, ImageType.pl(3, GrayF32.class));
 
             int start = longEdge();
 
@@ -101,8 +102,8 @@ class ContourBoundingBox
     public int longEdge()
     {
         double d1 = midpoints[0].distance(midpoints[2]);
-        double d2 = midpoints[0].distance(midpoints[2]);
-        return d1 > d2 ? 1 : 0;
+        double d2 = midpoints[1].distance(midpoints[3]);
+        return d1 > d2 ? 0 : 1;
     }
 
     public double area()
@@ -113,11 +114,18 @@ class ContourBoundingBox
 
     public boolean isRoughlyRecttangular()
     {
-        double d1 = slopes[0]/slopes[2];
-        double d2 = slopes[1]/slopes[3];
-        double low = 0;
-        double high = 3;
-        return d1 > low && d1 < high && d2 > low && d2 < high;
+        double d1 = midpoints[0].distance(midpoints[2]);
+        double d2 = midpoints[1].distance(midpoints[3]);
+        double ratio;
+        if(d1>d2)
+        {
+            ratio = d1/d2;
+        }
+        else
+        {
+            ratio = d2/d1;
+        }
+        return ratio > 1 && ratio < 2;
     }
 
     private static double slope(Point2D_I32 p1, Point2D_I32 p2)
@@ -134,14 +142,7 @@ class ContourBoundingBox
 
     public void draw(Graphics g)
     {
-        if(isRoughlyRecttangular())
-        {
-            g.setColor(Color.GREEN);
-        }
-        else
-        {
-            g.setColor(Color.ORANGE);
-        }
+        g.setColor(Color.GREEN);
         for(int i=0; i<4; i++)
         {
             int j = (i+1)%4;
@@ -151,6 +152,10 @@ class ContourBoundingBox
                 corners[j].x,
                 corners[j].y
             );
+            if(i==longEdge())
+            {
+                g.fillOval(corners[i].x-4, corners[i].y-4, 9, 9);
+            }
         }
     }
 }
