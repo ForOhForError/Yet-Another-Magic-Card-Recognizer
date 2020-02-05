@@ -19,6 +19,7 @@ public class SettingsPanel extends JPanel{
 	public static int RECOG_THRESH = 27;
 
 	private JComboBox<RecognitionStrategy> stratSelect;
+	private JComboBox<AreaRecognitionStrategy> areaStratSelect;
 
 	public SettingsPanel()
 	{
@@ -45,6 +46,19 @@ public class SettingsPanel extends JPanel{
 		});
 		add(score);
 		add(thresh);
+
+		areaStratSelect = new JComboBox<AreaRecognitionStrategy>(StrategySelect.getAreaStrats());
+		areaStratSelect.setSelectedItem(SavedConfig.getAreaStrat());
+		areaStratSelect.addActionListener(new ActionListener()
+		{
+			@SuppressWarnings("unchecked")
+			public void actionPerformed(ActionEvent e) {
+				JComboBox<AreaRecognitionStrategy> cb = 
+					(JComboBox<AreaRecognitionStrategy>)e.getSource();
+				RecogApp.INSTANCE.doSetAreaStrat(cb.getItemAt(cb.getSelectedIndex()));
+			}
+		});
+		add(areaStratSelect);
 
 		stratSelect = new JComboBox<RecognitionStrategy>(StrategySelect.getStrats());
 		stratSelect.setSelectedItem(SavedConfig.getStrat());
@@ -126,5 +140,10 @@ public class SettingsPanel extends JPanel{
 	public void resetStratSelector(RecognitionStrategy strat)
 	{
 		stratSelect.setSelectedItem(strat);
+	}
+
+	public void resetAreaStratSelector(AreaRecognitionStrategy strat)
+	{
+		areaStratSelect.setSelectedItem(strat);
 	}
 }

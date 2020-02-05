@@ -21,6 +21,7 @@ import com.github.sarxos.webcam.WebcamLockException;
 public class RecogApp extends JFrame implements KeyListener{
 	private static final long serialVersionUID = 1L;
 	private static RecognitionStrategy strat;
+	private static AreaRecognitionStrategy areaStrat;
 	private static RecognitionCanvas canvas;
 	private static SettingsPanel settings;
 	private static SetLoadPanel select;
@@ -116,6 +117,19 @@ public class RecogApp extends JFrame implements KeyListener{
 		settings.resetStratSelector(strat);
 	}
 
+	public void doSetAreaStrat(AreaRecognitionStrategy strategy)
+	{
+		if(task.setTask("Reloading strategy",1))
+		{
+			areaStrat = strategy;
+			SavedConfig.setPreferredAreaStrat(areaStrat);
+			canvas.setAreaStrat(areaStrat);
+			task.progressTask();
+		}
+		select.refresh();
+		settings.resetAreaStratSelector(areaStrat);
+	}
+
 	public void doSetWebcam()
 	{
 		synchronized(canvas)
@@ -145,8 +159,8 @@ public class RecogApp extends JFrame implements KeyListener{
 			if(img!=null)
 			{
 				synchronized(strat){
-					AreaRecognitionStrategy areaStrat = SavedConfig.getAreaStrat();
-					ArrayList<MatchResult> matches = areaStrat.recognize(canvas.lastDrawn(), strat);
+					AreaRecognitionStrategy areaSet = SavedConfig.getAreaStrat();
+					ArrayList<MatchResult> matches = areaSet.recognize(canvas.lastDrawn(), strat);
 					MatchResult res = matches.size() > 0 ? matches.get(0):null;
 					if(res!=null){
 						canvas.setLastResult(res);
