@@ -38,15 +38,14 @@ class ContourBoundingBox
             Planar<GrayF32> input = ConvertBufferedImage.convertFromPlanar(in, null, true, GrayF32.class);
 
             RemovePerspectiveDistortion<Planar<GrayF32>> removePerspective =
-                    new RemovePerspectiveDistortion<>(672, 936, ImageType.pl(3, GrayF32.class));
-                    //new RemovePerspectiveDistortion<>(400, 400, ImageType.pl(3, GrayF32.class));
+                    new RemovePerspectiveDistortion<>(300, 418, ImageType.pl(3, GrayF32.class));
 
             int start = longEdge();
 
             if( !removePerspective.apply(input,
                     new Point2D_F64(corners[start].x,corners[start].y),
-                    new Point2D_F64(corners[start+1].x,corners[start+1].y),
-                    new Point2D_F64(corners[start+2].x,corners[start+2].y),
+                    new Point2D_F64(corners[(start+1)%4].x,corners[(start+1)%4].y),
+                    new Point2D_F64(corners[(start+2)%4].x,corners[(start+2)%4].y),
                     new Point2D_F64(corners[(start+3)%4].x,corners[(start+3)%4].y)
                                     ) ){
                 return null;
@@ -101,9 +100,19 @@ class ContourBoundingBox
 
     public int longEdge()
     {
-        double d1 = midpoints[0].distance(midpoints[2]);
-        double d2 = midpoints[1].distance(midpoints[3]);
-        return d1 > d2 ? 0 : 1;
+        double shortest = Integer.MAX_VALUE;
+        int shortest_ix = 0;
+        for(int i=0; i<4; i++)
+        {
+            int j = (i+1)%4;
+            double d = corners[i].distance(corners[j]);
+            if(d<shortest)
+            {
+                shortest=d;
+                shortest_ix=i;
+            }
+        }
+        return shortest_ix%2;
     }
 
     public double area()
@@ -142,9 +151,16 @@ class ContourBoundingBox
 
     public void draw(Graphics g)
     {
-        g.setColor(Color.GREEN);
         for(int i=0; i<4; i++)
         {
+            if(i%2==longEdge()%2)
+            {
+                g.setColor(Color.RED);
+            }
+            else
+            {
+                g.setColor(Color.WHITE);
+            }
             int j = (i+1)%4;
             g.drawLine(
                 corners[i].x,
@@ -152,10 +168,6 @@ class ContourBoundingBox
                 corners[j].x,
                 corners[j].y
             );
-            if(i==longEdge())
-            {
-                g.fillOval(corners[i].x-4, corners[i].y-4, 9, 9);
-            }
         }
     }
 }
