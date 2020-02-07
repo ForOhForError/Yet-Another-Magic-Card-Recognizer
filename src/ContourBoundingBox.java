@@ -31,7 +31,7 @@ class ContourBoundingBox
     private Point2D_I32[] midpoints;
     private double[] slopes;
 
-    public BufferedImage getTransformedImage(BufferedImage in)
+    public BufferedImage getTransformedImage(BufferedImage in, boolean flip)
 	{
         try
         {
@@ -41,6 +41,11 @@ class ContourBoundingBox
                     new RemovePerspectiveDistortion<>(300, 418, ImageType.pl(3, GrayF32.class));
 
             int start = longEdge();
+
+            if(flip)
+            {
+                start = (start+2)%4;
+            }
 
             if( !removePerspective.apply(input,
                     new Point2D_F64(corners[start].x,corners[start].y),

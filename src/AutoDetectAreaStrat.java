@@ -13,7 +13,9 @@ class AutoDetectAreaStrat extends AreaRecognitionStrategy {
         results.clear();
         bounds = CardBoundingBoxFinder.process(in);
         for (ContourBoundingBox bound : bounds) {
-            ImageDesc i = new ImageDesc(ImageUtil.getScaledImage(bound.getTransformedImage(in)));
+            BufferedImage norm = ImageUtil.getScaledImage(bound.getTransformedImage(in,false));
+            BufferedImage flip = ImageUtil.getScaledImage(bound.getTransformedImage(in,true));
+            ImageDesc i = new ImageDesc(norm,flip);
             MatchResult mr = strat.getMatch(i, SettingsPanel.RECOG_THRESH/100.0);
             if (mr != null) {
                 results.add(mr);

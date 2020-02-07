@@ -32,13 +32,17 @@ public class ImageDesc {
 	private FastQueue<BrightFeature> desc = UtilFeature.createQueue(detDesc,0);
 	
 
-	public ImageDesc(BufferedImage in)
+	public ImageDesc(BufferedImage in, BufferedImage flip_in)
 	{
 		if(!AverageHash.isInitiated())
 		{
 			AverageHash.init(2, 2);
 		}
 		hash = AverageHash.avgHash(in,2,2);
+		if(flip_in != null)
+		{
+			flipped = AverageHash.avgHash(flip_in,2,2);
+		}
 		int histogram[] = new int[256];
 		int transform[] = new int[256];
 		GrayU8 img = ConvertBufferedImage.convertFromSingle(in, null, GrayU8.class);
@@ -50,6 +54,11 @@ public class ImageDesc {
 		ConvertImage.convert(norm, normf);
 		desc.reset();
 		describeImage(normf,desc);
+	}
+
+	public ImageDesc(BufferedImage in)
+	{
+		this(in,null);
 	}
 	
 	public ImageDesc(FastQueue<BrightFeature> d, AverageHash h)
@@ -133,10 +142,6 @@ public class ImageDesc {
 
 	public double compareHashWithFlip(ImageDesc i2)
 	{
-		if(flipped == null)
-		{
-			flipped = AverageHash.flipped(hash);
-		}
 		return Math.max(hash.match(i2.hash), flipped.match(i2.hash));
 	}
 }
