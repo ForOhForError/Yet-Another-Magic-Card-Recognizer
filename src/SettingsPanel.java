@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,6 +25,8 @@ public class SettingsPanel extends JPanel{
 	public SettingsPanel()
 	{
 		super();
+		Dimension d;
+
 		setLayout(new FlowLayout());
 
 		JCheckBox recog = new JCheckBox("Only trigger recognition manually",!RECOG_EVERY_FRAME);
@@ -48,6 +51,9 @@ public class SettingsPanel extends JPanel{
 		add(thresh);
 
 		areaStratSelect = new JComboBox<AreaRecognitionStrategy>(StrategySelect.getAreaStrats());
+		d = areaStratSelect.getPreferredSize();
+		d.width = 280;
+		areaStratSelect.setPreferredSize(d);
 		areaStratSelect.setSelectedItem(SavedConfig.getAreaStrat());
 		areaStratSelect.addActionListener(new ActionListener()
 		{
@@ -61,6 +67,9 @@ public class SettingsPanel extends JPanel{
 		add(areaStratSelect);
 
 		stratSelect = new JComboBox<RecognitionStrategy>(StrategySelect.getStrats());
+		d = stratSelect.getPreferredSize();
+		d.width = 280;
+		stratSelect.setPreferredSize(d);
 		stratSelect.setSelectedItem(SavedConfig.getStrat());
 		stratSelect.addActionListener(new ActionListener()
 		{
@@ -74,6 +83,9 @@ public class SettingsPanel extends JPanel{
 		add(stratSelect);
 
 		JButton selectCam = new JButton("Reselect webcam");
+		d = selectCam.getPreferredSize();
+		d.width = 130;
+		selectCam.setPreferredSize(d);
 		selectCam.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -81,8 +93,19 @@ public class SettingsPanel extends JPanel{
 			}
 		});
 		add(selectCam);
+
+		JButton launchPopout = new JButton("Card Preview");
+		launchPopout.setPreferredSize(d);
+		launchPopout.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new PopoutCardWindow();
+			}
+		});
+		add(launchPopout);
 		
 		JButton loadSelected = new JButton("Load Selected");
+		loadSelected.setPreferredSize(d);
 		loadSelected.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -92,6 +115,7 @@ public class SettingsPanel extends JPanel{
 		add(loadSelected);
 		
 		JButton unloadAll = new JButton("Unload all");
+		unloadAll.setPreferredSize(d);
 		unloadAll.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -100,16 +124,8 @@ public class SettingsPanel extends JPanel{
 		});
 		add(unloadAll);
 		
-		JButton launchPopout = new JButton("Card Preview");
-		launchPopout.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new PopoutCardWindow();
-			}
-		});
-		add(launchPopout);
-		
 		JButton launchSetGen = new JButton("Bulk Generate Sets");
+		launchSetGen.setPreferredSize(d);
 		launchSetGen.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -119,6 +135,7 @@ public class SettingsPanel extends JPanel{
 		add(launchSetGen);
 		
 		JButton launchDeckGen = new JButton("Deck Generator");
+		launchDeckGen.setPreferredSize(d);
 		launchDeckGen.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -128,6 +145,7 @@ public class SettingsPanel extends JPanel{
 		add(launchDeckGen);
 		
 		JButton toggleSetPanel = new JButton("Refresh Set Listing");
+		toggleSetPanel.setPreferredSize(d);
 		toggleSetPanel.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {

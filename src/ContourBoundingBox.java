@@ -30,6 +30,8 @@ class ContourBoundingBox
     private Point2D_F64[] corners_f;
     private Point2D_I32[] midpoints;
     private double[] slopes;
+    private double longestSide;
+    private double shortestSide;
 
     public BufferedImage getTransformedImage(BufferedImage in, boolean flip)
 	{
@@ -101,6 +103,7 @@ class ContourBoundingBox
             );
             slopes[i] = slope(corners[i],corners[j]);
         }
+        initLongShort();
     }
 
     public int longEdge()
@@ -118,6 +121,25 @@ class ContourBoundingBox
             }
         }
         return shortest_ix%2;
+    }
+
+    private void initLongShort()
+    {
+        shortestSide = Integer.MAX_VALUE;
+        longestSide = 0;
+        for(int i=0; i<4; i++)
+        {
+            int j = (i+1)%4;
+            double d = corners[i].distance(corners[j]);
+            if(d<shortestSide)
+            {
+                shortestSide=d;
+            }
+            if(d>longestSide)
+            {
+                longestSide=d;
+            }
+        }
     }
 
     public double area()
@@ -139,7 +161,15 @@ class ContourBoundingBox
         {
             ratio = d2/d1;
         }
-        return ratio > 1 && ratio < 2;
+        if(shortestSide != 0)
+        {
+            double shortLong = longestSide/shortestSide;
+            return ratio > 1 && ratio < 2 && shortLong < 2;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private static double slope(Point2D_I32 p1, Point2D_I32 p2)
