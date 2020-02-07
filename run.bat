@@ -1,1 +1,1 @@
-java -jar YamCR.jar
+java -jar -Xmx5g YamCR.jar

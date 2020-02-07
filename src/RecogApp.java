@@ -126,7 +126,6 @@ public class RecogApp extends JFrame implements KeyListener{
 			canvas.setAreaStrat(areaStrat);
 			task.progressTask();
 		}
-		select.refresh();
 		settings.resetAreaStratSelector(areaStrat);
 	}
 
