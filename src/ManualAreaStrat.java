@@ -5,27 +5,22 @@ import java.util.ArrayList;
 import java.awt.Point;
 import java.awt.Color;
 
-import boofcv.alg.distort.RemovePerspectiveDistortion;
-import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.image.GrayF32;
-import boofcv.struct.image.ImageType;
-import boofcv.struct.image.Planar;
-import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point2D_I32;
 
 class ManualAreaStrat extends AreaRecognitionStrategy {
 
-    private Point2D_I32[] points = new Point2D_I32[4];
-    private boolean pointsValid = false;
+	private Point2D_I32[] points = new Point2D_I32[4];
+	private ContourBoundingBox bound;
     private int draggingPoint = -1;
     private int width;
     private int height;
 
     @Override
     public ArrayList<MatchResult> recognize(BufferedImage in, RecognitionStrategy strat) {
-        ArrayList<MatchResult> res = new ArrayList<MatchResult>();
-        BufferedImage img = ImageUtil.getScaledImage(getBoundedZone(in));
-		ImageDesc id = new ImageDesc(img);
+		ArrayList<MatchResult> res = new ArrayList<MatchResult>();
+		BufferedImage norm = ImageUtil.getScaledImage(bound.getTransformedImage(in,false));
+        BufferedImage flip = ImageUtil.getScaledImage(bound.getTransformedImage(in,true));
+        ImageDesc id = new ImageDesc(norm,flip);
         MatchResult m = strat.getMatch(id, SettingsPanel.RECOG_THRESH/100f);
         if(m != null)
         {
@@ -34,34 +29,14 @@ class ManualAreaStrat extends AreaRecognitionStrategy {
         return res;
     }
 
-    public BufferedImage getBoundedZone(BufferedImage i)
+    private void updateBoundedZone()
 	{
-		if( i !=null && pointsValid )
+		ArrayList<Point2D_I32> pts = new ArrayList<Point2D_I32>();
+		for(int ix=0; ix<points.length; ix++)
 		{
-			try
-			{
-				Planar<GrayF32> input = ConvertBufferedImage.convertFromPlanar(i, null, true, GrayF32.class);
-
-				RemovePerspectiveDistortion<Planar<GrayF32>> removePerspective =
-						new RemovePerspectiveDistortion<>(672, 936, ImageType.pl(3, GrayF32.class));
-
-				if( !removePerspective.apply(input,
-						new Point2D_F64(points[0].x,points[0].y),
-						new Point2D_F64(points[1].x,points[1].y),
-						new Point2D_F64(points[2].x,points[2].y),
-						new Point2D_F64(points[3].x,points[3].y)
-										) ){
-					return null;
-				}
-				Planar<GrayF32> output = removePerspective.getOutput();
-				return ConvertBufferedImage.convertTo_F32(output,null,true);
-			}
-			catch(Exception e)
-			{
-				return null;
-			}
+			pts.add(new Point2D_I32((int)points[ix].x,(int)points[ix].y));
 		}
-		return null;
+		bound = new ContourBoundingBox(pts);
 	}
 
     @Override
@@ -71,7 +46,7 @@ class ManualAreaStrat extends AreaRecognitionStrategy {
 
     @Override
     public String getStratDisplayName() {
-        return "Manually Set Bounds";
+        return "Manually Set Bounds (Legacy)";
     }
 
     @Override
@@ -118,6 +93,7 @@ class ManualAreaStrat extends AreaRecognitionStrategy {
 				points[draggingPoint].y = p.y;
 			}
 		}
+		updateBoundedZone();
     }
 
     @Override
@@ -143,17 +119,13 @@ class ManualAreaStrat extends AreaRecognitionStrategy {
 		points[1] = new Point2D_I32(x+w,y);
 		points[2] = new Point2D_I32(x+w,y+h);
 		points[3] = new Point2D_I32(x,y+h);
-		pointsValid = true;
+		updateBoundedZone();
 	}
 
     public void drawBounds(Graphics g,int offx, int offy)
 	{
-		g.setColor(Color.GREEN);
-		g.drawLine(points[0].x+offx,points[0].y+offy,points[1].x+offx,points[1].y+offy);
 		g.setColor(Color.WHITE);
-		g.drawLine(points[1].x+offx,points[1].y+offy,points[2].x+offx,points[2].y+offy);
-		g.drawLine(points[2].x+offx,points[2].y+offy,points[3].x+offx,points[3].y+offy);
-		g.drawLine(points[3].x+offx,points[3].y+offy,points[0].x+offx,points[0].y+offy);
+		bound.draw(g);
 		for(int i=0;i<4;i++){
 			Point2D_I32 p = points[i];
 			if(draggingPoint == i)
@@ -164,14 +136,7 @@ class ManualAreaStrat extends AreaRecognitionStrategy {
 			{
 				g.setColor(Color.WHITE);
 			}
-			if(i==0)
-			{
-				g.fillOval(p.x-4, p.y-4, 9, 9);
-			}
-			else
-			{
-				g.fillOval(p.x-2, p.y-2, 5, 5);
-			}
+			g.fillOval(p.x-3, p.y-3, 7, 7);
 		}
 	}
 

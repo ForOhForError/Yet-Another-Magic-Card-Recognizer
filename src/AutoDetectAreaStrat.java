@@ -31,7 +31,7 @@ class AutoDetectAreaStrat extends AreaRecognitionStrategy {
 
     @Override
     public String getStratDisplayName() {
-        return "Auto-Detect Card Bounds Within Area";
+        return "Auto-Detect Card Bounds (Recommended)";
     }
 
     @Override
