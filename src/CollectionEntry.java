@@ -31,6 +31,16 @@ class CollectionEntry
         this.count = count;
     }
 
+    public CollectionEntry(CollectionEntry e)
+    {
+        this.backingCard = e.backingCard;
+        this.scry_id = e.scry_id;
+        this.name = e.name;
+        this.setCode = e.setCode;
+        this.isFoil = e.isFoil;
+        this.count = e.count;
+    }
+
     public UUID getId()
     {
         return scry_id;
@@ -54,6 +64,11 @@ class CollectionEntry
     public boolean isFoil()
     {
         return isFoil;
+    }
+
+    public void setCount(int i)
+    {
+        count = i;
     }
 
     public String toTSV()

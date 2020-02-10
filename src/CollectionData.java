@@ -26,14 +26,22 @@ class CollectionData extends DefaultTableModel {
 
     public void addEntry(CollectionEntry ent)
     {
+        for(CollectionEntry e : data)
+        {
+            if(e.getId().equals(ent.getId()))
+            {
+                e.setCount(e.getCount()+ent.getCount());
+                fireTableDataChanged();
+                return;
+            }
+        }
         data.add(ent);
         fireTableDataChanged();
     }
 
     public void addCard(Card c)
     {
-        data.add(new CollectionEntry(c));
-        fireTableDataChanged();
+        addEntry(new CollectionEntry(c));
     }
 
     public void addCards(Collection<Card> cards)
@@ -96,11 +104,11 @@ class CollectionData extends DefaultTableModel {
 
     @Override
     public void addTableModelListener(TableModelListener l) {
-
+        super.addTableModelListener(l);
     }
 
     @Override
     public void removeTableModelListener(TableModelListener l) {
-
+        super.removeTableModelListener(l);
     }
 }

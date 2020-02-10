@@ -53,11 +53,11 @@ class CollectionManagerWindow extends JFrame {
 
     private void leftToRight()
     {
-        int sel = leftTable.getSelectedRow();
-        if(sel != -1)
+        int[] sels = leftTable.getSelectedRows();
+        for(int sel:sels)
         {
             System.out.println(sel);
-            rightData.addEntry(leftData.get(sel));
+            rightData.addEntry(new CollectionEntry(leftData.get(sel)));
             rightData.fireTableChanged(null);
         }
     }
