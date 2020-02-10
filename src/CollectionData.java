@@ -1,3 +1,8 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -9,28 +14,23 @@ import forohfor.scryfall.api.Card;
 class CollectionData extends DefaultTableModel {
     private static final long serialVersionUID = 1L;
     private ArrayList<CollectionEntry> data;
-    private static final String[] NAMES = {"Name", "Set Code", "Foil", "Count"};
+    private static final String[] NAMES = { "Name", "Set Code", "Foil", "Count" };
 
-    private boolean showCount = false;
+    private boolean showExtra = false;
 
-    public CollectionData(boolean showCount)
-    {
+    public CollectionData(boolean showExtra) {
         data = new ArrayList<CollectionEntry>();
-        this.showCount = showCount;
+        this.showExtra = showExtra;
     }
 
-    public CollectionEntry get(int ix)
-    {
+    public CollectionEntry get(int ix) {
         return data.get(ix);
     }
 
-    public void addEntry(CollectionEntry ent)
-    {
-        for(CollectionEntry e : data)
-        {
-            if(e.getId().equals(ent.getId()) && e.isFoil() == ent.isFoil())
-            {
-                e.setCount(e.getCount()+ent.getCount());
+    public void addEntry(CollectionEntry ent) {
+        for (CollectionEntry e : data) {
+            if (e.getId().equals(ent.getId()) && e.isFoil() == ent.isFoil()) {
+                e.setCount(e.getCount() + ent.getCount());
                 fireTableDataChanged();
                 return;
             }
@@ -39,45 +39,35 @@ class CollectionData extends DefaultTableModel {
         fireTableDataChanged();
     }
 
-    public void addCard(Card c)
-    {
+    public void addCard(Card c) {
         addEntry(new CollectionEntry(c));
     }
 
-    public void addCards(Collection<Card> cards)
-    {
-        for(Card c: cards)
-        {
+    public void addCards(Collection<Card> cards) {
+        for (Card c : cards) {
             addCard(c);
         }
     }
 
-    public void offsetCount(int row, int offset)
-    {
+    public void offsetCount(int row, int offset) {
         CollectionEntry e = data.get(row);
-        e.setCount(e.getCount()+offset);
+        e.setCount(e.getCount() + offset);
         this.fireTableRowsUpdated(row, row);
     }
 
-    public void toggleFoil(int row)
-    {
+    public void toggleFoil(int row) {
         CollectionEntry e = data.get(row);
         e.setFoil(!e.isFoil());
         this.fireTableRowsUpdated(row, row);
     }
 
-    public void removeEmptyRows()
-    {
-        int i=0;
-        while(i < data.size())
-        {
-            if(data.get(i).getCount() <= 0)
-            {
+    public void removeEmptyRows() {
+        int i = 0;
+        while (i < data.size()) {
+            if (data.get(i).getCount() <= 0) {
                 data.remove(i);
                 fireTableRowsDeleted(i, i);
-            }
-            else
-            {
+            } else {
                 i++;
             }
         }
@@ -85,8 +75,7 @@ class CollectionData extends DefaultTableModel {
 
     @Override
     public int getRowCount() {
-        if(data != null)
-        {
+        if (data != null) {
             return data.size();
         }
         return 0;
@@ -94,7 +83,7 @@ class CollectionData extends DefaultTableModel {
 
     @Override
     public int getColumnCount() {
-        return (showCount ? NAMES.length:NAMES.length-1);
+        return (showExtra ? NAMES.length : NAMES.length - 2);
     }
 
     @Override
@@ -115,18 +104,53 @@ class CollectionData extends DefaultTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         CollectionEntry coll = data.get(rowIndex);
-        switch(columnIndex)
-        {
-            case 0:
-                return coll.getName();
-            case 1:
-                return coll.getSetCode();
-            case 2:
-                return coll.isFoil() ? "✓":"";
-            case 3:
-                return ""+coll.getCount();
+        switch (columnIndex) {
+        case 0:
+            return coll.getName();
+        case 1:
+            return coll.getSetCode();
+        case 2:
+            return coll.isFoil() ? "✓" : "";
+        case 3:
+            return "" + coll.getCount();
         }
         return "";
+    }
+
+    public void saveToFile(File f) {
+        try {
+            FileWriter writer = new FileWriter(f);
+            writer.write("Scryfall ID\tCard Name\tSet Code\tFoil\tCount\n");
+            for(CollectionEntry e:data)
+            {
+                writer.write(e.toTSV()+"\n");
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("I/O Error");
+        }
+    }
+
+    public void loadFromFile(File f) {
+        data.clear();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(f));
+            String line = reader.readLine();
+            while(line != null)
+            {
+                line = reader.readLine();
+                if(line != null)
+                {
+                    CollectionEntry e = CollectionEntry.fromTSV(line);
+                    addEntry(e);
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            System.out.println("I/O Error");
+        }
+        fireTableDataChanged();
     }
 
     @Override
