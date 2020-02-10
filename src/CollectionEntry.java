@@ -66,6 +66,11 @@ class CollectionEntry
         return isFoil;
     }
 
+    public void setFoil(boolean foil)
+    {
+        isFoil = foil;
+    }
+
     public void setCount(int i)
     {
         count = i;

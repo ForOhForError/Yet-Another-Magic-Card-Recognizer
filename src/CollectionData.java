@@ -28,7 +28,7 @@ class CollectionData extends DefaultTableModel {
     {
         for(CollectionEntry e : data)
         {
-            if(e.getId().equals(ent.getId()))
+            if(e.getId().equals(ent.getId()) && e.isFoil() == ent.isFoil())
             {
                 e.setCount(e.getCount()+ent.getCount());
                 fireTableDataChanged();
@@ -49,6 +49,37 @@ class CollectionData extends DefaultTableModel {
         for(Card c: cards)
         {
             addCard(c);
+        }
+    }
+
+    public void offsetCount(int row, int offset)
+    {
+        CollectionEntry e = data.get(row);
+        e.setCount(e.getCount()+offset);
+        this.fireTableRowsUpdated(row, row);
+    }
+
+    public void toggleFoil(int row)
+    {
+        CollectionEntry e = data.get(row);
+        e.setFoil(!e.isFoil());
+        this.fireTableRowsUpdated(row, row);
+    }
+
+    public void removeEmptyRows()
+    {
+        int i=0;
+        while(i < data.size())
+        {
+            if(data.get(i).getCount() <= 0)
+            {
+                data.remove(i);
+                fireTableRowsDeleted(i, i);
+            }
+            else
+            {
+                i++;
+            }
         }
     }
 
