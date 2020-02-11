@@ -27,6 +27,7 @@ public class HashNarrowedRecogStrat extends ListRecogStrat{
 
 		for(int i=0;i<size;i++)
 		{
+			System.out.println(desc.get(i).stringData);
 			double score = in.compareSURF(desc.get(i).descData);
 			if(score>max)
 			{

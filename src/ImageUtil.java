@@ -60,7 +60,7 @@ public class ImageUtil {
 		return bimg;
 	}
 
-	private static final int SQUARE_SIZE = 300;
+	public static final int SQUARE_SIZE = 300;
 
 	public static BufferedImage getScaledImage(BufferedImage src){
 		int finalw = SQUARE_SIZE;
