@@ -21,6 +21,16 @@ class CollectionEntry
         count = 1;
     }
 
+    public CollectionEntry(MatchResult res)
+    {
+        backingCard = null;
+        this.scry_id = UUID.fromString(res.scryfallId);
+        this.name = res.name;
+        this.setCode = res.setCode;
+        this.isFoil = false;
+        this.count = 1;
+    }
+
     public CollectionEntry(String scryID, String name, String setCode, boolean isFoil, int count)
     {
         backingCard = null;
@@ -38,7 +48,7 @@ class CollectionEntry
         this.name = e.name;
         this.setCode = e.setCode;
         this.isFoil = e.isFoil;
-        this.count = e.count;
+        this.count = 1;
     }
 
     public UUID getId()

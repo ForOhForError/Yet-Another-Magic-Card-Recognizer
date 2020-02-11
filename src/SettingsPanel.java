@@ -153,6 +153,13 @@ public class SettingsPanel extends JPanel{
 			}
 		});
 		add(toggleSetPanel);
+
+		JButton showCollectionManager = new JButton("Collection Manager");
+		showCollectionManager.setPreferredSize(d);
+		showCollectionManager.addActionListener(
+			e -> RecogApp.INSTANCE.getCollectionWindow().setVisible(true)
+		);
+		add(showCollectionManager);
 	}
 
 	public void resetStratSelector(RecognitionStrategy strat)

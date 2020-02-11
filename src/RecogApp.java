@@ -26,6 +26,7 @@ public class RecogApp extends JFrame implements KeyListener{
 	private static SettingsPanel settings;
 	private static SetLoadPanel select;
 	private static OperationBar task;
+	private static CollectionManagerWindow collection;
 	
 	public static RecogApp INSTANCE;
 
@@ -38,6 +39,7 @@ public class RecogApp extends JFrame implements KeyListener{
 			System.err.println(e.getMessage());
 		}
 		SavedConfig.init();
+		collection = new CollectionManagerWindow();
 		new RecogApp();
 	}
 
@@ -160,6 +162,7 @@ public class RecogApp extends JFrame implements KeyListener{
 				synchronized(strat){
 					AreaRecognitionStrategy areaSet = SavedConfig.getAreaStrat();
 					ArrayList<MatchResult> matches = areaSet.recognize(canvas.lastDrawn(), strat);
+					collection.addRecognizedCards(matches);
 					MatchResult res = matches.size() > 0 ? matches.get(0):null;
 					if(res!=null){
 						canvas.setLastResult(res);
@@ -183,6 +186,11 @@ public class RecogApp extends JFrame implements KeyListener{
 	public SetLoadPanel getLoader()
 	{
 		return select;
+	}
+
+	public CollectionManagerWindow getCollectionWindow()
+	{
+		return collection;
 	}
 
 	@Override

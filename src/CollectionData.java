@@ -61,6 +61,15 @@ class CollectionData extends DefaultTableModel {
         this.fireTableRowsUpdated(row, row);
     }
 
+    public void clear() {
+        int i = data.size();
+        data.clear();
+        if(i > 0)
+        {
+            fireTableRowsDeleted(0, i-1);
+        }
+    }
+
     public void removeEmptyRows() {
         int i = 0;
         while (i < data.size()) {

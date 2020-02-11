@@ -6,11 +6,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileFilter;
 
-import forohfor.scryfall.api.MTGCardQuery;
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.io.File;
+import java.util.Collection;
 
 import javax.swing.BoxLayout;
 import java.awt.Component;
@@ -34,6 +33,7 @@ class CollectionManagerWindow extends JFrame {
         JPanel left = new JPanel();
         JPanel center = new JPanel();
         JPanel rightButtons = new JPanel();
+        JPanel leftButtons = new JPanel();
 
         leftTable = new JTable(leftData);
         rightTable = new JTable(rightData);
@@ -43,6 +43,7 @@ class CollectionManagerWindow extends JFrame {
         right.setLayout(new BorderLayout());
         rightButtons.setLayout(new FlowLayout());
         left.setLayout(new BorderLayout());
+        leftButtons.setLayout(new FlowLayout());
         center.setLayout(new BoxLayout(center, BoxLayout.X_AXIS));
 
         JButton arrow = new JButton("=>");
@@ -70,6 +71,9 @@ class CollectionManagerWindow extends JFrame {
         JButton load = new JButton("Load CSV");
         load.addActionListener(e -> this.load());
 
+        JButton clear = new JButton("Clear");
+        clear.addActionListener(e -> leftData.clear());
+
         rightButtons.add(m4);
         rightButtons.add(m1);
         rightButtons.add(foil);
@@ -78,20 +82,28 @@ class CollectionManagerWindow extends JFrame {
         rightButtons.add(save);
         rightButtons.add(load);
 
+        leftButtons.add(clear);
+
         right.add(new JScrollPane(rightTable), BorderLayout.CENTER);
         right.add(rightButtons, BorderLayout.SOUTH);
         left.add(new JScrollPane(leftTable), BorderLayout.CENTER);
+        left.add(leftButtons, BorderLayout.SOUTH);
         center.add(arrow);
 
         add(center, BorderLayout.CENTER);
         add(right, BorderLayout.EAST);
         add(left, BorderLayout.WEST);
 
-        leftData.addCards(MTGCardQuery.search("t:noble"));
-
         pack();
-        setVisible(true);
         setResizable(false);
+    }
+
+    public void addRecognizedCards(Collection<MatchResult> matches)
+    {
+        for(MatchResult match : matches)
+        {
+            leftData.addEntry(new CollectionEntry(match));
+        }
     }
 
     private class CSVFilter extends FileFilter {
@@ -159,6 +171,6 @@ class CollectionManagerWindow extends JFrame {
 
     public static void main(String[] args)
     {
-        new CollectionManagerWindow();
+        new CollectionManagerWindow().setVisible(true);
     }
 }
