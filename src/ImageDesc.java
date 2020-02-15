@@ -7,7 +7,6 @@ import java.util.List;
 
 import georegression.struct.homography.Homography2D_F64;
 import georegression.struct.point.Point2D_F64;
-import georegression.transform.homography.HomographyPointOps_F64;
 
 import org.ddogleg.fitting.modelset.ModelMatcher;
 import org.ddogleg.struct.FastQueue;
@@ -150,8 +149,6 @@ public class ImageDesc {
 		associate.setSource(desc);
 		associate.setDestination(i2.desc);
 		associate.associate();
-		
-		double max = Math.max(desc.size(), i2.desc.size());
 
 		List<AssociatedPair> pairs = new ArrayList<>();
 		FastQueue<AssociatedIndex> matches = associate.getMatches();
@@ -172,22 +169,12 @@ public class ImageDesc {
 		}
 		Homography2D_F64 homography = modelMatcher.getModelParameters();
 		
-		return (score*scoreHomography(homography))/max;
+		return score*scoreHomography(homography)*1000;
 	}
 
 	private double scoreHomography(Homography2D_F64 homography)
 	{
-		Point2D_F64 result = new Point2D_F64();
-		double score = 0;
-		for(Point2D_F64 point: referencePoints)
-		{
-			HomographyPointOps_F64.transform(homography, point, result);
-			System.out.println(point.toString() + " -> " + result.toString());
-			score += point.distance(result)/(double)ImageUtil.SQUARE_SIZE;
-		}
-		score /= (double)referencePoints.length;
-		System.out.println("score: "+(1-score));
-		return 1-score;
+		return HomographyCoverage.calculateCoverage(referencePoints, homography);
 	}
 	
 	public double compareHash(ImageDesc i2)
