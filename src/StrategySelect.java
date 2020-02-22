@@ -10,7 +10,6 @@ class StrategySelect
         strats = new ArrayList<RecognitionStrategy>(2);
         registerStrategy(new ListRecogStrat());
         registerStrategy(new HashNarrowedRecogStrat());
-        registerStrategy(new TreeRecogStrat());
 
         areaStrats = new ArrayList<AreaRecognitionStrategy>(2);
         registerAreaStrategy(new ManualAreaStrat());

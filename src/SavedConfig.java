@@ -116,8 +116,8 @@ public class SavedConfig {
 		CONF_OBJECT.put("debug", false);
 		CONF_OBJECT.put("load_basics", false);
 		CONF_OBJECT.put("write_basics_to_sets", false);
-		CONF_OBJECT.put("recognition_strategy", new ListRecogStrat().getStratName());
-		CONF_OBJECT.put("area_recognition_strategy", new ManualAreaStrat().getStratName());
+		CONF_OBJECT.put("recognition_strategy", new HashNarrowedRecogStrat().getStratName());
+		CONF_OBJECT.put("area_recognition_strategy", new AutoDetectAreaStrat().getStratName());
 		JSONObject camconf = new JSONObject();
 		camconf.put("cam_name", "");
 		camconf.put("cam_resolution_w", -1);

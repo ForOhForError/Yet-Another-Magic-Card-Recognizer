@@ -9,7 +9,7 @@ public class HashNarrowedRecogStrat extends ListRecogStrat{
 
 	public String getStratDisplayName()
 	{
-		return "Perceptual Hash Narrowing (Fast, Experimental)";
+		return "Perceptual Hash Narrowing (Recommended)";
 	}
 
 	public HashNarrowedRecogStrat()

@@ -21,7 +21,7 @@ public class ListRecogStrat extends RecognitionStrategy{
 
 	public String getStratDisplayName()
 	{
-		return "Full Scan (Stable, Slow)";
+		return "Full Scan (Slow, Legacy)";
 	}
 
 	public ListRecogStrat()
