@@ -17,7 +17,7 @@ public class SettingsPanel extends JPanel{
 
 	public static boolean RECOG_EVERY_FRAME = true;
 
-	public static int RECOG_THRESH = 50;
+	public static int RECOG_THRESH = 40;
 
 	private JComboBox<RecognitionStrategy> stratSelect;
 	private JComboBox<AreaRecognitionStrategy> areaStratSelect;

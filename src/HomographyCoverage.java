@@ -1,5 +1,3 @@
-import java.util.Arrays;
-
 import georegression.struct.homography.Homography2D_F64;
 import georegression.struct.point.Point2D_F64;
 import georegression.transform.homography.HomographyPointOps_F64;
@@ -25,18 +23,17 @@ class HomographyCoverage
         {
             return 0;
         }
-        double[] xs = {
-            a[0],a[1],b[0],b[1]
-        };
-        double[] ys = {
-            a[2],a[3],b[2],b[3]
-        };
-        Arrays.sort(xs);
-        Arrays.sort(ys);
-        double overlap = (xs[2]-xs[1])*(ys[2]-ys[1]);
+
+        double x_min = Math.max(a[0], b[0]);
+        double x_max = Math.min(a[1], b[1]);
+        double y_min = Math.max(a[2], b[2]);
+        double y_max = Math.min(a[3],b[3]);
+
+        double overlap = (x_max-x_min)*(y_max-y_min);
         double aa = (a[1]-a[0])*(a[3]-a[2]);
         double ba = (b[1]-b[0])*(b[3]-b[2]);
-        return 2*overlap/(aa*ba);
+        double union = aa+ba-overlap;
+        return overlap/union;
     }
 
     public static boolean overlaps(double[] a, double[] b)

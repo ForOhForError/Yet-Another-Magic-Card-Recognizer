@@ -5,10 +5,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import georegression.struct.homography.Homography2D_F64;
 import georegression.struct.point.Point2D_F64;
 
-import org.ddogleg.fitting.modelset.ModelMatcher;
 import org.ddogleg.struct.FastQueue;
 
 import boofcv.abst.feature.associate.AssociateDescription;
@@ -20,14 +18,11 @@ import boofcv.alg.misc.ImageStatistics;
 import boofcv.core.image.ConvertImage;
 import boofcv.factory.feature.associate.FactoryAssociation;
 import boofcv.factory.feature.detdesc.FactoryDetectDescribe;
-import boofcv.factory.geo.ConfigRansac;
-import boofcv.factory.geo.FactoryMultiViewRobust;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.feature.AssociatedIndex;
 import boofcv.struct.feature.BrightFeature;
-import boofcv.struct.geo.AssociatedPair;
 
 
 public class ImageDesc {
@@ -42,17 +37,7 @@ public class ImageDesc {
 	private static ScoreAssociation<BrightFeature> scorer = 
 		FactoryAssociation.defaultScore(detDesc.getDescriptionType());
 	private static AssociateDescription<BrightFeature> associate = 
-		FactoryAssociation.greedy(scorer, Double.MAX_VALUE, true);
-	private static ModelMatcher<Homography2D_F64,AssociatedPair> modelMatcher = 
-		FactoryMultiViewRobust.homographyRansac(null,new ConfigRansac(60,30));
-	
-	private static Point2D_F64[] referencePoints = 
-	{
-		new Point2D_F64(0,0),
-		new Point2D_F64(ImageUtil.SQUARE_SIZE, 0),
-		new Point2D_F64(ImageUtil.SQUARE_SIZE, ImageUtil.SQUARE_SIZE),
-		new Point2D_F64(0, ImageUtil.SQUARE_SIZE)
-	};
+		FactoryAssociation.greedy(scorer, 8, true);
 
 	private AverageHash hash;
 	private AverageHash flipped;
@@ -150,31 +135,16 @@ public class ImageDesc {
 		associate.setDestination(i2.desc);
 		associate.associate();
 
-		List<AssociatedPair> pairs = new ArrayList<>();
+		double max = Math.max(desc.size(), i2.desc.size());
 		FastQueue<AssociatedIndex> matches = associate.getMatches();
 		double score = 0;
 		for (int i=0;i<matches.size();i++)
 		{
 			AssociatedIndex match = matches.get(i);
 			score += 1 - match.fitScore;
-			pairs.add(new AssociatedPair(
-				points.get(match.src), 
-				i2.points.get(match.dst),false
-			));
 		}
-
-		if( !modelMatcher.process(pairs) )
-		{
-			return 0;
-		}
-		Homography2D_F64 homography = modelMatcher.getModelParameters();
-		
-		return score*scoreHomography(homography)*1000;
-	}
-
-	private double scoreHomography(Homography2D_F64 homography)
-	{
-		return HomographyCoverage.calculateCoverage(referencePoints, homography);
+		score = score/max;
+		return score;
 	}
 	
 	public double compareHash(ImageDesc i2)
