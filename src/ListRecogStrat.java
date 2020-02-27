@@ -1,18 +1,8 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class ListRecogStrat extends RecognitionStrategy{
 	public ArrayList<DescContainer> desc;
-	private String name = "";
-
-	private int sizeOfSet=0;
 
 	public String getStratName()
 	{
@@ -35,21 +25,6 @@ public class ListRecogStrat extends RecognitionStrategy{
 		this.name = name;
 	}
 
-	public ListRecogStrat(File f) throws IOException
-	{
-		desc = new ArrayList<>();
-		ByteBuffer buf = BufferUtils.getBuffer(f);
-		BufferUtils.readUTF8(buf);
-		sizeOfSet = buf.getInt();
-		int rec = buf.getInt();
-		for(int i=0;i<rec;i++)
-		{
-			String s = BufferUtils.readUTF8(buf);
-			ImageDesc id = ImageDesc.readIn(buf);
-			desc.add(new DescContainer(id,s));
-		}
-	}
-
 	public synchronized boolean add(ListRecogStrat l)
 	{
 		for(int i=0;i<l.desc.size();i++)
@@ -59,39 +34,15 @@ public class ListRecogStrat extends RecognitionStrategy{
 		return true;
 	}
 
-
-
 	public synchronized void clear()
 	{
 		desc.clear();
 		name = "";
 	}
 
-	public synchronized void writeOut(File f) throws IOException
-	{
-		DataOutputStream out = new DataOutputStream(new FileOutputStream(f));
-		out.writeUTF(name);
-		out.writeInt(sizeOfSet);
-		out.writeInt(desc.size());
-		for(int i=0;i<desc.size();i++)
-		{
-			out.writeUTF(desc.get(i).stringData);
-			desc.get(i).descData.writeOut(out);
-		}
-		out.close();
-	}
-
 	public synchronized void add(DescContainer dc)
 	{
 		desc.add(dc);
-	}
-
-	public synchronized void printStringData()
-	{
-		for(int i=0;i<desc.size();i++)
-		{
-			System.out.println(desc.get(i).stringData);
-		}
 	}
 
 	public synchronized MatchResult getMatch(ImageDesc in, double threshhold)
@@ -109,7 +60,7 @@ public class ListRecogStrat extends RecognitionStrategy{
 		}
 		if(max>threshhold)
 		{
-			return new MatchResult(desc.get(ix).stringData,max);
+			return new MatchResult(desc.get(ix),max);
 		}
 		return null;
 	}
@@ -121,46 +72,14 @@ public class ListRecogStrat extends RecognitionStrategy{
 	public String getName() {
 		return name;
 	}
-
-	public static String getNameFromFile(File f)
-	{
-		try
-		{
-			DataInputStream in = new DataInputStream(new FileInputStream(f));
-			String name = in.readUTF();
-			in.close();
-			return name;
-		}
-		catch(IOException e)
-		{
-			return null;
-		}
-	}
-
-	public static int getSizeFromFile(File f)
-	{
-		try
-		{
-			DataInputStream in = new DataInputStream(new FileInputStream(f));
-			in.readUTF();
-			int size = in.readInt();
-			in.close();
-			return size;
-		}
-		catch(IOException e)
-		{
-			return -1;
-		}
-	}
-
-	public void setSizeOfSet(int i)
-	{
-		sizeOfSet = i;
-	}
 	
 	public synchronized void finalizeLoad(){}
 
 	public synchronized int size() {
 		return desc.size();
+	}
+
+	public ArrayList<DescContainer> getContainers() {
+		return desc;
 	}
 }

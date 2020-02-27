@@ -117,7 +117,6 @@ public class SetGenerator{
 	{
 		String path = SavedConfig.getSetPath(set.getCode()); 
 		ListRecogStrat r = new ListRecogStrat(set.getName());
-		r.setSizeOfSet(set.getCardCount());
 		File f = new File(path);
 		
 		ArrayList<Card> cards = MTGCardQuery.getCardsFromURI(set.getSearchURI());

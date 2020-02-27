@@ -36,7 +36,7 @@ public class HashNarrowedRecogStrat extends ListRecogStrat{
 		}
 		if(max>threshhold)
 		{
-			return new MatchResult(desc.get(ix).stringData,max);
+			return new MatchResult(desc.get(ix),max);
 		}
 		return null;
 	}

@@ -1,19 +1,25 @@
+import org.json.simple.JSONObject;
+
+import forohfor.scryfall.api.JSONUtil;
 
 public class DescContainer implements Comparable<DescContainer>{
-	public DescContainer(ImageDesc descData, String stringData) {
+	public DescContainer(ImageDesc descData, String id, JSONObject jo) {
 		super();
 		this.descData = descData;
-		this.stringData = stringData;
+		this.id = id;
+		this.jsonData = jo;
 	}
 	
 	public DescContainer(DescContainer d)
 	{
 		this.descData = d.descData;
-		this.stringData = d.stringData;
+		this.id = d.id;
+		this.jsonData = d.jsonData;
 	}
 	
 	public ImageDesc descData;
-	public String stringData;
+	public String id;
+	public JSONObject jsonData;
 	
 	public double match = 0;
 
@@ -22,8 +28,13 @@ public class DescContainer implements Comparable<DescContainer>{
 		return Double.compare(arg0.match,this.match);
 	}
 	
+	public String getID()
+	{
+		return id;
+	}
+
 	public String getName()
 	{
-		return stringData.split("\\|")[0];
+		return JSONUtil.getStringData(jsonData,"name");
 	}
 }
