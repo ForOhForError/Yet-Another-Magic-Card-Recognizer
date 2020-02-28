@@ -14,6 +14,7 @@ public class MatchResult {
 	public MatchResult(DescContainer result, double score) {
 		super();
 		this.result = result.id;
+		this.meta = result.jsonData;
 		this.score = score;
 	}
 
