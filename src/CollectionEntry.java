@@ -24,7 +24,7 @@ class CollectionEntry
     public CollectionEntry(MatchResult res)
     {
         backingCard = null;
-        this.scry_id = UUID.fromString(res.result);
+        this.scry_id = UUID.fromString(res.getData().getID());
         this.name = res.getName();
         this.setCode = res.set();
         this.isFoil = false;

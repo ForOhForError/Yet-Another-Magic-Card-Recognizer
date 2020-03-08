@@ -1,13 +1,15 @@
 import org.json.simple.JSONObject;
+import java.awt.image.BufferedImage;
 
 import forohfor.scryfall.api.JSONUtil;
 
 public class DescContainer implements Comparable<DescContainer>{
-	public DescContainer(ImageDesc descData, String id, JSONObject jo) {
+	public DescContainer(ImageDesc descData, String id, JSONObject jo, BufferedImage i) {
 		super();
 		this.descData = descData;
 		this.id = id;
 		this.jsonData = jo;
+		this.img = i;
 	}
 	
 	public DescContainer(DescContainer d)
@@ -15,13 +17,15 @@ public class DescContainer implements Comparable<DescContainer>{
 		this.descData = d.descData;
 		this.id = d.id;
 		this.jsonData = d.jsonData;
+		this.img = d.img;
 	}
 	
-	public ImageDesc descData;
-	public String id;
-	public JSONObject jsonData;
+	private ImageDesc descData;
+	private String id;
+	private JSONObject jsonData;
+	private BufferedImage img;
 	
-	public double match = 0;
+	private double match = 0;
 
 	@Override
 	public int compareTo(DescContainer arg0) {
@@ -36,5 +40,25 @@ public class DescContainer implements Comparable<DescContainer>{
 	public String getName()
 	{
 		return JSONUtil.getStringData(jsonData,"name");
+	}
+
+	public ImageDesc getDescData()
+	{
+		return descData;
+	}
+
+	public JSONObject getJSON()
+	{
+		return jsonData;
+	}
+
+	public BufferedImage getImage()
+	{
+		return img;
+	}
+
+	public void setMatchScore(double score)
+	{
+		match = score;
 	}
 }

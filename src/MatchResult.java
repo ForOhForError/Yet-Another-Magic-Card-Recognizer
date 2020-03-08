@@ -1,20 +1,17 @@
 import java.io.IOException;
 
-import org.json.simple.JSONObject;
-
 import forohfor.scryfall.api.Card;
 import forohfor.scryfall.api.JSONUtil;
 import forohfor.scryfall.api.MTGCardQuery;
 
 public class MatchResult {
-	public String result;
-	public double score;
-	public JSONObject meta;
+
+	private DescContainer result;
+	private double score;
 	
 	public MatchResult(DescContainer result, double score) {
 		super();
-		this.result = result.id;
-		this.meta = result.jsonData;
+		this.result = result;
 		this.score = score;
 	}
 
@@ -28,7 +25,7 @@ public class MatchResult {
 	public Card getCard()
 	{
 		try {
-			return MTGCardQuery.getCardByScryfallId(result);
+			return MTGCardQuery.getCardByScryfallId(result.getID());
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -37,12 +34,12 @@ public class MatchResult {
 
 	public String getName()
 	{
-		return JSONUtil.getStringData(meta, "name");
+		return JSONUtil.getStringData(result.getJSON(), "name");
 	}
 
 	public String set()
 	{
-		return JSONUtil.getStringData(meta, "set");
+		return JSONUtil.getStringData(result.getJSON(), "set");
 	}
 
 	public boolean equals(Object obj) {
@@ -63,6 +60,11 @@ public class MatchResult {
 
 	@Override
 	public String toString() {
-		return JSONUtil.getStringData(meta, "name")+" : " + score;
+		return result.getName()+" : " + score;
+	}
+
+	public DescContainer getData()
+	{
+		return result;
 	}
 }

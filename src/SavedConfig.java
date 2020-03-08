@@ -22,7 +22,6 @@ public class SavedConfig {
 	public static String PATH;
 	public static boolean DEBUG;
 	public static boolean WRITE_BASICS_TO_SETS=false;
-	public static boolean LOAD_BASICS=false;
 	
 	private static JSONObject CONF_OBJECT;
 	
@@ -40,7 +39,6 @@ public class SavedConfig {
 				PATH = JSONUtil.getStringData(root, "path");
 				DEBUG = JSONUtil.getBoolData(root, "debug");
 				WRITE_BASICS_TO_SETS = JSONUtil.getBoolData(root, "write_basics_to_sets");
-				LOAD_BASICS = JSONUtil.getBoolData(root, "load_basics");
 				WebcamUtils.loadSettings((JSONObject)root.get("webcam_settings"));
 			} 
 			catch (Exception err)
@@ -114,7 +112,6 @@ public class SavedConfig {
 		CONF_OBJECT = new JSONObject();
 		CONF_OBJECT.put("path", path);
 		CONF_OBJECT.put("debug", false);
-		CONF_OBJECT.put("load_basics", false);
 		CONF_OBJECT.put("write_basics_to_sets", false);
 		CONF_OBJECT.put("recognition_strategy", new HashNarrowedRecogStrat().getStratName());
 		CONF_OBJECT.put("area_recognition_strategy", new AutoDetectAreaStrat().getStratName());
@@ -156,10 +153,10 @@ public class SavedConfig {
 	
 	public static String getDeckPath(String deckName)
 	{
-		return Paths.get(PATH, "decks",deckName.replace(" ", "_")+".dat").toString();
+		return Paths.get(PATH, "decks",deckName.replace(" ", "_")+".yam").toString();
 	}
 	
 	public static String getSetPath(String setCode){
-		return Paths.get(PATH, setCode+".dat").toString();
+		return Paths.get(PATH, setCode+".yam").toString();
 	}
 }

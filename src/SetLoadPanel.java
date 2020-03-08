@@ -67,7 +67,15 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 					if(bar.setTask("Loading Sets",1))
 					{
 						synchronized(strat){
-							strat.addFromFile(node.getFilePath());
+							try
+							{
+								strat.addFromFile(node.getFilePath());
+							}
+							catch(Exception ex)
+							{
+								System.err.println("Couldn't load set -- exception follows");
+								ex.printStackTrace();
+							}
 							strat.finalizeLoad();
 							node.setLoaded(true);
 							bar.progressTask();

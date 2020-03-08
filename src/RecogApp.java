@@ -166,7 +166,7 @@ public class RecogApp extends JFrame implements KeyListener{
 					MatchResult res = matches.size() > 0 ? matches.get(0):null;
 					if(res!=null){
 						canvas.setLastResult(res);
-						PopoutCardWindow.setDisplay(res.result,res.getName());
+						PopoutCardWindow.setDisplay(res.getData());
 					}
 				}
 			}

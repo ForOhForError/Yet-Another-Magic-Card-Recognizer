@@ -81,42 +81,53 @@ public class PopoutCardWindow extends JFrame implements ActionListener{
 		display.setIcon(icon);
 	}
 
-	public static boolean isDisplayingCardId(String id,String name)
+	public static boolean isDisplayingCardId(DescContainer dc)
 	{
-		return (card!=null && cardId.equals(id) && cardName.equals(name));
+		return (card!=null && cardId.equals(dc.getID()) && cardName.equals(dc.getName()));
 	}
 
-	public static void setDisplay(String id,String name)
+	public static void setDisplay(DescContainer dc)
 	{
 		if(isOut)
 		{
-			if(!isDisplayingCardId(id,name))
+			if(!isDisplayingCardId(dc))
 			{
-				try {
-					card = MTGCardQuery.getCardByScryfallId(id);
-					cardId = card.getScryfallUUID().toString();
-					boolean found = false;
-					if(card.isMultifaced())
-					{
-						for(CardFace face:card.getCardFaces())
+				BufferedImage i = dc.getImage();
+				if(i == null)
+				{
+					try {
+						card = MTGCardQuery.getCardByScryfallId(dc.getID());
+						cardId = card.getScryfallUUID().toString();
+						boolean found = false;
+						if(card.isMultifaced())
 						{
-							if(face.getName().equals(name))
+							for(CardFace face:card.getCardFaces())
 							{
-								img = face.getImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
-								cardName = face.getName();
-								found = true;
+								if(face.getName().equals(dc.getName()))
+								{
+									img = face.getImage();
+									cardName = face.getName();
+									found = true;
+								}
 							}
 						}
+						if((!card.isMultifaced())||found==false)
+						{
+							cardName = card.getName();
+							img = card.getImage();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-					if((!card.isMultifaced())||found==false)
-					{
-						cardName = card.getName();
-						img = card.getImage().getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH);
-					}
-					ImageIcon icon = new ImageIcon(img);
+				}
+				else
+				{
+					img = i;
+				}
+				if(img != null)
+				{
+					ImageIcon icon = new ImageIcon(img.getScaledInstance(336, 469, BufferedImage.SCALE_SMOOTH));
 					display.setIcon(icon);
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
 		}

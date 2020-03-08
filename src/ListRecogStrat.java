@@ -51,7 +51,7 @@ public class ListRecogStrat extends RecognitionStrategy{
 		double max = 0;
 		for(int i=0;i<desc.size();i++)
 		{
-			double score = in.compareSURF(desc.get(i).descData);
+			double score = in.compareSURF(desc.get(i).getDescData());
 			if(score>max)
 			{
 				max=score;
