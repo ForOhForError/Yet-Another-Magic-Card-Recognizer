@@ -153,7 +153,7 @@ public abstract class RecognitionStrategy {
 					add(new DescContainer(
 							new ImageDesc(ImageUtil.getScaledImage(top_img)), 
 							card.getScryfallUUID().toString(), 
-							card.getJSONData(),
+							extractCardMetadata(card),
 							null
 							));
 				}
