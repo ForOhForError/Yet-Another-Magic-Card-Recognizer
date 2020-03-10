@@ -1,7 +1,6 @@
 import java.io.IOException;
 
 import forohfor.scryfall.api.Card;
-import forohfor.scryfall.api.JSONUtil;
 import forohfor.scryfall.api.MTGCardQuery;
 
 public class MatchResult {
@@ -34,12 +33,12 @@ public class MatchResult {
 
 	public String getName()
 	{
-		return JSONUtil.getStringData(result.getJSON(), "name");
+		return result.getName();
 	}
 
 	public String set()
 	{
-		return JSONUtil.getStringData(result.getJSON(), "set");
+		return result.getSet();
 	}
 
 	public boolean equals(Object obj) {

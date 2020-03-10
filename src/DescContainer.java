@@ -42,6 +42,11 @@ public class DescContainer implements Comparable<DescContainer>{
 		return JSONUtil.getStringData(jsonData,"name");
 	}
 
+	public String getSet()
+	{
+		return JSONUtil.getStringData(jsonData,"set");
+	}
+
 	public ImageDesc getDescData()
 	{
 		return descData;

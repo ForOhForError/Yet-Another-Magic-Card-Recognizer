@@ -128,7 +128,7 @@ public abstract class RecognitionStrategy {
 						add(new DescContainer(
 							new ImageDesc(ImageUtil.getScaledImage(i)), 
 							card.getScryfallUUID().toString(), 
-							card.getJSONData(),
+							extractCardMetadata(card),
 							null
 							));
 					}
@@ -167,6 +167,15 @@ public abstract class RecognitionStrategy {
 				System.err.println("Couldn't find card art for card: "+card.toString()+"\n");
 			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static JSONObject extractCardMetadata(Card card)
+	{
+		JSONObject jo = new JSONObject();
+		jo.put("name", card.getName());
+		jo.put("set", card.getSetCode());
+		return jo;
 	}
 
 	public abstract ArrayList<DescContainer> getContainers();
