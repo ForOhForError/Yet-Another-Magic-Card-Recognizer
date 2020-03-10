@@ -47,7 +47,7 @@ public abstract class RecognitionStrategy {
 
 		DataInputStream is = new DataInputStream(zip.getInputStream(feature));
 		byte[] byteArr = new byte[(int)feature.getSize()];
-		is.read(byteArr);
+		is.readFully(byteArr);
 		is.close();
 		ByteBuffer buf = ByteBuffer.wrap(byteArr);
 		int rec = JSONUtil.getIntData(jo, "size");
@@ -66,7 +66,6 @@ public abstract class RecognitionStrategy {
 			}
 			DescContainer dc = new DescContainer(desc,id,jobj,image);
 			this.add(dc);
-			System.out.println(dc);
 		}
 		zip.close();
 	}
