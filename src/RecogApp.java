@@ -144,6 +144,11 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 	}
 
+	public void doSetBackground()
+	{
+		CardBoundingBoxFinder.adaptBackground(canvas.getWebcam());
+	}
+
 	public void doRecog()
 	{
 		synchronized(canvas)

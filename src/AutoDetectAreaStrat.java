@@ -11,7 +11,7 @@ class AutoDetectAreaStrat extends AreaRecognitionStrategy {
     @Override
     public ArrayList<MatchResult> recognize(BufferedImage in, RecognitionStrategy strat) {
         results.clear();
-        bounds = CardBoundingBoxFinder.process(in);
+        bounds = CardBoundingBoxFinder.process(in,true);
         for (ContourBoundingBox bound : bounds) {
             BufferedImage norm = ImageUtil.getScaledImage(bound.getTransformedImage(in,false));
             BufferedImage flip = ImageUtil.getScaledImage(bound.getTransformedImage(in,true));

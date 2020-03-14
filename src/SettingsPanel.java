@@ -160,6 +160,13 @@ public class SettingsPanel extends JPanel{
 			e -> RecogApp.INSTANCE.getCollectionWindow().setVisible(true)
 		);
 		add(showCollectionManager);
+
+		JButton resetBackground = new JButton("Set Key Background");
+		resetBackground.setPreferredSize(d);
+		resetBackground.addActionListener(
+			e -> RecogApp.INSTANCE.doSetBackground()
+		);
+		add(resetBackground);
 	}
 
 	public void resetStratSelector(RecognitionStrategy strat)
