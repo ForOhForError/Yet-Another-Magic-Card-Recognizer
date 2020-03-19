@@ -33,10 +33,14 @@ class CardBoundingBoxFinder
         {
             background.segment(img, binary);
             binary=BinaryImageOps.dilate8(binary, 5, null);
-            mask(img,binary,img);
+            //mask(img,binary,img);
+        }
+        else
+        {
+            GThresholdImageOps.localMean(img, binary, ConfigLength.fixed(20), 1.0, true, null, null,null);
         }
 
-        GThresholdImageOps.localMean(img, binary, ConfigLength.fixed(20), 1.0, true, null, null,null);
+        //GThresholdImageOps.localMean(img, binary, ConfigLength.fixed(20), 1.0, true, null, null,null);
 
         GrayU8 filtered = BinaryImageOps.erode8(binary, 2, null);
         GrayS32 label = new GrayS32(img.width,img.height);
@@ -49,7 +53,7 @@ class CardBoundingBoxFinder
         {
             ContourBoundingBox bb = new ContourBoundingBox(contour.external);
             double ratio = bb.area()/imgArea;
-            if(ratio > 0.05 && ratio < 0.5 && bb.isRoughlyRecttangular())
+            if( ratio > 0.005 && ratio < 0.5 && bb.isRoughlyRecttangular())
             {
                 bounds.add(bb);
             }
