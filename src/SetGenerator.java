@@ -123,10 +123,14 @@ public class SetGenerator{
 
 		for(Card card:cards)
 		{
-			if( SavedConfig.WRITE_BASICS_TO_SETS || (!CardUtils.isEssentialBasic(card.getName())) )
+			if(CardUtils.isEssentialBasic(card.getName()))
 			{
-				r.addFromCard(card);
+				if( !(SavedConfig.WRITE_BASICS_TO_SETS || card.isFullArt()) )
+				{
+					continue;
+				}
 			}
+			r.addFromCard(card);
 		}
 
 		try {

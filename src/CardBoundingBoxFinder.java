@@ -32,6 +32,7 @@ class CardBoundingBoxFinder
         if(removeBackground)
         {
             background.segment(img, binary);
+            binary=BinaryImageOps.dilate8(binary, 5, null);
             mask(img,binary,img);
         }
 
