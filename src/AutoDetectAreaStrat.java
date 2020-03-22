@@ -6,12 +6,13 @@ import java.util.ArrayList;
 class AutoDetectAreaStrat extends AreaRecognitionStrategy {
 
     private ArrayList<MatchResult> results = new ArrayList<MatchResult>();
-    ArrayList<ContourBoundingBox> bounds = new ArrayList<ContourBoundingBox>();
+    private ArrayList<ContourBoundingBox> bounds = new ArrayList<ContourBoundingBox>();
+    private AutoDetectSettings settings = new AutoDetectSettings();
 
     @Override
     public ArrayList<MatchResult> recognize(BufferedImage in, RecognitionStrategy strat) {
         results.clear();
-        bounds = CardBoundingBoxFinder.process(in,true);
+        bounds = CardBoundingBoxFinder.process(in, settings.getRemoveBackground());
         for (ContourBoundingBox bound : bounds) {
             BufferedImage norm = ImageUtil.getScaledImage(bound.getTransformedImage(in,false));
             BufferedImage flip = ImageUtil.getScaledImage(bound.getTransformedImage(in,true));
@@ -72,6 +73,12 @@ class AutoDetectAreaStrat extends AreaRecognitionStrategy {
 
     @Override
     public void init(int width, int height) {
+        settings.init();
+    }
+
+    @Override
+    public SettingsEntry getSettingsEntry() {
+        return settings;
     }
 
 }

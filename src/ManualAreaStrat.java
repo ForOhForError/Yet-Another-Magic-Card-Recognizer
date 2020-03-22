@@ -140,4 +140,9 @@ class ManualAreaStrat extends AreaRecognitionStrategy {
 		}
 	}
 
+	@Override
+	public SettingsEntry getSettingsEntry() {
+		return null;
+	}
+
 }

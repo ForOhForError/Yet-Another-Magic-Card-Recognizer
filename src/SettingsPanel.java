@@ -9,6 +9,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -28,6 +29,8 @@ public class SettingsPanel extends JPanel{
 		Dimension d;
 
 		setLayout(new FlowLayout());
+		setBorder(new EmptyBorder(5, 5, 5, 5));
+		setPreferredSize(new Dimension(700,280));
 
 		JCheckBox recog = new JCheckBox("Only trigger recognition manually",!RECOG_EVERY_FRAME);
 		recog.setToolTipText("Only trigger recognition manually");
@@ -52,7 +55,7 @@ public class SettingsPanel extends JPanel{
 
 		areaStratSelect = new JComboBox<AreaRecognitionStrategy>(StrategySelect.getAreaStrats());
 		d = areaStratSelect.getPreferredSize();
-		d.width = 280;
+		d.width = 230;
 		areaStratSelect.setPreferredSize(d);
 		areaStratSelect.setSelectedItem(SavedConfig.getAreaStrat());
 		areaStratSelect.addActionListener(new ActionListener()
@@ -65,6 +68,21 @@ public class SettingsPanel extends JPanel{
 			}
 		});
 		add(areaStratSelect);
+
+		JButton areaStratSettings = new JButton("Settings");
+		d = areaStratSettings.getPreferredSize();
+		d.width = 30;
+		areaStratSettings.setPreferredSize(d);
+		areaStratSettings.addActionListener(e -> {
+			SettingsEntry ent = RecogApp.INSTANCE.getAreaStrategy().getSettingsEntry();
+			if(ent != null)
+			{
+				ent.showSettingsWindow();
+			}
+		});
+		add(areaStratSettings);
+
+
 
 		stratSelect = new JComboBox<RecognitionStrategy>(StrategySelect.getStrats());
 		d = stratSelect.getPreferredSize();

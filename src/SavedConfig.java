@@ -132,6 +132,55 @@ public class SavedConfig {
 		camconf.put("cam_resolution_h", dim.height);
 		CONF_OBJECT.put("webcam_settings",camconf);
 	}
+
+	@SuppressWarnings("unchecked")
+	public static boolean putProperty(String path, Object o)
+	{
+		String[] ids = path.split("\\.");
+		JSONObject obj = CONF_OBJECT;
+		for(int i=0;i<ids.length;i++)
+		{
+			if(i+1==ids.length)
+			{
+				obj.put(ids[i], o);
+				return true;
+			}
+
+			if(obj.containsKey(ids[i]))
+			{
+				obj = (JSONObject)obj.get(ids[i]);
+			}
+			else
+			{
+				JSONObject o2 = new JSONObject();
+				obj.put(ids[i], o2);
+				obj = o2;
+			}
+		}
+		return false;
+	}
+
+	public static Object getProperty(String path, Object defaultValue)
+	{
+		String[] ids = path.split(".");
+		JSONObject obj = CONF_OBJECT;
+		for(int i=0;i<ids.length;i++)
+		{
+			if(obj.containsKey(ids[i]))
+			{
+				if(i+1==ids.length)
+				{
+					return obj.get(ids[i]);
+				}
+				obj = (JSONObject)obj.get(ids[i]);
+			}
+			else
+			{
+				return defaultValue;
+			}
+		}
+		return defaultValue;
+	}
 	
 	public static void writeOut()
 	{

@@ -1,7 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
@@ -65,7 +64,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 
 		JPanel right = new JPanel();
-		right.setLayout(new GridLayout(2,1));
+		right.setLayout(new BorderLayout());
 
 		canvas = new RecognitionCanvas(w,SavedConfig.getAreaStrat());
 
@@ -81,8 +80,8 @@ public class RecogApp extends JFrame implements KeyListener{
 		add(right,BorderLayout.EAST);
 		add(task,BorderLayout.SOUTH);
 		settings = new SettingsPanel();
-		right.add(settings);
-		right.add(scroll);
+		right.add(settings, BorderLayout.NORTH);
+		right.add(scroll, BorderLayout.CENTER);
 		right.setPreferredSize(new Dimension(300,canvas.getHeight()));
 		pack();
 		setVisible(true);
@@ -104,6 +103,11 @@ public class RecogApp extends JFrame implements KeyListener{
 				doRecog();
 			}
 		}
+	}
+
+	public AreaRecognitionStrategy getAreaStrategy()
+	{
+		return areaStrat;
 	}
 
 	public void doSetStrat(RecognitionStrategy strategy)

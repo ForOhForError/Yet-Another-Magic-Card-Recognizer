@@ -17,6 +17,8 @@ abstract class AreaRecognitionStrategy implements MouseInputListener
 
     public abstract void init(int width, int height);
 
+    public abstract SettingsEntry getSettingsEntry();
+
     public String toString()
 	{
 		return getStratDisplayName();
