@@ -98,8 +98,8 @@ public class DeckGenerator extends JFrame{
 	public void writeDeck(String path)
 	{
 		ListRecogStrat r = new ListRecogStrat(namebox.getText());
-		new File(SavedConfig.getDecksPath()).mkdirs();
-		File f = new File(SavedConfig.getDeckPath(namebox.getText()));
+		new File(SavedConfig.getSubPath("decks")).mkdirs();
+		File f = new File(SavedConfig.getCustomSetPath("decks",namebox.getText()));
 
 		ArrayList<String> names = getCardNames();
 		ArrayList<Card> cards = MTGCardQuery.toCardList(names, true);

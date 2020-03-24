@@ -104,7 +104,8 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 		root.removeAllChildren();
 
 		root.add(buildSetSubtree());
-		root.add(buildDeckSubtree());
+		root.add(buildFolderSubtree("Decks", "decks"));
+		root.add(buildFolderSubtree("Custom Sets", "custom"));
 
 		((DefaultTreeModel)tree.getModel()).reload();
 		if(this.getRootPane()!=null)
@@ -151,16 +152,16 @@ public class SetLoadPanel extends JPanel implements MouseInputListener {
 		return subtree;
 	}
 
-	public DefaultMutableTreeNode buildDeckSubtree()
+	public DefaultMutableTreeNode buildFolderSubtree(String name, String folderName)
 	{
-		DefaultMutableTreeNode subtree = new DefaultMutableTreeNode("Decks");
+		DefaultMutableTreeNode subtree = new DefaultMutableTreeNode(name);
 		try
 		{
-			File[] flist = new File(SavedConfig.getDecksPath()).listFiles();
+			File[] flist = new File(SavedConfig.getSubPath(folderName)).listFiles();
 
 			ArrayList<File> good = new ArrayList<>();
 			for(int i = 0; i < flist.length; i++){
-				if(flist[i].isFile() && flist[i].getName().endsWith(".dat")) {
+				if(flist[i].isFile() && flist[i].getName().endsWith(".yam")) {
 					good.add(flist[i]);
 				}
 			}

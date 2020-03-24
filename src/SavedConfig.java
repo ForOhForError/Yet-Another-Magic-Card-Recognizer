@@ -196,13 +196,13 @@ public class SavedConfig {
 		}
 	}
 	
-	public static String getDecksPath(){
-		return Paths.get(PATH, "decks").toString();
+	public static String getSubPath(String folderName){
+		return Paths.get(PATH, folderName).toString();
 	}
 	
-	public static String getDeckPath(String deckName)
+	public static String getCustomSetPath(String folderName, String deckName)
 	{
-		return Paths.get(PATH, "decks",deckName.replace(" ", "_")+".yam").toString();
+		return Paths.get(PATH, folderName,deckName.replace(" ", "_")+".yam").toString();
 	}
 	
 	public static String getSetPath(String setCode){

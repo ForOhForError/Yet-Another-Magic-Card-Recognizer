@@ -161,6 +161,13 @@ public class SettingsPanel extends JPanel{
 			}
 		});
 		add(launchDeckGen);
+
+		JButton launchCustomGen = new JButton("Create Custom Set");
+		launchCustomGen.setPreferredSize(d);
+		launchCustomGen.addActionListener(e -> {
+			new CustomSetGenerator();
+		});
+		add(launchCustomGen);
 		
 		JButton toggleSetPanel = new JButton("Refresh Set Listing");
 		toggleSetPanel.setPreferredSize(d);
