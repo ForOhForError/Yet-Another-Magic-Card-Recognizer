@@ -5,7 +5,7 @@ import java.util.List;
 import com.github.sarxos.webcam.Webcam;
 
 import boofcv.alg.InputSanityCheck;
-import boofcv.alg.background.BackgroundModelStationary;
+import boofcv.alg.background.stationary.BackgroundStationaryBasic;
 import boofcv.alg.filter.binary.BinaryImageOps;
 import boofcv.alg.filter.binary.Contour;
 import boofcv.alg.filter.binary.GThresholdImageOps;
@@ -20,9 +20,10 @@ import boofcv.struct.image.ImageType;
 
 class CardBoundingBoxFinder
 {
-    static ImageType<GrayU8> imageType = ImageType.single(GrayU8.class);
-    static BackgroundModelStationary<GrayU8> background =
-		FactoryBackgroundModel.stationaryBasic(new ConfigBackgroundBasic(35, 0.01f), imageType);
+    private static float INITIAL_LEARN_RATE = 0.01f;
+    private static ImageType<GrayU8> imageType = ImageType.single(GrayU8.class);
+    private static BackgroundStationaryBasic<GrayU8> background =
+		FactoryBackgroundModel.stationaryBasic(new ConfigBackgroundBasic(35, INITIAL_LEARN_RATE), imageType);
 
 
     public static ArrayList<ContourBoundingBox> process(BufferedImage in, boolean removeBackground) {
@@ -77,11 +78,18 @@ class CardBoundingBoxFinder
 				output.data[indexOut] = mskval == (byte)1 ? srcval:(byte)0;
 			}
 		}
-	}
+    }
+    
+    public static void adaptBackground(BufferedImage frame)
+    {
+        GrayU8 img = ConvertBufferedImage.convertFromSingle(frame, null, GrayU8.class);
+        background.updateBackground(img);
+    }
 
     public static void adaptBackground(Webcam w)
     {
         background.reset();
+        background.setLearnRate(INITIAL_LEARN_RATE);
         BufferedImage frame = w.getImage();
         GrayU8 img = null;
         for(int i=0;i<10;i++)

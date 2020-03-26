@@ -50,7 +50,6 @@ public class RecogApp extends JFrame implements KeyListener{
 		setLayout(bl);
 		task = new OperationBar();
 		strat = SavedConfig.getStrat();
-		
 
 		SetListing.init();
 		
@@ -66,7 +65,8 @@ public class RecogApp extends JFrame implements KeyListener{
 		JPanel right = new JPanel();
 		right.setLayout(new BorderLayout());
 
-		canvas = new RecognitionCanvas(w,SavedConfig.getAreaStrat());
+		areaStrat = SavedConfig.getAreaStrat();
+		canvas = new RecognitionCanvas(w,areaStrat);
 
 		ImageIcon ico = null;
 		ico = new ImageIcon("res/YamCR.png");
@@ -94,6 +94,7 @@ public class RecogApp extends JFrame implements KeyListener{
 			System.exit(0);
 		}
 		canvas.getCanvas().addKeyListener(this);
+		doSetBackground();
 		while(true)
 		{
 			canvas.draw();

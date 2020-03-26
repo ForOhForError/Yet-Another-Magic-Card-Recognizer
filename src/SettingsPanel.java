@@ -69,9 +69,10 @@ public class SettingsPanel extends JPanel{
 		});
 		add(areaStratSelect);
 
-		JButton areaStratSettings = new JButton("Settings");
+		JButton areaStratSettings = new JButton("Edit");
+		areaStratSettings.setToolTipText("Card Detector Settings");
 		d = areaStratSettings.getPreferredSize();
-		d.width = 30;
+		d.width = 50;
 		areaStratSettings.setPreferredSize(d);
 		areaStratSettings.addActionListener(e -> {
 			SettingsEntry ent = RecogApp.INSTANCE.getAreaStrategy().getSettingsEntry();
@@ -86,7 +87,7 @@ public class SettingsPanel extends JPanel{
 
 		stratSelect = new JComboBox<RecognitionStrategy>(StrategySelect.getStrats());
 		d = stratSelect.getPreferredSize();
-		d.width = 280;
+		d.width = 285;
 		stratSelect.setPreferredSize(d);
 		stratSelect.setSelectedItem(SavedConfig.getStrat());
 		stratSelect.addActionListener(new ActionListener()

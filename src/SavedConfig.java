@@ -162,7 +162,7 @@ public class SavedConfig {
 
 	public static Object getProperty(String path, Object defaultValue)
 	{
-		String[] ids = path.split(".");
+		String[] ids = path.split("\\.");
 		JSONObject obj = CONF_OBJECT;
 		for(int i=0;i<ids.length;i++)
 		{
