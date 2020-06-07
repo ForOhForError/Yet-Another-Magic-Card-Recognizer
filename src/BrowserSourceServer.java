@@ -18,11 +18,14 @@ import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 
 public class BrowserSourceServer {
-    public static void main(String[] args) {
 
-        StaticServer staticServer = new StaticServer("browser-source", "localhost", 7777);
+    private StaticServer staticServer;
+    private SocketIOServer socketServer;
+
+    private void start()
+    {
+        staticServer = new StaticServer("browser-source", "localhost", 7777);
         staticServer.startServer();
-        System.out.println("Hosting server");
 
         Configuration config = new Configuration();
         config.setHostname("localhost");
@@ -37,17 +40,22 @@ public class BrowserSourceServer {
                 System.out.println("data get: "+data.toString());
             }
         });
+
         socketServer.start();
-        System.out.println("Hosting server");
-        
-        try {
-            Thread.sleep(Integer.MAX_VALUE);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    }
+
+    public void stop()
+    {
         staticServer.stop();
         socketServer.stop();
+    }
 
+
+    public static void main(String[] args) throws InterruptedException{
+        BrowserSourceServer bss = new BrowserSourceServer();
+        bss.start();
+        Thread.sleep(Integer.MAX_VALUE);
+        bss.stop();
     }
 }
 
