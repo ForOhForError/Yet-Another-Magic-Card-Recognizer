@@ -55,6 +55,16 @@
 			<version>0.35</version>
 		</dependency>
 		<dependency>
+			<groupId>com.corundumstudio.socketio</groupId>
+			<artifactId>netty-socketio</artifactId>
+			<version>1.7.12</version>
+		</dependency>
+		<dependency>
+			<groupId>org.nanohttpd</groupId>
+			<artifactId>nanohttpd</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
 	    	<groupId>io.github.forohforerror</groupId>
 	    	<artifactId>ScryfallAPIBinding</artifactId>
 	   		<version>1.10.2</version>
