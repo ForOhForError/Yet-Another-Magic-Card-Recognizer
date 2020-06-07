@@ -1,8 +1,9 @@
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="/address-config.js"></script>
 <script> 
-var socket = io.connect('http://localhost:7778',{transports: ['websocket']});-
+var socket = io.connect(socket_server_addr, {transports: ['websocket']});-
     
     
 socket.on('card_image',function(msg){

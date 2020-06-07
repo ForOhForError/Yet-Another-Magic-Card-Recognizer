@@ -4,6 +4,7 @@
 <meta charset=utf-8>
 <title>Nifty Recognizer Card Controller</title>
   <script src="/socket.io/socket.io.js"></script>
+<script src="/address-config.js"></script>
 
 <style>
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
@@ -80,7 +81,7 @@ margin: 0;
   </div> 
 <div id="buttons"><button onclick="return clearImage()">Clear</button><button disabled id="override" onclick="return overrideStop()">Remove Override</button></div>
 <script>
-  var socket = io.connect('http://localhost:7778',{transports: ['websocket']});
+  var socket = io.connect(socket_server_addr ,{transports: ['websocket']});
   var override = document.getElementById('override');
 
   var holder = document.getElementById('holder'),

@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,14 +23,23 @@ public class BrowserSourceServer {
     private StaticServer staticServer;
     private SocketIOServer socketServer;
 
-    private void start()
+    private void start(String address, int webPort)
     {
-        staticServer = new StaticServer("browser-source", "localhost", 7777);
+        int socketPort = -1;
+
+        try {
+            ServerSocket s = new ServerSocket(0);
+            socketPort = s.getLocalPort();
+            s.close();
+        } catch (IOException e) {
+        }
+
+        staticServer = new StaticServer("browser-source", address, webPort, socketPort);
         staticServer.startServer();
 
         Configuration config = new Configuration();
-        config.setHostname("localhost");
-        config.setPort(7778);
+        config.setHostname(address);
+        config.setPort(socketPort);
         config.setTransports(Transport.byName("websocket"));
 
         final SocketIOServer socketServer = new SocketIOServer(config);
@@ -53,7 +63,7 @@ public class BrowserSourceServer {
 
     public static void main(String[] args) throws InterruptedException{
         BrowserSourceServer bss = new BrowserSourceServer();
-        bss.start();
+        bss.start("localhost",7777);
         Thread.sleep(Integer.MAX_VALUE);
         bss.stop();
     }
@@ -62,10 +72,14 @@ public class BrowserSourceServer {
 class StaticServer extends NanoHTTPD {
     private ArrayList<String> allowFiles;
     private String path;
+    private int wsPort;
+    private String address;
 
-    public StaticServer(String path, String address, int port) {
+    public StaticServer(String path, String address, int port, int wsPort) {
         super(address, port);
+        this.address = address;
         this.path = path;
+        this.wsPort = wsPort;
         allowFiles = new ArrayList<>();
         try {
             Files.walk(Paths.get(path)).filter(Files::isRegularFile).forEach(f -> {
@@ -91,8 +105,14 @@ class StaticServer extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-
-        Path p = Paths.get(path, session.getUri());
+        String uri = session.getUri();
+        System.out.println(uri);
+        if(uri.equalsIgnoreCase("/address-config.js"))
+        {
+            String content = String.format("var socket_server_addr = \"http://%s:%d\";\n", address, wsPort);
+            return newFixedLengthResponse(Status.OK, "application/javascript", content);
+        }
+        Path p = Paths.get(path, uri);
         File f = p.toFile();
         if (allowFiles.contains(f.getAbsolutePath()) && f.exists() && f.isFile()) {
             FileInputStream fin;
