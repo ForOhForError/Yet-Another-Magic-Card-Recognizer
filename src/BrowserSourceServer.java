@@ -1,3 +1,6 @@
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
@@ -20,7 +25,7 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
 
 public class BrowserSourceServer {
 
-    private StaticServer staticServer;
+    private HttpServer httpServer;
     private SocketIOServer socketServer;
 
     private void start(String address, int webPort)
@@ -34,8 +39,8 @@ public class BrowserSourceServer {
         } catch (IOException e) {
         }
 
-        staticServer = new StaticServer("browser-source", address, webPort, socketPort);
-        staticServer.startServer();
+        httpServer = new HttpServer("browser-source", address, webPort, socketPort);
+        httpServer.startServer();
 
         Configuration config = new Configuration();
         config.setHostname(address);
@@ -56,7 +61,7 @@ public class BrowserSourceServer {
 
     public void stop()
     {
-        staticServer.stop();
+        httpServer.stop();
         socketServer.stop();
     }
 
@@ -64,18 +69,18 @@ public class BrowserSourceServer {
     public static void main(String[] args) throws InterruptedException{
         BrowserSourceServer bss = new BrowserSourceServer();
         bss.start("localhost",7777);
-        Thread.sleep(Integer.MAX_VALUE);
+        RecogApp.main(args);
         bss.stop();
     }
 }
 
-class StaticServer extends NanoHTTPD {
+class HttpServer extends NanoHTTPD {
     private ArrayList<String> allowFiles;
     private String path;
     private int wsPort;
     private String address;
 
-    public StaticServer(String path, String address, int port, int wsPort) {
+    public HttpServer(String path, String address, int port, int wsPort) {
         super(address, port);
         this.address = address;
         this.path = path;
@@ -106,11 +111,28 @@ class StaticServer extends NanoHTTPD {
     @Override
     public Response serve(IHTTPSession session) {
         String uri = session.getUri();
-        System.out.println(uri);
         if(uri.equalsIgnoreCase("/address-config.js"))
         {
             String content = String.format("var socket_server_addr = \"http://%s:%d\";\n", address, wsPort);
             return newFixedLengthResponse(Status.OK, "application/javascript", content);
+        }
+        if(uri.equalsIgnoreCase("/card-image"))
+        {
+            try
+            {
+                String cardId = session.getParameters().get("id").get(0);
+                BufferedImage cardImage = RecogApp.INSTANCE.getCardImageFromID(cardId);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(cardImage, "png", baos);
+                byte[] buf = baos.toByteArray();
+                ByteArrayInputStream bain = new ByteArrayInputStream(buf);
+                baos.close();
+                return newChunkedResponse(Status.OK, "image/png", bain);
+            }
+            catch(Exception e)
+            {
+                return newFixedLengthResponse(Status.BAD_REQUEST, "text/html", "");
+            }
         }
         Path p = Paths.get(path, uri);
         File f = p.toFile();
@@ -128,9 +150,6 @@ class StaticServer extends NanoHTTPD {
             }
             return newChunkedResponse(Status.OK, mime, fin);
         }
-        else
-        {
-            return newFixedLengthResponse(Status.BAD_REQUEST, "text/html", "");
-        }
+        return newFixedLengthResponse(Status.BAD_REQUEST, "text/html", "");
     }
 }

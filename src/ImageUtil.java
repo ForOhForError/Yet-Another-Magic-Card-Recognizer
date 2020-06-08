@@ -1,9 +1,14 @@
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
+
+import forohfor.scryfall.api.Card;
+import forohfor.scryfall.api.CardFace;
+import forohfor.scryfall.api.MTGCardQuery;
 
 public class ImageUtil {
 	
@@ -80,6 +85,33 @@ public class ImageUtil {
 		g2.drawImage(src, 0, 0, finalw, finalh, null);
 		g2.dispose();
 		return resizedImg;
+	}
+
+	public static BufferedImage getDescContainerImage(DescContainer dc)
+	{
+		BufferedImage i = dc.getImage();
+		if(i == null)
+		{
+			try {
+				Card card = MTGCardQuery.getCardByScryfallId(dc.getID());
+				if(card.isMultifaced())
+				{
+					for(CardFace face:card.getCardFaces())
+					{
+						if(face.getName().equals(dc.getName()))
+						{
+							return face.getImage();
+						}
+					}
+				}
+				if(!card.isMultifaced())
+				{
+					return card.getImage();
+				}
+			} catch (IOException e) {
+			}
+		}
+		return i;
 	}
 
 	public static BufferedImage getImageFromUrl(String u){

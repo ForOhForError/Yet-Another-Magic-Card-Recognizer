@@ -169,6 +169,18 @@ public abstract class RecognitionStrategy {
 		}
 	}
 
+	public BufferedImage resolveArt(String id)
+	{
+		for(DescContainer dc:getContainers())
+		{
+			if(dc.getID().equals(id))
+			{
+				return ImageUtil.getDescContainerImage(dc);
+			}
+		}
+		return null;
+	}
+
 	@SuppressWarnings("unchecked")
 	private static JSONObject extractCardMetadata(Card card)
 	{
@@ -176,7 +188,7 @@ public abstract class RecognitionStrategy {
 		jo.put("name", card.getName());
 		jo.put("set", card.getSetCode());
 		return jo;
-	}
+	}  
 
 	public abstract ArrayList<DescContainer> getContainers();
 

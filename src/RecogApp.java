@@ -106,6 +106,11 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 	}
 
+	public BufferedImage getCardImageFromID(String id)
+	{
+		return strat.resolveArt(id);
+	}
+
 	public AreaRecognitionStrategy getAreaStrategy()
 	{
 		return areaStrat;
