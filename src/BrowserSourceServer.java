@@ -43,7 +43,7 @@ public class BrowserSourceServer {
         }
     }
 
-    public void start(String address, int webPort)
+    public boolean start(String address, int webPort)
     {
         if(!isUp)
         {
@@ -56,10 +56,14 @@ public class BrowserSourceServer {
                 socketPort = s.getLocalPort();
                 s.close();
             } catch (IOException e) {
+                return false;
             }
 
             httpServer = new HttpServer("browser-source", address, webPort, socketPort);
-            httpServer.startServer();
+            if(!httpServer.startServer())
+            {
+                return false;
+            }
 
             Configuration config = new Configuration();
             config.setHostname(address);
@@ -73,10 +77,18 @@ public class BrowserSourceServer {
                     socketServer.getBroadcastOperations().sendEvent("card_image", data);
                 }
             });
-
-            socketServer.start();
+            try
+            {
+                socketServer.start();
+            }
+            catch(Exception e)
+            {
+                return false;
+            }
             isUp = true;
+            return true;
         }
+        return false;
     }
 
     public void stop()

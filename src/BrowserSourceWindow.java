@@ -3,12 +3,18 @@ import java.text.NumberFormat;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import javax.swing.text.NumberFormatter;
+
+import java.awt.datatransfer.StringSelection;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 
 class BrowserSourceWindow extends JFrame
 {
@@ -18,12 +24,13 @@ class BrowserSourceWindow extends JFrame
     public BrowserSourceWindow()
     {
         super("Browser Source");
+        Dimension d;
         server = new BrowserSourceServer();
 
         JPanel top = new JPanel();
         top.setBorder(new EmptyBorder(5, 5, 5, 5));
         top.setLayout(new FlowLayout());
-		top.setPreferredSize(new Dimension(300,50));
+		top.setPreferredSize(new Dimension(300,100));
 
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(false);
@@ -34,21 +41,58 @@ class BrowserSourceWindow extends JFrame
         formatter.setAllowsInvalid(false);
         formatter.setCommitsOnValidEdit(true);
         JFormattedTextField portField = new JFormattedTextField(formatter);
-        portField.setValue(7777);
+        portField.setValue(SavedConfig.getProperty("browser_source.port", 7777));
+        d = portField.getPreferredSize();
+        d.width = 40;
+        portField.setPreferredSize(d);
+
+        JTextField addressField = new JTextField(10);
+        addressField.setText((String)SavedConfig.getProperty("browser_source.address", "localhost"));
 
         JButton start = new JButton("Start Server");
+        JButton stop = new JButton("Stop Server");
+        JButton copy = new JButton("Copy Source Address to Clipboard");
+        stop.setEnabled(false);
+
         start.addActionListener(e -> {
-            server.start("localhost", (Integer)portField.getValue());
+            Integer port = ((Long)portField.getValue()).intValue();
+            String addr = addressField.getText();
+            SavedConfig.putProperty("browser_source.port", port);
+            SavedConfig.putProperty("browser_source.address", addr);
+            SavedConfig.writeOut();
+            boolean started = server.start(addr, port);
+            System.out.println(started);
+            if(started)
+            {
+                start.setEnabled(false);
+                portField.setEnabled(false);
+                addressField.setEnabled(false);
+                stop.setEnabled(true);
+            }
         });
 
-        JButton stop = new JButton("Stop Server");
         stop.addActionListener(e -> {
             server.stop();
+            start.setEnabled(true);
+            portField.setEnabled(true);
+            addressField.setEnabled(true);
+            stop.setEnabled(false);
         });
 
+        copy.addActionListener(e -> {
+            Integer port = ((Long)portField.getValue()).intValue();
+            String addr = addressField.getText();
+            setClipboard(String.format("http://%s:%d/card-view.html", addr, port));
+        });
+
+        top.add(new JLabel("Browser source address:"));
+        top.add(addressField);
+        top.add(new JLabel(":"));
         top.add(portField);
         top.add(start);
         top.add(stop);
+        top.add(copy);
+
         add(top);
         pack();
         setResizable(false);
@@ -57,5 +101,12 @@ class BrowserSourceWindow extends JFrame
     public BrowserSourceServer getServer()
     {
         return server;
+    }
+
+    private void setClipboard(String text)
+    {
+        StringSelection stringSelection = new StringSelection(text);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, null);
     }
 }
