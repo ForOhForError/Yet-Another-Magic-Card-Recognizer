@@ -26,6 +26,7 @@ public class RecogApp extends JFrame implements KeyListener{
 	private static SetLoadPanel select;
 	private static OperationBar task;
 	private static CollectionManagerWindow collection;
+	private static BrowserSourceWindow browserSource;
 	
 	public static RecogApp INSTANCE;
 
@@ -39,6 +40,7 @@ public class RecogApp extends JFrame implements KeyListener{
 		}
 		SavedConfig.init();
 		collection = new CollectionManagerWindow();
+		browserSource = new BrowserSourceWindow();
 		new RecogApp();
 	}
 
@@ -182,6 +184,7 @@ public class RecogApp extends JFrame implements KeyListener{
 					if(res!=null){
 						canvas.setLastResult(res);
 						PopoutCardWindow.setDisplay(res.getData());
+						browserSource.getServer().update(res.getData(), true);
 					}
 				}
 			}
@@ -206,6 +209,11 @@ public class RecogApp extends JFrame implements KeyListener{
 	public CollectionManagerWindow getCollectionWindow()
 	{
 		return collection;
+	}
+
+	public BrowserSourceWindow getBrowserSourceWindow()
+	{
+		return browserSource;
 	}
 
 	@Override

@@ -187,12 +187,12 @@ public class SettingsPanel extends JPanel{
 		);
 		add(showCollectionManager);
 
-		JButton resetBackground = new JButton("Set Key Background");
-		resetBackground.setPreferredSize(d);
-		resetBackground.addActionListener(
-			e -> RecogApp.INSTANCE.doSetBackground()
+		JButton browserSource = new JButton("Browser Source");
+		browserSource.setPreferredSize(d);
+		browserSource.addActionListener(
+			e -> RecogApp.INSTANCE.getBrowserSourceWindow().setVisible(true)
 		);
-		add(resetBackground);
+		add(browserSource);
 	}
 
 	public void resetStratSelector(RecognitionStrategy strat)

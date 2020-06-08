@@ -27,51 +27,73 @@ public class BrowserSourceServer {
 
     private HttpServer httpServer;
     private SocketIOServer socketServer;
+    private boolean isUp=false;
+    private String address;
+    private int webPort;
 
-    private void start(String address, int webPort)
+    public void update(DescContainer dc, boolean auto)
     {
-        int socketPort = -1;
-
-        try {
-            ServerSocket s = new ServerSocket(0);
-            socketPort = s.getLocalPort();
-            s.close();
-        } catch (IOException e) {
+        if(isUp)
+        {
+            String imageUrl = String.format("http://%s:%d/card-image?id=%s", address, webPort, dc.getID());
+            CardImageMessage msg = new CardImageMessage();
+            msg.auto = auto;
+            msg.src = imageUrl;
+            socketServer.getBroadcastOperations().sendEvent("card_image", msg);
         }
+    }
 
-        httpServer = new HttpServer("browser-source", address, webPort, socketPort);
-        httpServer.startServer();
+    public void start(String address, int webPort)
+    {
+        if(!isUp)
+        {
+            this.address = address;
+            this.webPort = webPort;
+            int socketPort = -1;
 
-        Configuration config = new Configuration();
-        config.setHostname(address);
-        config.setPort(socketPort);
-        config.setTransports(Transport.byName("websocket"));
-
-        final SocketIOServer socketServer = new SocketIOServer(config);
-        socketServer.addEventListener("card_image", Object.class, new DataListener<Object>() {
-            @Override
-            public void onData(SocketIOClient client, Object data, AckRequest ackRequest) {
-                socketServer.getBroadcastOperations().sendEvent("card_image", data);
-                System.out.println("data get: "+data.toString());
+            try {
+                ServerSocket s = new ServerSocket(0);
+                socketPort = s.getLocalPort();
+                s.close();
+            } catch (IOException e) {
             }
-        });
 
-        socketServer.start();
+            httpServer = new HttpServer("browser-source", address, webPort, socketPort);
+            httpServer.startServer();
+
+            Configuration config = new Configuration();
+            config.setHostname(address);
+            config.setPort(socketPort);
+            config.setTransports(Transport.byName("websocket"));
+
+            socketServer = new SocketIOServer(config);
+            socketServer.addEventListener("card_image", Object.class, new DataListener<Object>() {
+                @Override
+                public void onData(SocketIOClient client, Object data, AckRequest ackRequest) {
+                    socketServer.getBroadcastOperations().sendEvent("card_image", data);
+                }
+            });
+
+            socketServer.start();
+            isUp = true;
+        }
     }
 
     public void stop()
     {
-        httpServer.stop();
-        socketServer.stop();
+        if(isUp)
+        {
+            httpServer.stop();
+            socketServer.stop();
+            isUp = false;
+        }
     }
+}
 
-
-    public static void main(String[] args) throws InterruptedException{
-        BrowserSourceServer bss = new BrowserSourceServer();
-        bss.start("localhost",7777);
-        RecogApp.main(args);
-        bss.stop();
-    }
+class CardImageMessage
+{
+    public boolean auto;
+    public String src;
 }
 
 class HttpServer extends NanoHTTPD {

@@ -22,11 +22,18 @@ class AutoDetectSettings implements SettingsEntry
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        remBG = new JCheckBox("Subtract Static Background");
+        remBG = new JCheckBox("Subtract Static Background (Experimental)");
         remBG.setToolTipText(
             "Detect cards based on difference from a static background. "+
-            "Use if you have a static, textured background with stable lighting."
+            "Use if you have a static, textured background with stable lighting "+
+            "and a stable camera position."
         );
+
+        JButton resetBackground = new JButton("Update Static Background");
+		resetBackground.addActionListener(
+			e -> RecogApp.INSTANCE.doSetBackground()
+		);
+		p.add(resetBackground);
 
         JButton bSave = new JButton("Save");
 
