@@ -104,10 +104,7 @@ public class ImageUtil {
 						}
 					}
 				}
-				if(!card.isMultifaced())
-				{
-					return card.getImage();
-				}
+				return card.getImage();
 			} catch (IOException e) {
 			}
 		}

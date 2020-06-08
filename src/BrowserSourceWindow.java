@@ -41,7 +41,7 @@ class BrowserSourceWindow extends JFrame
         formatter.setAllowsInvalid(false);
         formatter.setCommitsOnValidEdit(true);
         JFormattedTextField portField = new JFormattedTextField(formatter);
-        portField.setValue(SavedConfig.getProperty("browser_source.port", 7777));
+        portField.setValue(((Long)SavedConfig.getProperty("browser_source.port", 7777)).intValue());
         d = portField.getPreferredSize();
         d.width = 40;
         portField.setPreferredSize(d);
@@ -51,18 +51,23 @@ class BrowserSourceWindow extends JFrame
 
         JButton start = new JButton("Start Server");
         JButton stop = new JButton("Stop Server");
+        d = start.getPreferredSize();
+        d.width = 96;
+        start.setPreferredSize(d);
+        stop.setPreferredSize(d);
+
         JButton copy = new JButton("Copy Source Address to Clipboard");
+
         stop.setEnabled(false);
 
+
         start.addActionListener(e -> {
-            Integer port = ((Long)portField.getValue()).intValue();
+            Integer port = (Integer)portField.getValue();
             String addr = addressField.getText();
             SavedConfig.putProperty("browser_source.port", port);
             SavedConfig.putProperty("browser_source.address", addr);
             SavedConfig.writeOut();
-            boolean started = server.start(addr, port);
-            System.out.println(started);
-            if(started)
+            if(server.start(addr, port))
             {
                 start.setEnabled(false);
                 portField.setEnabled(false);
@@ -80,7 +85,7 @@ class BrowserSourceWindow extends JFrame
         });
 
         copy.addActionListener(e -> {
-            Integer port = ((Long)portField.getValue()).intValue();
+            Integer port = (Integer)portField.getValue();
             String addr = addressField.getText();
             setClipboard(String.format("http://%s:%d/card-view.html", addr, port));
         });
