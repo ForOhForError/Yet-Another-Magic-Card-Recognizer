@@ -4,6 +4,7 @@ cached_sets.json
 .classpath
 .settings
 .vscode
+.idea
 target
 errorlog.txt
 YamCR.zip
