@@ -1,72 +1,152 @@
-![YamCR Banner](readmeImages/YamCRBanner.png)
+# About YamCR
 
-## About
+![YamCR Banner](readmeImages/YamCRBanner.png)
 
 YamCR is an open-source Magic The Gathering card recognizer, written in Java using BoofCV.
 
-Currently, the features are based around recognizing a card on a webcam feed and displaying it on screen for usecases such as livestreaming.
+The current feature set is built toward collectors and paper Magic livestreamers.
 
 It's partially written as a pet project, and partially as a tool with features that other recognizers lack.
 
-## Usage
+## Setup
 
-### Setup
+Extract the contents of the zip from the [release page](https://github.com/ForOhForError/Yet-Another-Magic-Card-Recognizer/releases/latest) to any directory on your machine.
 
-Extract the contents of the zip from the [a release page](https://github.com/ForOhForError/Yet-Another-Magic-Card-Recognizer/releases/latest) to any directory on your machine.
+Run the program by opening the file ```YamCR.jar``` with a Java runtime (version 8+). Windows users may use ```run.bat``` instead.
 
-Run the program by opening the file "YamCR.jar" with any recent java runtime.
+The first time the program launches, it will prompt you to select a path to save set and decklist files to. This can be any destination.
 
-The first time the program launches, it will prompt you to select a path to save set and decklist files to. This can be any destination. Keep in mind that the set files can end up being large, so choose a partition with a few gigs to spare.
+The total size of all set files so far is around 1.3 gigabytes at default settings, so choose a destination with some free space.
 
-### Webcam selection
+## Webcam selection
 
-Currently, the YamCR needs to recieve webcam input to function. You will be prompted to choose a webcam device and resolution when the program first launches. The program may
+You will be prompted to choose a webcam device and resolution when the program first launches. The program may
 repeat this prompt if the last used camera cannot be found, but it will attempt to respect your previous selection.
 
-The program also supports "IP" webcams. Configuration for these is specified in the ```ip_cams``` section of the programs config.json file.
+For users without a physical webcam, YamCR provides a simulated webcam input. This isn't especially useful for card recogmition, but it may prove useful for
+using other features of the program.
 
-If features of the program need to be used without a webcam present, the following entry can be inserted into config.json to use a 'Dummy' webcam.
+YamCR also supports IP webcams. Configuration for these is specified in the ```webcam_settings``` -> ```ip_cams``` section of the programs config.json file.
+IP webcams should each be an object in the array and specify ```"push"``` or ```"pull"``` as ```mode```, the video feed url as ```address```, and the display name as
+```name```. A sample entry is shown below.
 
+```json
+...
+"ip_cams": [
+    {
+        "mode": "pull",
+        "address": "https://img.scryfall.com/cards/art_crop/front/9/0/90c7bea0-79c9-4856-8279-cef7cee82fc1.jpg?1562739519",
+        "name": "Sample IP Webcam"
+    }
+],
+...
 ```
-"ip_cams":[{"mode":"pull","address":"https:\/\/img.scryfall.com\/cards\/large\/front\/0\/a\/0a426922-5e96-48f3-b696-f5dc99258943.jpg?1562135149","name":"Sample IP Webcam"}]}}
-```
 
-### Generating sets and decklists
+## Generating Sets,  Custom Sets, and Decks
 
-To recognize cards on the webcam feed, the program must process the features of each card. This process requires an internet connection to [Scryfall's](https://scryfall.com) API, as well as
-a fair amount of processing time.
+To recognize cards on the webcam feed, the program must process the features of each card.
+This process requires an internet connection to [Scryfall's](https://scryfall.com) API,
+as well as a fair amount of processing time. Note that set generation will pause card recognition
+while it runs.
 
-To generate sets, press the "Set Generator" button on the sidebar of the program window. A popup will display, giving a dropdown list of the types of sets
-that should be generated. Once the desired option is selected, press the "Generate Sets" button to begin the set generation process. The window will log its progress.
+To generate sets in bulk, press the ```Bulk Generate Sets``` button on the sidebar of the program window.
+A popup will display, giving a selection of the types of sets
+that should be generated. Once the desired option is selected,
+press the ```OK``` button to begin the set generation process.
+Generation progress is shown at the bottom of the program window.
 
-To generate decklists, press the "Deck Generator" button on the sidebar of the program window. A popup will display, giving an area to paste in a list of card names (one per line), as well as a
-deck name. The decklist supports many of the plaintext formats exported from deckbuilder sets. Once the desired cards are in the text area, the "Generate Deck" button can be used to generate a decklist file.
+To generate custom sets, press the ```Create Custom Set``` button on the sidebar of the program window.
+A popup will display, which provides instructions on generating a custom set from invidual card images.
 
-### Loading sets and decklists
+To generate decklists, press the ```Deck Generator``` button on the sidebar of the program window.
+A popup will display, giving an area to paste in a list of card names (one per line),
+as well as a deck name. The decklist supports many of the plaintext formats exported from deckbuilding websites.
+Once the desired cards are in the text area, the ```Generate Deck``` button can be used to generate a decklist file.
 
-Any sets and decklists can be seen in the settings pane, in the area below the function buttons.
+Note: Set files are generated from copyrighted images, and likely retain that copyright.
+As such, please do not distribute set files.
 
-Sets marked with a red X icon are available to be generated. These can be generated with the 'generate sets' option, or by selecting them in the selection pane and pressing 'generate selected'. 
+## Loading sets and decklists
 
-Sets and decks can be unloaded by pressing the "Unload all" button, unloading all sets at once.
+Any sets, custom sets, and decks can be seen in the settings pane, in the area below the function buttons. The ```Sets``` folder lists printed Magic sets,
+```Decks``` lists generated decks, and ```Custom Sets``` lists custom sets.
 
-Multiple sets can be loaded at once by pressing the "Load Selected" button. This loads the selected set, as well as any sub-sets. For example, using this feature on the "Sets" folder icon will load all sets recursively. Depending on the amount being loaded, this may take some time. Additionally, since recognition time scales as the number of loaded sets increase, this is not a recommended use case at the moment.
+Folders (and sets with sub-sets) can be expanded or collapsed via the "+/-" icon next to the set icon.
 
-### Recognition
+![Status Icons](readmeImages/SetPanel.png)
 
-Card recognition begins automatically when any number of sets or decks are loaded. The area within the white border on the webcam feed is processed. If a matching card is found, its name will display
-in red text on the upper left of the webcam feed. 
+Sets marked with a red X icon are available to be generated. These can be generated by double-clicking the icon.
 
-The recognition area can be moved by clicking and dragging on the corners of the recognition area. For the best results, ensure the larger corner point is located at the top-left of your card area, and the green line is the top edge of the area. Below is an example image:
+Sets marked with a gray icon are generated and can be loaded by double-clicking the icon.
 
-![Example Capture Area](readmeImages/CaptureAreaExample.png)
+Sets marked with a green checkmark icon are loaded and will be matched against during recognition.
+
+Sets and decks can be unloaded by pressing the ```Unload all``` button, unloading all sets at once.
+
+Multiple sets can be loaded at once by pressing the ```Load Selected``` button. This loads the selected set,
+as well as any sub-sets (ex: tokens, promos).
+For example, using this feature on the ```Sets``` folder icon will load all generated sets.
+Depending on the amount being loaded, this may take some time.
+
+Loading all existing sets at once (under default generation settings) should use about 2 gigabytes of memory.
+
+## Recognition
+
+Card recognition begins automatically when any number of sets or decks are loaded.
+
+There are 2 modes for detecting cards in a scene:
+
+* Under the ```Auto-Detect Card Bounds``` mode, YamCR attempts to identify the boundaries of cards in the image automatically. Under default settings, this works best against a solid-colored background.
+
+  * If the ```Subtract Static Background``` option is enabled in the autodetect settings, cards will instead be detected purely on the difference from the background image, which can be set in the same menu. This option is currently experimental.
+
+* The ```Manually Set Bounds``` mode allows manual selection of the recognition area. It can be moved by clicking and dragging on the corners of the polygon.
+For useful results, the bounds must contain the full card and nothing else.
+
+![Detection Examples](readmeImages/CardBounds.png)
+
+There are two modes for matching these detected cards:
+
+* ```Full Scan``` attempts to score all cards using an accurate but slow algorithm. This will become unusably slow after multiple large sets are loaded.
+However, it allows looser card bounds to be recognized accurately.
+
+* ```Perceptual Hash Narrowing``` scores all cards using a fast, less accurate method, before using the above algorithm on the top matches. This allows real-time recognition against all existing Magic cards, but requires accurate
+boundaries before the fast algorithm is reliable. Thus, it is mostly useful only
+under auto-detected bounds.
 
 The sidebar provides some options for refining recognition behavior:
-- The "Only trigger recognition manually" checkbox can be used to disable automatic recognition. Instead, recognition will only be attempted when pressing any keyboard key after clicking the webcam area.
-- The "Score threshold" bar determines how closely a match must "fit" to be accepted as a result. Turning this down will result in more matches, but may increase false positives.
 
-### Other features
+* The ```Only trigger recognition manually``` checkbox can be used to disable automatic recognition. Instead, recognition will only be attempted when pressing any keyboard key after clicking the webcam area.
 
-The "Card Preview" button will create a popup that will display the image of any recognized cards. This is a useful feature for livestreaming paper magic.
+* The ```Score threshold``` slider determines how closely a match must "fit" to be accepted as a result. Turning this down will result in more matches, but may increase false positives.
 
-The "Screen Grab" button allows the user to select an area of their computer screen to attempt recognition on. Click at two opposing corners of a rectangle to set the recognition bounds. This is an experimental feature.
+## Collection Manager
+
+![Collection Manager](readmeImages/CollectionManager.png)
+
+The collection manager provides an interface for managing a collection listing as a csv file.
+
+The left panel shows all cards recognized since launching the program. This list can be cleared
+using the ```Clear``` button.
+
+The right panel shows the current collection, which can be manipulated via the buttons below it. Note that while the program can save from and load to a csv file, the file is not auto-saved. Thus, changes made will be lost unless saved manually.
+
+While the collection manager is intended to have a useful set of features, it is intentionally minimal in its functionality. Suggested enhancements can be submitted via the [Issues Page](https://github.com/ForOhForError/Yet-Another-Magic-Card-Recognizer/issues). Please tag suggestions under ```enhancement```.
+
+## Browser Source
+
+YamCR provides a browser source server to allow paper Magic livestreamers to display card images from within their streaming software.
+
+The ```Browser Source``` button opens a panel for hosting the server. Options are included to set the address and port to bind to. Out of the box, there are 2 pages hosted:
+
+* ```http://<address>:<port>/card-view.html``` shows the detected card image. For convience, a button is provided to copy this address to the clipboard.
+
+* ```http://<address>:<port>/card-controller.html``` is a management panel, allowing drag-and-drop display of other images, as well as clearing the image/override.
+
+The browser source pages are slightly modified versions of [Paul Saunder's Nifty-Recognizer](https://github.com/paul-lrr/nifty-recognizer).
+
+Note: In addition to the listed port, the server binds to an arbitrary port to host the websocket interface.
+
+## Other Functionality
+
+The ```Card Preview``` button will create a popup that will display the image of any recognized cards. This is useful for checking results at a glance.

@@ -251,11 +251,24 @@ public abstract class RecognitionStrategy {
 		try
 		{
 			JSONObject jo = getFileMetadata(f);
-			return (Integer)jo.get("size");
+			return intValue(jo.get("size"));
 		}
 		catch(IOException e)
 		{
 			return -1;
 		}
+	}
+
+	private static int intValue(Object o)
+	{
+		if(o instanceof Long)
+		{
+			return ((Long)o).intValue();
+		}
+		if(o instanceof Integer)
+		{
+			return (Integer)o;
+		}
+		return -1;
 	}
 }
