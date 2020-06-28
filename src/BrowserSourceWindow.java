@@ -41,7 +41,7 @@ class BrowserSourceWindow extends JFrame
         formatter.setAllowsInvalid(false);
         formatter.setCommitsOnValidEdit(true);
         JFormattedTextField portField = new JFormattedTextField(formatter);
-        portField.setValue(((Long)SavedConfig.getProperty("browser_source.port", 7777)).intValue());
+        portField.setValue(SavedConfig.getIntProperty("browser_source.port", 7777));
         d = portField.getPreferredSize();
         d.width = 40;
         portField.setPreferredSize(d);

@@ -168,9 +168,4 @@ class CollectionManagerWindow extends JFrame {
             rightData.addEntry(new CollectionEntry(leftData.get(sel)));
         }
     }
-
-    public static void main(String[] args)
-    {
-        new CollectionManagerWindow().setVisible(true);
-    }
 }

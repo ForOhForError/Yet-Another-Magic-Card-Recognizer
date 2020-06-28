@@ -181,6 +181,24 @@ public class SavedConfig {
 		}
 		return defaultValue;
 	}
+
+	public static Object getIntProperty(String path, int defaultValue)
+	{
+		Object result = getProperty(path, null);
+		if(result == null)
+		{
+			return defaultValue;
+		}
+		else if(result instanceof Long)
+		{
+			return ((Long)result).intValue();
+		}
+		else if(result instanceof Integer)
+		{
+			return ((Integer) result).intValue();
+		}
+		return defaultValue;
+	}
 	
 	public static void writeOut()
 	{
@@ -202,10 +220,14 @@ public class SavedConfig {
 	
 	public static String getCustomSetPath(String folderName, String deckName)
 	{
-		return Paths.get(PATH, folderName,deckName.replace(" ", "_")+".yam").toString();
+		return Paths.get(PATH, folderName,deckName.replace(" ", "_")+"_.yam").toString();
 	}
 	
 	public static String getSetPath(String setCode){
-		return Paths.get(PATH, setCode+".yam").toString();
+		// Why add an underscore to the set code? Well, windows disallows
+		// certain file names from existing with any extension, including
+		// the device name "CON" -- and guess what Conflux's set code is.
+		// Thanks, Windows :|
+		return Paths.get(PATH, setCode+"_.yam").toString();
 	}
 }
