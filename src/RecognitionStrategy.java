@@ -29,6 +29,7 @@ public abstract class RecognitionStrategy {
 	private static JSONParser PARSER = new JSONParser();
 
 	protected String name;
+	private int setSize;
 
 	public void addFromFile(File handle) throws IOException {
 		ZipFile zip = new ZipFile(handle);
@@ -82,6 +83,10 @@ public abstract class RecognitionStrategy {
 		JSONObject top = new JSONObject();
 		top.put("name", this.name);
 		top.put("size", size());
+		// set_size is used purely for checking if a set is outdated during
+		// bulk generation -- the actual size contains multiple entries for
+		// the sides of a multifaced card, for example
+		top.put("set_size", this.setSize);
 		JSONObject dat = new JSONObject();
 		ArrayList<DescContainer> descs = getContainers();
 		for(DescContainer dc:descs)
@@ -202,6 +207,16 @@ public abstract class RecognitionStrategy {
 		return jo;
 	}
 
+	public int getSetSize()
+	{
+		return setSize;
+	}
+
+	public void setSetSize(int size)
+	{
+		setSize = size;
+	}
+
 	public abstract ArrayList<DescContainer> getContainers();
 
 	public abstract void finalizeLoad();
@@ -263,7 +278,7 @@ public abstract class RecognitionStrategy {
 		try
 		{
 			JSONObject jo = getFileMetadata(f);
-			return intValue(jo.get("size"));
+			return intValue(jo.get("set-size"));
 		}
 		catch(IOException e)
 		{
