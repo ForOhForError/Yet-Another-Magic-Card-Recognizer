@@ -84,10 +84,10 @@ public class RecogApp extends JFrame implements KeyListener{
 		settings = new SettingsPanel();
 		right.add(settings, BorderLayout.NORTH);
 		right.add(scroll, BorderLayout.CENTER);
-		right.setPreferredSize(new Dimension(300,canvas.getHeight()));
+		right.setPreferredSize(new Dimension(320,canvas.getHeight()));
 		pack();
 		setVisible(true);
-		setResizable(false);
+		//setResizable(false);
 		try{
 			w.open(true);
 		}catch(WebcamLockException e)

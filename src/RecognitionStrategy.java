@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -126,10 +127,11 @@ public abstract class RecognitionStrategy {
 					try
 					{
 						add(new DescContainer(
-							new ImageDesc(ImageUtil.getScaledImage(i)), 
-							card.getScryfallUUID().toString(), 
-							extractCardMetadata(card),
-							null
+							new ImageDesc(
+								ImageUtil.getScaledImage(i)),
+								UUID.randomUUID().toString(),
+								extractFaceMetadata(card, face),
+								null
 							));
 					}
 					catch(Exception e)
@@ -151,8 +153,8 @@ public abstract class RecognitionStrategy {
 				try
 				{
 					add(new DescContainer(
-							new ImageDesc(ImageUtil.getScaledImage(top_img)), 
-							card.getScryfallUUID().toString(), 
+							new ImageDesc(ImageUtil.getScaledImage(top_img)),
+							UUID.randomUUID().toString(),
 							extractCardMetadata(card),
 							null
 							));
@@ -187,8 +189,18 @@ public abstract class RecognitionStrategy {
 		JSONObject jo = new JSONObject();
 		jo.put("name", card.getName());
 		jo.put("set", card.getSetCode());
+		jo.put("scryfall-id", card.getScryfallUUID().toString());
 		return jo;
-	}  
+	}
+
+	private static JSONObject extractFaceMetadata(Card card, CardFace face)
+	{
+		JSONObject jo = new JSONObject();
+		jo.put("name", face.getName());
+		jo.put("set", card.getSetCode());
+		jo.put("scryfall-id", card.getScryfallUUID().toString());
+		return jo;
+	}
 
 	public abstract ArrayList<DescContainer> getContainers();
 

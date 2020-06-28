@@ -24,7 +24,7 @@ public class MatchResult {
 	public Card getCard()
 	{
 		try {
-			return MTGCardQuery.getCardByScryfallId(result.getID());
+			return MTGCardQuery.getCardByScryfallId(result.getScryfallId());
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;

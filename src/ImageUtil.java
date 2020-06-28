@@ -93,7 +93,7 @@ public class ImageUtil {
 		if(i == null)
 		{
 			try {
-				Card card = MTGCardQuery.getCardByScryfallId(dc.getID());
+				Card card = MTGCardQuery.getCardByScryfallId(dc.getScryfallId());
 				if(card.isMultifaced())
 				{
 					for(CardFace face:card.getCardFaces())

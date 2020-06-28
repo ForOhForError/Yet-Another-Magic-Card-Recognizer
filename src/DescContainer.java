@@ -37,6 +37,11 @@ public class DescContainer implements Comparable<DescContainer>{
 		return id;
 	}
 
+	public String getScryfallId()
+	{
+		return JSONUtil.getStringData(jsonData,"scryfall-id");
+	}
+
 	public String getName()
 	{
 		return JSONUtil.getStringData(jsonData,"name");
