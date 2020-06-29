@@ -278,7 +278,7 @@ public abstract class RecognitionStrategy {
 		try
 		{
 			JSONObject jo = getFileMetadata(f);
-			return intValue(jo.get("set-size"));
+			return intValue(jo.get("set_size"));
 		}
 		catch(IOException e)
 		{
