@@ -24,7 +24,10 @@ class CollectionEntry
     public CollectionEntry(MatchResult res)
     {
         backingCard = null;
-        this.scry_id = UUID.fromString(res.getData().getScryfallId());
+        String scryfallId = res.getData().getScryfallId();
+        if(scryfallId != null) {
+            this.scry_id = UUID.fromString(res.getData().getScryfallId());
+        }
         this.name = res.getName();
         this.setCode = res.set();
         this.isFoil = false;
@@ -34,7 +37,14 @@ class CollectionEntry
     public CollectionEntry(String scryID, String name, String setCode, boolean isFoil, int count)
     {
         backingCard = null;
-        this.scry_id = UUID.fromString(scryID);
+        try
+        {
+            this.scry_id = UUID.fromString(scryID);
+        }
+        catch (IllegalArgumentException e)
+        {
+            this.scry_id = null;
+        }
         this.name = name;
         this.setCode = setCode;
         this.isFoil = isFoil;
@@ -49,6 +59,20 @@ class CollectionEntry
         this.setCode = e.setCode;
         this.isFoil = e.isFoil;
         this.count = 1;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if(obj instanceof CollectionEntry)
+        {
+            CollectionEntry e = (CollectionEntry) obj;
+            if(this.scry_id != null && e.getId() != null)
+            {
+                return this.scry_id.equals(e.getId()) && this.isFoil() == e.isFoil();
+            }
+            return this.name.equals(e.getName()) && this.isFoil() == e.isFoil();
+        }
+        return false;
     }
 
     public UUID getId()
@@ -86,11 +110,20 @@ class CollectionEntry
         count = i;
     }
 
+    public String getIdString()
+    {
+        if(scry_id != null)
+        {
+            return scry_id.toString();
+        }
+        return "";
+    }
+
     public String toTSV()
     {
         return String.format(
-            "%s\t%s\t%s\t%s\t%s", 
-            scry_id.toString(), 
+            "%s\t%s\t%s\t%s\t%s",
+            getIdString(),
             name,
             setCode,
             ""+isFoil,
@@ -100,7 +133,7 @@ class CollectionEntry
 
     public static CollectionEntry fromTSV(String s)
     {
-        String[] cells = s.trim().split("\t");
+        String[] cells = s.replaceAll("[\n\r]$", "").split("\t");
         return new CollectionEntry(
             cells[0],
             cells[1],

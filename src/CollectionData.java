@@ -29,7 +29,7 @@ class CollectionData extends DefaultTableModel {
 
     public void addEntry(CollectionEntry ent) {
         for (CollectionEntry e : data) {
-            if (e.getId().equals(ent.getId()) && e.isFoil() == ent.isFoil()) {
+            if (e.equals(ent)) {
                 e.setCount(e.getCount() + ent.getCount());
                 fireTableDataChanged();
                 return;
