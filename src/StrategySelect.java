@@ -14,6 +14,7 @@ class StrategySelect
         areaStrats = new ArrayList<AreaRecognitionStrategy>(2);
         registerAreaStrategy(new ManualAreaStrat());
         registerAreaStrategy(new AutoDetectAreaStrat());
+        registerAreaStrategy(new RadiusAreaStrat());
     }
 
     public static void registerStrategy(RecognitionStrategy strat) 
