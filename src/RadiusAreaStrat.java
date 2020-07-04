@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import java.util.List;
 
-import boofcv.abst.feature.detect.line.DetectLine;
 import boofcv.abst.feature.detect.line.DetectLineSegment;
 import boofcv.abst.feature.detect.line.DetectLineSegmentsGridRansac;
 import boofcv.abst.filter.derivative.ImageGradient;
@@ -13,17 +12,12 @@ import boofcv.alg.feature.detect.line.ConnectLinesGrid;
 import boofcv.alg.feature.detect.line.GridRansacLineDetector;
 import boofcv.alg.feature.detect.line.gridline.*;
 import boofcv.alg.filter.blur.GBlurImageOps;
-import boofcv.factory.feature.detect.line.ConfigHoughGradient;
 import boofcv.factory.feature.detect.line.ConfigLineRansac;
-import boofcv.factory.feature.detect.line.FactoryDetectLine;
 import boofcv.factory.filter.derivative.FactoryDerivative;
 import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.GrayS16;
 import boofcv.struct.image.GrayU8;
-import boofcv.struct.image.ImageGray;
 import georegression.fitting.line.ModelManagerLinePolar2D_F32;
-import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.line.LinePolar2D_F32;
 import georegression.struct.line.LineSegment2D_F32;
 import georegression.struct.point.Point2D_F32;
