@@ -44,6 +44,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
     private DetectLineSegment<GrayU8> detector;
 
     private Point2D_I32[] points = new Point2D_I32[2];
+    private int offx, offy = 0;
     private ContourBoundingBox bound;
     private int draggingPoint = -1;
     private int width;
@@ -235,6 +236,11 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
             if(Math.abs(p.x-pt.x)<=3 && Math.abs(p.y-pt.y)<=3)
             {
                 draggingPoint = i;
+                if(i == 0)
+                {
+                    offx = points[1].x-points[0].x;
+                    offy = points[1].y-points[0].y;
+                }
                 return;
             }
         }
@@ -267,6 +273,11 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
             if(p.y >= 0 && p.y <= this.height)
             {
                 points[draggingPoint].y = p.y;
+            }
+            if(draggingPoint == 0)
+            {
+                points[1].x = points[0].x + offx;
+                points[1].y = points[0].y + offy;
             }
         }
         updateCircle();
