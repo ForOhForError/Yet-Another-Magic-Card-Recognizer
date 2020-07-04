@@ -50,13 +50,13 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
     private int width;
     private int height;
 
-    private ArrayList<Point2D_I32> inters = new ArrayList<>();
-
+    private ArrayList<ContourBoundingBox> candidates = new ArrayList<>();
     private ArrayList<MatchResult> result = new ArrayList<>();
 
     @Override
     public ArrayList<MatchResult> recognize(BufferedImage in, RecognitionStrategy strat) {
         result.clear();
+        candidates.clear();
         if(draggingPoint == -1) {
             // convert the line into a single band image
             GrayU8 input = ConvertBufferedImage.convertFromSingle(in, null, GrayU8.class);
@@ -73,6 +73,16 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
 
             found = detector.detect(blurred);
             processSegments(strat);
+
+            for (ContourBoundingBox bound : candidates) {
+                BufferedImage norm = ImageUtil.getScaledImage(bound.getTransformedImage(in,false));
+                BufferedImage flip = ImageUtil.getScaledImage(bound.getTransformedImage(in,true));
+                ImageDesc i = new ImageDesc(norm,flip);
+                MatchResult mr = strat.getMatch(i, SettingsPanel.RECOG_THRESH/100.0);
+                if (mr != null) {
+                    result.add(mr);
+                }
+            }
         }
         return result;
     }
@@ -90,25 +100,31 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
             }
         }
 
+        doAngleHistogram();
+    }
+
+    private double getAngle(LineSegment2D_F32 segment)
+    {
+        double angle = Math.toDegrees(Math.atan2(segment.slopeY(),segment.slopeX()));
+        if(angle < 0)
+        {
+            angle = angle+360;
+        }
+        return angle;
+    }
+
+    public void doAngleHistogram()
+    {
         ArrayList<Double> angles = new ArrayList<>(found.size());
         for(LineSegment2D_F32 segment:found)
         {
-            double angle = Math.toDegrees(Math.atan2(segment.slopeY(),segment.slopeX()));
-            if(angle < 0)
-            {
-                angle = angle+180;
-            }
-            angles.add(angle%180);
+            angles.add(getAngle(segment));
         }
-        doAngleHistogram(angles);
-    }
-
-    public void doAngleHistogram(List<Double> angles)
-    {
         int[] count = new int[36];
         for(double a:angles)
         {
-            int i = (int)(a+2.5)%5;
+            double angle = (a+2.5)%180;
+            int i = (int)(angle)/5;
             count[i] += 1;
         }
         int max = 0;
@@ -121,7 +137,86 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
                 maxix = i;
             }
         }
-        System.out.println(maxix*5);
+        if(maxix!=-1) {
+            int correspix = (maxix+18)%36;
+            if(count[maxix]>=2 && count[correspix] >= 2) {
+                int ix=0;
+                ArrayList<LineSegment2D_F32> seg1 = new ArrayList<>(count[maxix]);
+                ArrayList<LineSegment2D_F32> seg2 = new ArrayList<>(count[correspix]);
+                while(ix<found.size())
+                {
+                    double a = angles.get(ix);
+                    double angle = (a+2.5)%180;
+                    int i = (int)(angle)/5;
+                    if(i == maxix)
+                    {
+                        seg1.add(found.get(ix));
+                        ix++;
+                    }
+                    else if(i == correspix)
+                    {
+                        seg2.add(found.get(ix));
+                        ix++;
+                    }
+                    else
+                    {
+                        found.remove(ix);
+                        angles.remove(ix);
+                    }
+                }
+                doConnectSegments(seg1,seg2);
+            }
+        }
+    }
+
+    private void doConnectSegments(List<LineSegment2D_F32> seg1, List<LineSegment2D_F32> seg2)
+    {
+        ArrayList<Point2D_I32> corners = new ArrayList<>(4);
+        LineSegment2D_F32 start = seg1.remove(0);
+        LineSegment2D_F32 currentSegment = start;
+        Point2D_F32 currentPoint = currentSegment.a;
+        boolean parallelToStart = true;
+        for(;;)
+        {
+            System.out.println(corners.size());
+            System.out.println(seg1.size()+" "+seg2.size());
+            List<LineSegment2D_F32> samples = parallelToStart ? seg2 : seg1;
+            double minDist = Double.POSITIVE_INFINITY;
+            LineSegment2D_F32 next = null;
+            Point2D_F32 nextPoint = null;
+
+            if(corners.size() < 3) {
+                for (LineSegment2D_F32 seg : samples) {
+                    double distA, distB;
+                    distA = seg.a.distance(currentPoint);
+                    distB = seg.b.distance(currentPoint);
+                    if (distA < minDist) {
+                        minDist = distA;
+                        next = seg;
+                        nextPoint = seg.b;
+                    }
+                    if (distB < minDist) {
+                        minDist = distB;
+                        next = seg;
+                        nextPoint = seg.a;
+                    }
+                }
+            }
+            else
+            {
+                next = start;
+            }
+            corners.add(extrapolateAndCollide(currentSegment,next));
+            if(corners.size() == 4)
+            {
+                candidates.add(new ContourBoundingBox(corners));
+                return;
+            }
+            samples.remove(next);
+            currentSegment = next;
+            currentPoint = nextPoint;
+            parallelToStart = !parallelToStart;
+        }
     }
 
     private boolean isInRadius(LineSegment2D_F32 line)
@@ -141,22 +236,20 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
         return "Radius Recognition";
     }
 
-    Point2D_F32 collide(LineParametric2D_F32 l1, LineParametric2D_F32 l2, float low, float high)
+    /**
+     * Extrapolate 2 line segments, and get their collision point, or null
+     * if the segments are perfectly parallel
+     */
+    Point2D_I32 extrapolateAndCollide(LineSegment2D_F32 s1, LineSegment2D_F32 s2)
     {
         float m1, b1, m2, b2;
         double a1, a2;
-        m1 = l1.slope.y / l1.slope.x;
-        b1 = l1.p.y - (l1.p.x * m1);
-        a1 = Math.atan2(l1.slope.y, l1.slope.x);
-        m2 = l2.slope.y / l2.slope.x;
-        b2 = l2.p.y - (l2.p.x * m2);
-        a2 = Math.atan2(l2.slope.y, l2.slope.x);
 
-        double diff = Math.abs(a1-a2)%Math.PI;
-        if(diff<low || diff>high)
-        {
-            return null;
-        }
+        m1 = s1.slopeY() / s1.slopeX();
+        b1 = s1.a.y - (s1.a.x * m1);
+
+        m2 = s2.slopeY() / s2.slopeX();
+        b2 = s2.a.y - (s2.a.x * m2);
 
         if (m1 == m2)
         {
@@ -165,7 +258,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
 
         float x = (b2 - b1) / (m1 - m2);
         float y = m1 * x + b1;
-        return new Point2D_F32(x,y);
+        return new Point2D_I32((int)x, (int)y);
     }
 
     @Override
@@ -194,6 +287,12 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
         for(LineSegment2D_F32 line : found)
         {
             g.drawLine((int)line.a.x, (int)line.a.y, (int)line.b.x, (int)line.b.y);
+            g.drawString((int)getAngle(line)+"",(int)line.a.x,(int)line.a.y);
+        }
+
+        for(ContourBoundingBox bound : candidates)
+        {
+            bound.draw(g);
         }
     }
 
@@ -203,7 +302,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
         center.y = points[0].y;
         radius = points[0].distance(points[1]);
         config.connectLines = true;
-        config.regionSize = (int) (radius/2);
+        config.regionSize = (int) (radius/3);
         config.thresholdAngle = 0.5;
         config.thresholdEdge = 50;
         configChanged = true;
@@ -225,40 +324,29 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
     public void mousePressed(MouseEvent e) {
         Point p = e.getPoint();
-        for(int i=0;i<points.length;i++){
-            Point2D_I32 pt = points[i];
-            if(Math.abs(p.x-pt.x)<=3 && Math.abs(p.y-pt.y)<=3)
-            {
-                draggingPoint = i;
-                if(i == 0)
-                {
-                    offx = points[1].x-points[0].x;
-                    offy = points[1].y-points[0].y;
-                }
-                return;
-            }
+        double dist = p.distance(points[0].x,points[0].y);
+        System.out.println(dist-radius);
+        if(Math.abs(radius-dist) <= 3)
+        {
+            draggingPoint = 1;
+            return;
+        }
+
+        dist = p.distance(points[0].x,points[0].y);
+        if(dist<=3)
+        {
+            draggingPoint = 0;
+            offx = points[1].x-points[0].x;
+            offy = points[1].y-points[0].y;
+            return;
         }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
         draggingPoint = -1;
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
     }
 
     @Override
@@ -288,6 +376,25 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
 
     }
 
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    /**
+     * Derived from the BoofCV factory source code, but exposes
+     * the RANSAC iterations and the max lines per grid region
+     */
     private DetectLineSegmentsGridRansac<GrayU8,GrayS16> lineRansac(ConfigLineRansac config, int maxIter, int maxLines) {
 
         if( config == null )
