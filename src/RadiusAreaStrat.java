@@ -3,6 +3,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import java.util.Collections;
 import java.util.List;
 
 import boofcv.abst.feature.detect.line.DetectLineSegment;
@@ -29,9 +30,16 @@ import org.ddogleg.fitting.modelset.ransac.Ransac;
 public class RadiusAreaStrat extends AreaRecognitionStrategy{
 
     static final int maxLines = 10;
+    static final int collateFrames = 10;
+
     private Point2D_F32 center = new Point2D_F32(320,240);
     private double radius = 200;
+
+    private List<List<LineSegment2D_F32>> segments = new ArrayList<>(3);
     private List<LineSegment2D_F32> found = new ArrayList<>();
+
+    private List<Point2D_F32> visPoints = new ArrayList<>();
+
 
     private boolean configChanged = true;
     private ConfigLineRansac config = new ConfigLineRansac();
@@ -47,10 +55,21 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
     private ArrayList<ContourBoundingBox> candidates = new ArrayList<>();
     private ArrayList<MatchResult> result = new ArrayList<>();
 
+    public RadiusAreaStrat()
+    {
+        for(int i=0;i<collateFrames;i++)
+        {
+            segments.add(new ArrayList<>());
+        }
+    }
+
     @Override
     public ArrayList<MatchResult> recognize(BufferedImage in, RecognitionStrategy strat) {
         result.clear();
         candidates.clear();
+        List<LineSegment2D_F32> frameSegments = segments.remove(collateFrames-1);
+        frameSegments.clear();
+        segments.add(0,frameSegments);
         if(draggingPoint == -1) {
             // convert the line into a single band image
             GrayU8 input = ConvertBufferedImage.convertFromSingle(in, null, GrayU8.class);
@@ -61,11 +80,10 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
             GBlurImageOps.gaussian(input, blurred, 0, blurRad, null);
 
             if(configChanged) {
-                detector = this.lineRansac(config, 600, 1);
+                detector = this.lineRansac(config, 60, 2);
                 configChanged = false;
             }
-
-            found = detector.detect(blurred);
+            frameSegments.addAll(detector.detect(blurred));
             processSegments(strat);
 
             for (ContourBoundingBox bound : candidates) {
@@ -83,11 +101,16 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
 
     private void processSegments(RecognitionStrategy strat)
     {
+        found.clear();
+        for(List<LineSegment2D_F32> frameSegments:segments)
+        {
+            found.addAll(frameSegments);
+        }
         //eliminate segments outside of the recognition area
         int i = 0;
         while (i < found.size()) {
             LineSegment2D_F32 line = found.get(i);
-            if (!isInRadius(line)) {
+            if (!isGoodSegment(line)) {
                 found.remove(i);
             } else {
                 i++;
@@ -137,6 +160,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
                 int ix=0;
                 ArrayList<LineSegment2D_F32> seg1 = new ArrayList<>(count[maxix]);
                 ArrayList<LineSegment2D_F32> seg2 = new ArrayList<>(count[correspix]);
+                float trueAngle = 0;
                 while(ix<found.size())
                 {
                     double a = angles.get(ix);
@@ -145,6 +169,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
                     if(i == maxix)
                     {
                         seg1.add(found.get(ix));
+                        trueAngle += Math.toRadians(a);
                         ix++;
                     }
                     else if(i == correspix)
@@ -158,66 +183,120 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
                         angles.remove(ix);
                     }
                 }
-                doConnectSegments(seg1,seg2);
+                doCollateLines(seg1,seg2,trueAngle/seg1.size());
             }
         }
     }
 
-    private void doConnectSegments(List<LineSegment2D_F32> seg1, List<LineSegment2D_F32> seg2)
+    @SuppressWarnings("unchecked")
+    private void doCollateLines(List<LineSegment2D_F32> seg1, List<LineSegment2D_F32> seg2, double rad)
     {
-        ArrayList<Point2D_I32> corners = new ArrayList<>(4);
-        LineSegment2D_F32 start = seg1.remove(0);
-        LineSegment2D_F32 currentSegment = start;
-        Point2D_F32 currentPoint = currentSegment.a;
-        boolean parallelToStart = true;
-        for(;;)
-        {
-            System.out.println(corners.size());
-            System.out.println(seg1.size()+" "+seg2.size());
-            List<LineSegment2D_F32> samples = parallelToStart ? seg2 : seg1;
-            double minDist = Double.POSITIVE_INFINITY;
-            LineSegment2D_F32 next = null;
-            Point2D_F32 nextPoint = null;
+        LineSegment2D_F32[] tangents = new LineSegment2D_F32[4];
+        List<PointCluster>[] intersects = new List[4];
+        List<LineSegment2D_F32>[] segs = new List[] {seg1,seg2};
+        LineSegment2D_F32[] foundLines = new LineSegment2D_F32[4];
 
-            if(corners.size() < 3) {
-                for (LineSegment2D_F32 seg : samples) {
-                    double distA, distB;
-                    distA = seg.a.distance(currentPoint);
-                    distB = seg.b.distance(currentPoint);
-                    if (distA < minDist) {
-                        minDist = distA;
-                        next = seg;
-                        nextPoint = seg.b;
+        float thresh = (float)(radius/5);
+
+        // Init tangent lines
+        for(int i=0;i<4;i++)
+        {
+            intersects[i] = new ArrayList<>();
+            Point2D_F32 a, b;
+            double ax = radius*Math.cos(rad)+center.x;
+            double ay = radius*Math.sin(rad)+center.y;
+            rad += Math.PI/2;
+            double bx = ax+100*Math.cos(rad);
+            double by = ay+100*Math.sin(rad);
+            a = new Point2D_F32((float)ax,(float)ay);
+            b = new Point2D_F32((float)bx,(float)by);
+            tangents[i] = new LineSegment2D_F32(a,b);
+        }
+
+        // For the two sets of segments, intersect with each tangent line,
+        // and cluster intersection points based on radius
+        for(int i=0;i<2;i++)
+        {
+            List<LineSegment2D_F32> samples = segs[i];
+            for(int j=0;j<2;j++)
+            {
+                int ix = i+(2*j);
+                LineSegment2D_F32 tan = tangents[ix];
+
+                // Add to cluster, or create a new cluster
+                for(LineSegment2D_F32 s : samples)
+                {
+                    Point2D_F32 inter = extrapolateAndCollide(tan,s);
+                    float len = s.getLength();
+                    List<PointCluster> inters = intersects[ix];
+                    boolean matched = false;
+                    for(PointCluster cluster:inters)
+                    {
+                        if (cluster.testAndAdd(inter, len, thresh)) {
+                            matched = true;
+                            break;
+                        }
                     }
-                    if (distB < minDist) {
-                        minDist = distB;
-                        next = seg;
-                        nextPoint = seg.a;
+                    if(!matched)
+                    {
+                        inters.add(new PointCluster(inter,len));
                     }
                 }
             }
+
+            // Sort clusters by total segment length contained
+            Collections.sort(intersects[i]);
+            Collections.sort(intersects[i+2]);
+
+            // If there are 2 or more points on each side, match the top
+            // 2 of each side into 2 line segments
+            if(intersects[i].size() >= 2 && intersects[i+2].size() >= 2)
+            {
+                Point2D_F32 a1,a2,b1,b2;
+                a1 = intersects[i].get(0).getPoint();
+                b1 = intersects[i].get(1).getPoint();
+                a2 = intersects[i+2].get(0).getPoint();
+                b2 = intersects[i+2].get(1).getPoint();
+                if(a1.distance(a2) > a1.distance(b2))
+                {
+                    Point2D_F32 temp = a2;
+                    a2 = b2;
+                    b2 = temp;
+                }
+                foundLines[i] = new LineSegment2D_F32(a1,a2);
+                foundLines[i+2] = new LineSegment2D_F32(b1,b2);
+            }
             else
             {
-                next = start;
-            }
-            corners.add(extrapolateAndCollide(currentSegment,next));
-            if(corners.size() == 4)
-            {
-                candidates.add(new ContourBoundingBox(corners));
                 return;
             }
-            samples.remove(next);
-            currentSegment = next;
-            currentPoint = nextPoint;
-            parallelToStart = !parallelToStart;
         }
+        List<Point2D_I32> corners = new ArrayList<>();
+        for(int i=0;i<4;i++)
+        {
+            LineSegment2D_F32 l1,l2;
+            l1 = foundLines[i];
+            l2 = foundLines[(i+1)%4];
+            Point2D_F32 corner = extrapolateAndCollide(l1,l2);
+            corners.add(new Point2D_I32((int)corner.x,(int)corner.y));
+        }
+        candidates.add(new ContourBoundingBox(corners));
     }
 
-    private boolean isInRadius(LineSegment2D_F32 line)
+    private boolean isGoodSegment(LineSegment2D_F32 segment)
     {
         double effectiveRadius = radius*1.1;
-        return line.a.distance(center)<=effectiveRadius &&
-                line.b.distance(center)<=effectiveRadius;
+        boolean inRadius = segment.a.distance(center)<=effectiveRadius &&
+                segment.b.distance(center)<=effectiveRadius;
+        double perp = Math.toRadians(getAngle(segment)+90);
+        Point2D_F32 out = new Point2D_F32(
+                (float)(center.x + Math.cos(perp)),
+                (float)(center.y + Math.sin(perp))
+        );
+        Point2D_F32 inter = extrapolateAndCollide(segment, new LineSegment2D_F32(center, out));
+        boolean farEnough = inter.distance(center) >= radius/3;
+
+        return inRadius && farEnough;
     }
 
     @Override
@@ -234,7 +313,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
      * Extrapolate 2 line segments, and get their collision point, or null
      * if the segments are perfectly parallel
      */
-    Point2D_I32 extrapolateAndCollide(LineSegment2D_F32 s1, LineSegment2D_F32 s2)
+    Point2D_F32 extrapolateAndCollide(LineSegment2D_F32 s1, LineSegment2D_F32 s2)
     {
         float m1, b1, m2, b2;
         double a1, a2;
@@ -252,7 +331,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
 
         float x = (b2 - b1) / (m1 - m2);
         float y = m1 * x + b1;
-        return new Point2D_I32((int)x, (int)y);
+        return new Point2D_F32(x, y);
     }
 
     @Override
@@ -278,10 +357,17 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
         }
         g.drawOval((int)(center.x-radius),(int)(center.y-radius),(int)(radius*2),(int)(radius*2));
 
+        /**
         for(LineSegment2D_F32 line : found)
         {
             g.drawLine((int)line.a.x, (int)line.a.y, (int)line.b.x, (int)line.b.y);
             g.drawString((int)getAngle(line)+"",(int)line.a.x,(int)line.a.y);
+        }
+         */
+
+        for(Point2D_F32 p : visPoints)
+        {
+            g.fillOval((int)p.x-3, (int)p.y-3, 7, 7);
         }
 
         for(ContourBoundingBox bound : candidates)
@@ -334,6 +420,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
             draggingPoint = 0;
             offx = points[1].x-points[0].x;
             offy = points[1].y-points[0].y;
+            found.clear();
             return;
         }
     }
