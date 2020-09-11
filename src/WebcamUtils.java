@@ -131,22 +131,34 @@ public class WebcamUtils {
 		for(Object o:jarr.toArray())
 		{
 			JSONObject entry = (JSONObject)o;
-			registerIPCam(JSONUtil.getStringData(entry, "name"),JSONUtil.getStringData(entry, "address"),JSONUtil.getStringData(entry, "mode"));
+			registerIPCam(
+					JSONUtil.getStringData(entry, "name"),
+					JSONUtil.getStringData(entry, "address"),
+					JSONUtil.getStringData(entry, "mode"),
+					JSONUtil.getIntData(entry,"width"),
+					JSONUtil.getIntData(entry,"height")
+			);
 		}
 		
 	}
 	
-	public static boolean registerIPCam(String name, String address, String mode)
+	public static boolean registerIPCam(String name, String address, String mode, int w, int h)
 	{
 		try {
+			IpCamDevice dev;
 			if(mode!=null && mode.equalsIgnoreCase("push"))
 			{
-				IpCamDeviceRegistry.register(new IpCamDevice(name,address,IpCamMode.PUSH));
+				dev = new IpCamDevice(name,address,IpCamMode.PUSH);
 			}
 			else
 			{
-				IpCamDeviceRegistry.register(new IpCamDevice(name,address,IpCamMode.PULL));
+				dev = new IpCamDevice(name,address,IpCamMode.PULL);
 			}
+			for(Dimension d:dev.getResolutions()){
+				System.out.println(d);
+			}
+			dev.setResolution(new Dimension(w,h));
+			IpCamDeviceRegistry.register(dev);
 			return true;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

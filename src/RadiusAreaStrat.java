@@ -32,6 +32,9 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
     static final int maxLines = 10;
     static final int collateFrames = 10;
 
+    static final int BUCKET_ANGLE = 3;
+    static final int NUM_BUCKETS = 180/BUCKET_ANGLE;
+
     private Point2D_F32 center = new Point2D_F32(320,240);
     private double radius = 200;
 
@@ -133,20 +136,22 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
     public void doAngleHistogram()
     {
         ArrayList<Double> angles = new ArrayList<>(found.size());
+        final int HALF_BUCKETS = NUM_BUCKETS/2;
+        final double HALF_ANGLE = BUCKET_ANGLE/2.0;
         for(LineSegment2D_F32 segment:found)
         {
             angles.add(getAngle(segment));
         }
-        int[] count = new int[36];
+        int[] count = new int[NUM_BUCKETS];
         for(double a:angles)
         {
-            double angle = (a+2.5)%180;
-            int i = (int)(angle)/5;
+            double angle = (a+HALF_ANGLE)%180;
+            int i = (int)(angle)/BUCKET_ANGLE;
             count[i] += 1;
         }
         int max = 0;
         int maxix = -1;
-        for(int i=0;i<36;i++)
+        for(int i=0;i<NUM_BUCKETS;i++)
         {
             if(count[i]>max)
             {
@@ -155,7 +160,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
             }
         }
         if(maxix!=-1) {
-            int correspix = (maxix+18)%36;
+            int correspix = (maxix+HALF_BUCKETS)%NUM_BUCKETS;
             if(count[maxix]>=2 && count[correspix] >= 2) {
                 int ix=0;
                 ArrayList<LineSegment2D_F32> seg1 = new ArrayList<>(count[maxix]);
@@ -164,8 +169,8 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
                 while(ix<found.size())
                 {
                     double a = angles.get(ix);
-                    double angle = (a+2.5)%180;
-                    int i = (int)(angle)/5;
+                    double angle = (a+HALF_ANGLE)%180;
+                    int i = (int)(angle)/BUCKET_ANGLE;
                     if(i == maxix)
                     {
                         seg1.add(found.get(ix));
@@ -294,7 +299,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
                 (float)(center.y + Math.sin(perp))
         );
         Point2D_F32 inter = extrapolateAndCollide(segment, new LineSegment2D_F32(center, out));
-        boolean farEnough = inter.distance(center) >= radius/3;
+        boolean farEnough = inter.distance(center) >= radius/4;
 
         return inRadius && farEnough;
     }
@@ -357,13 +362,14 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
         }
         g.drawOval((int)(center.x-radius),(int)(center.y-radius),(int)(radius*2),(int)(radius*2));
 
-        /**
-        for(LineSegment2D_F32 line : found)
-        {
-            g.drawLine((int)line.a.x, (int)line.a.y, (int)line.b.x, (int)line.b.y);
-            g.drawString((int)getAngle(line)+"",(int)line.a.x,(int)line.a.y);
+        if(SavedConfig.DEBUG) {
+            g.setColor(Color.BLUE);
+            for (LineSegment2D_F32 line : found) {
+                g.drawLine((int) line.a.x, (int) line.a.y, (int) line.b.x, (int) line.b.y);
+                //g.drawString((int) getAngle(line) + "", (int) line.a.x, (int) line.a.y);
+            }
         }
-         */
+
 
         for(Point2D_F32 p : visPoints)
         {
@@ -382,9 +388,9 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
         center.y = points[0].y;
         radius = points[0].distance(points[1]);
         config.connectLines = true;
-        config.regionSize = (int) (radius/3);
-        config.thresholdAngle = 0.5;
-        config.thresholdEdge = 50;
+        config.regionSize = (int) (radius/4);
+        config.thresholdAngle = 0.16;
+        config.thresholdEdge = 10;
         configChanged = true;
     }
 
@@ -407,7 +413,6 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
     public void mousePressed(MouseEvent e) {
         Point p = e.getPoint();
         double dist = p.distance(points[0].x,points[0].y);
-        System.out.println(dist-radius);
         if(Math.abs(radius-dist) <= 3)
         {
             draggingPoint = 1;
@@ -459,12 +464,10 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
     }
 
     @Override
@@ -488,7 +491,7 @@ public class RadiusAreaStrat extends AreaRecognitionStrategy{
         GridLineModelFitter fitter = new GridLineModelFitter((float)config.thresholdAngle);
 
         ModelMatcher<LinePolar2D_F32, Edgel> matcher =
-                new Ransac<>(123123, manager, fitter, distance, maxIter, 1);
+                new Ransac<>(123123, manager, fitter, distance, maxIter, 0.25);
 
         GridRansacLineDetector<GrayS16> alg =
                 (GridRansacLineDetector)new ImplGridRansacLineDetector_S16(config.regionSize,maxLines,matcher);
