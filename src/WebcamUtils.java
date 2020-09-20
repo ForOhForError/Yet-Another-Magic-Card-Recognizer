@@ -154,9 +154,6 @@ public class WebcamUtils {
 			{
 				dev = new IpCamDevice(name,address,IpCamMode.PULL);
 			}
-			for(Dimension d:dev.getResolutions()){
-				System.out.println(d);
-			}
 			dev.setResolution(new Dimension(w,h));
 			IpCamDeviceRegistry.register(dev);
 			return true;
