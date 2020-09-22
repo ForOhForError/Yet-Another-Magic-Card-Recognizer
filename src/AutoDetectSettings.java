@@ -1,11 +1,6 @@
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-
-import java.awt.Dimension;
+import java.awt.*;
 
 class AutoDetectSettings implements SettingsEntry
 {
@@ -24,24 +19,25 @@ class AutoDetectSettings implements SettingsEntry
 
         remBG = new JCheckBox("Subtract Static Background (Experimental)");
         remBG.setToolTipText(
-            "Detect cards based on difference from a static background. "+
-            "Use if you have a static, textured background with stable lighting "+
-            "and a stable camera position."
+                "Detect cards based on difference from a static background. " +
+                        "Use if you have a static, textured background with stable lighting " +
+                        "and a stable camera position."
         );
 
         JButton resetBackground = new JButton("Update Static Background");
-		resetBackground.addActionListener(
-			e -> RecogApp.INSTANCE.doSetBackground()
-		);
-		p.add(resetBackground);
+        resetBackground.addActionListener(
+                e -> RecogApp.INSTANCE.doSetBackground()
+        );
+        p.add(resetBackground);
 
         JButton bSave = new JButton("Save");
 
         bSave.addActionListener(
-            e -> {
-                save();
-                frame.setVisible(false);
-            }
+                e ->
+                {
+                    save();
+                    frame.setVisible(false);
+                }
         );
 
         p.add(remBG);
@@ -55,20 +51,23 @@ class AutoDetectSettings implements SettingsEntry
     }
 
     @Override
-    public void init() {
-        removeBG = (Boolean)SavedConfig.getProperty("autodetect.remove_background", false);
+    public void init()
+    {
+        removeBG = (Boolean) SavedConfig.getProperty("autodetect.remove_background", false);
         remBG.setSelected(removeBG);
     }
 
     @Override
-    public void save() {
+    public void save()
+    {
         removeBG = remBG.isSelected();
         SavedConfig.putProperty("autodetect.remove_background", removeBG);
         SavedConfig.writeOut();
     }
 
     @Override
-    public void showSettingsWindow() {
+    public void showSettingsWindow()
+    {
         init();
         frame.setVisible(false);
         frame.setVisible(true);
@@ -78,5 +77,5 @@ class AutoDetectSettings implements SettingsEntry
     {
         return removeBG;
     }
-    
+
 }

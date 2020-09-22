@@ -1,39 +1,29 @@
+import com.corundumstudio.socketio.*;
+import com.corundumstudio.socketio.listener.DataListener;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoHTTPD.Response.Status;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
-
-import com.corundumstudio.socketio.AckRequest;
-import com.corundumstudio.socketio.Configuration;
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.SocketIOServer;
-import com.corundumstudio.socketio.Transport;
-import com.corundumstudio.socketio.listener.DataListener;
-
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoHTTPD.Response.Status;
-
-public class BrowserSourceServer {
+public class BrowserSourceServer
+{
 
     private HttpServer httpServer;
     private SocketIOServer socketServer;
-    private boolean isUp=false;
+    private boolean isUp = false;
     private String address;
     private int webPort;
 
     public void update(DescContainer dc, boolean auto)
     {
-        if(isUp)
+        if (isUp)
         {
             String imageUrl = String.format("http://%s:%d/card-image?id=%s", address, webPort, dc.getID());
             CardImageMessage msg = new CardImageMessage();
@@ -45,22 +35,24 @@ public class BrowserSourceServer {
 
     public boolean start(String address, int webPort)
     {
-        if(!isUp)
+        if (!isUp)
         {
             this.address = address;
             this.webPort = webPort;
             int socketPort = -1;
 
-            try {
+            try
+            {
                 ServerSocket s = new ServerSocket(0);
                 socketPort = s.getLocalPort();
                 s.close();
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 return false;
             }
 
             httpServer = new HttpServer("browser-source", address, webPort, socketPort);
-            if(!httpServer.startServer())
+            if (!httpServer.startServer())
             {
                 return false;
             }
@@ -71,17 +63,18 @@ public class BrowserSourceServer {
             config.setTransports(Transport.byName("websocket"));
 
             socketServer = new SocketIOServer(config);
-            socketServer.addEventListener("card_image", Object.class, new DataListener<Object>() {
+            socketServer.addEventListener("card_image", Object.class, new DataListener<Object>()
+            {
                 @Override
-                public void onData(SocketIOClient client, Object data, AckRequest ackRequest) {
+                public void onData(SocketIOClient client, Object data, AckRequest ackRequest)
+                {
                     socketServer.getBroadcastOperations().sendEvent("card_image", data);
                 }
             });
             try
             {
                 socketServer.start();
-            }
-            catch(Exception e)
+            } catch (Exception e)
             {
                 return false;
             }
@@ -93,7 +86,7 @@ public class BrowserSourceServer {
 
     public void stop()
     {
-        if(isUp)
+        if (isUp)
         {
             httpServer.stop();
             socketServer.stop();
@@ -108,49 +101,59 @@ class CardImageMessage
     public String src;
 }
 
-class HttpServer extends NanoHTTPD {
+class HttpServer extends NanoHTTPD
+{
     private ArrayList<String> allowFiles;
     private String path;
     private int wsPort;
     private String address;
 
-    public HttpServer(String path, String address, int port, int wsPort) {
+    public HttpServer(String path, String address, int port, int wsPort)
+    {
         super(address, port);
         this.address = address;
         this.path = path;
         this.wsPort = wsPort;
         allowFiles = new ArrayList<>();
-        try {
-            Files.walk(Paths.get(path)).filter(Files::isRegularFile).forEach(f -> {
+        try
+        {
+            Files.walk(Paths.get(path)).filter(Files::isRegularFile).forEach(f ->
+            {
                 allowFiles.add(f.toAbsolutePath().toString());
             });
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             e.printStackTrace();
         }
     }
 
-    public boolean startServer() {
-        try {
+    public boolean startServer()
+    {
+        try
+        {
             super.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             return false;
         }
         return true;
     }
 
-    public void stop() {
+    public void stop()
+    {
         super.stop();
     }
 
     @Override
-    public Response serve(IHTTPSession session) {
+    public Response serve(IHTTPSession session)
+    {
         String uri = session.getUri();
-        if(uri.equalsIgnoreCase("/address-config.js"))
+        if (uri.equalsIgnoreCase("/address-config.js"))
         {
             String content = String.format("var socket_server_addr = \"http://%s:%d\";\n", address, wsPort);
             return newFixedLengthResponse(Status.OK, "application/javascript", content);
         }
-        if(uri.equalsIgnoreCase("/card-image"))
+        if (uri.equalsIgnoreCase("/card-image"))
         {
             try
             {
@@ -162,23 +165,25 @@ class HttpServer extends NanoHTTPD {
                 ByteArrayInputStream bain = new ByteArrayInputStream(buf);
                 baos.close();
                 return newChunkedResponse(Status.OK, "image/png", bain);
-            }
-            catch(Exception e)
+            } catch (Exception e)
             {
                 return newFixedLengthResponse(Status.BAD_REQUEST, "text/html", "");
             }
         }
         Path p = Paths.get(path, uri);
         File f = p.toFile();
-        if (allowFiles.contains(f.getAbsolutePath()) && f.exists() && f.isFile()) {
+        if (allowFiles.contains(f.getAbsolutePath()) && f.exists() && f.isFile())
+        {
             FileInputStream fin;
-            try {
+            try
+            {
                 fin = new FileInputStream(f);
-            } catch (FileNotFoundException e) {
+            } catch (FileNotFoundException e)
+            {
                 return newFixedLengthResponse(Status.BAD_REQUEST, "text/html", "");
             }
             String mime = "text/html";
-            if(f.getName().endsWith(".js"))
+            if (f.getName().endsWith(".js"))
             {
                 mime = "application/javascript";
             }

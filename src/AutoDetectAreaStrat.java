@@ -1,24 +1,28 @@
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-class AutoDetectAreaStrat extends AreaRecognitionStrategy {
+class AutoDetectAreaStrat extends AreaRecognitionStrategy
+{
 
     private ArrayList<MatchResult> results = new ArrayList<MatchResult>();
     private ArrayList<ContourBoundingBox> bounds = new ArrayList<ContourBoundingBox>();
     private AutoDetectSettings settings = new AutoDetectSettings();
 
     @Override
-    public ArrayList<MatchResult> recognize(BufferedImage in, RecognitionStrategy strat) {
+    public ArrayList<MatchResult> recognize(BufferedImage in, RecognitionStrategy strat)
+    {
         results.clear();
         bounds = CardBoundingBoxFinder.process(in, settings.getRemoveBackground());
-        for (ContourBoundingBox bound : bounds) {
-            BufferedImage norm = ImageUtil.getScaledImage(bound.getTransformedImage(in,false));
-            BufferedImage flip = ImageUtil.getScaledImage(bound.getTransformedImage(in,true));
-            ImageDesc i = new ImageDesc(norm,flip);
-            MatchResult mr = strat.getMatch(i, SettingsPanel.RECOG_THRESH/100.0);
-            if (mr != null) {
+        for (ContourBoundingBox bound : bounds)
+        {
+            BufferedImage norm = ImageUtil.getScaledImage(bound.getTransformedImage(in, false));
+            BufferedImage flip = ImageUtil.getScaledImage(bound.getTransformedImage(in, true));
+            ImageDesc i = new ImageDesc(norm, flip);
+            MatchResult mr = strat.getMatch(i, SettingsPanel.RECOG_THRESH / 100.0);
+            if (mr != null)
+            {
                 results.add(mr);
             }
         }
@@ -26,58 +30,70 @@ class AutoDetectAreaStrat extends AreaRecognitionStrategy {
     }
 
     @Override
-    public String getStratName() {
+    public String getStratName()
+    {
         return "auto-detect";
     }
 
     @Override
-    public String getStratDisplayName() {
+    public String getStratDisplayName()
+    {
         return "Auto-Detect Card Bounds (Recommended)";
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent e)
+    {
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(MouseEvent e)
+    {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent e)
+    {
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
+    public void mouseEntered(MouseEvent e)
+    {
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(MouseEvent e)
+    {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
+    public void mouseDragged(MouseEvent e)
+    {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {
+    public void mouseMoved(MouseEvent e)
+    {
     }
 
     @Override
-    public void draw(Graphics g) {
-        for(ContourBoundingBox bb : bounds)
+    public void draw(Graphics g)
+    {
+        for (ContourBoundingBox bb : bounds)
         {
             bb.draw(g);
         }
     }
 
     @Override
-    public void init(int width, int height) {
+    public void init(int width, int height)
+    {
         settings.init();
     }
 
     @Override
-    public SettingsEntry getSettingsEntry() {
+    public SettingsEntry getSettingsEntry()
+    {
         return settings;
     }
 

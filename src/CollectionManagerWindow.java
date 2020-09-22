@@ -1,20 +1,11 @@
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.io.File;
 import java.util.Collection;
 
-import javax.swing.BoxLayout;
-import java.awt.Component;
-
-class CollectionManagerWindow extends JFrame {
+class CollectionManagerWindow extends JFrame
+{
     private static final long serialVersionUID = 1L;
 
     private JTable leftTable;
@@ -23,7 +14,8 @@ class CollectionManagerWindow extends JFrame {
     private CollectionData rightData = new CollectionData(true);
     private JFileChooser fileChooser;
 
-    public CollectionManagerWindow() {
+    public CollectionManagerWindow()
+    {
         super("Collection Manager");
 
         fileChooser = new JFileChooser();
@@ -100,22 +92,27 @@ class CollectionManagerWindow extends JFrame {
 
     public void addRecognizedCards(Collection<MatchResult> matches)
     {
-        for(MatchResult match : matches)
+        for (MatchResult match : matches)
         {
             leftData.addEntry(new CollectionEntry(match));
         }
     }
 
-    private class CSVFilter extends FileFilter {
-        public String getDescription() {
+    private class CSVFilter extends FileFilter
+    {
+        public String getDescription()
+        {
             return "CSV Data Files (*.csv)";
         }
 
         @Override
-        public boolean accept(File f) {
-            if (f.isDirectory()) {
+        public boolean accept(File f)
+        {
+            if (f.isDirectory())
+            {
                 return true;
-            } else {
+            } else
+            {
                 String filename = f.getName().toLowerCase();
                 return filename.endsWith(".csv");
             }
@@ -124,7 +121,7 @@ class CollectionManagerWindow extends JFrame {
 
     private void save()
     {
-        if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) 
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
         {
             rightData.saveToFile(fileChooser.getSelectedFile());
         }
@@ -132,7 +129,7 @@ class CollectionManagerWindow extends JFrame {
 
     private void load()
     {
-        if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) 
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
         {
             rightData.loadFromFile(fileChooser.getSelectedFile());
         }
@@ -141,7 +138,7 @@ class CollectionManagerWindow extends JFrame {
     private void toggleFoils()
     {
         int[] sels = rightTable.getSelectedRows();
-        for(int sel:sels)
+        for (int sel : sels)
         {
             rightData.toggleFoil(sel);
         }
@@ -150,11 +147,11 @@ class CollectionManagerWindow extends JFrame {
     private void offsetRightCounts(int offset)
     {
         int[] sels = rightTable.getSelectedRows();
-        for(int sel:sels)
+        for (int sel : sels)
         {
             rightData.offsetCount(sel, offset);
         }
-        if(offset < 0)
+        if (offset < 0)
         {
             rightData.removeEmptyRows();
         }
@@ -163,7 +160,7 @@ class CollectionManagerWindow extends JFrame {
     private void leftToRight()
     {
         int[] sels = leftTable.getSelectedRows();
-        for(int sel:sels)
+        for (int sel : sels)
         {
             rightData.addEntry(new CollectionEntry(leftData.get(sel)));
         }

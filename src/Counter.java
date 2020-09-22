@@ -1,4 +1,4 @@
-
-public class Counter {
-	int count;
+public class Counter
+{
+    int count;
 }

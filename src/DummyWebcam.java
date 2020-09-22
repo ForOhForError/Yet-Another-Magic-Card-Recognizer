@@ -1,8 +1,10 @@
 import com.github.sarxos.webcam.Webcam;
 
-class DummyWebcam extends Webcam {
+class DummyWebcam extends Webcam
+{
 
-    public DummyWebcam() {
+    public DummyWebcam()
+    {
         super(new DummyWebcamDevice());
     }
 

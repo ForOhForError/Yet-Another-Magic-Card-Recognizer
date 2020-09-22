@@ -3,7 +3,9 @@ import java.util.HashSet;
 class CardUtils
 {
     private static HashSet<String> basicNames;
-    static{
+
+    static
+    {
         basicNames = new HashSet<>(5);
         basicNames.add("Plains");
         basicNames.add("Island");

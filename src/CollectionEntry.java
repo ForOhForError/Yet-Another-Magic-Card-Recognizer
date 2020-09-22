@@ -1,6 +1,6 @@
-import java.util.UUID;
-
 import forohfor.scryfall.api.Card;
+
+import java.util.UUID;
 
 class CollectionEntry
 {
@@ -25,7 +25,8 @@ class CollectionEntry
     {
         backingCard = null;
         String scryfallId = res.getData().getScryfallId();
-        if(scryfallId != null) {
+        if (scryfallId != null)
+        {
             this.scry_id = UUID.fromString(res.getData().getScryfallId());
         }
         this.name = res.getName();
@@ -40,8 +41,7 @@ class CollectionEntry
         try
         {
             this.scry_id = UUID.fromString(scryID);
-        }
-        catch (IllegalArgumentException e)
+        } catch (IllegalArgumentException e)
         {
             this.scry_id = null;
         }
@@ -63,10 +63,10 @@ class CollectionEntry
 
     public boolean equals(Object obj)
     {
-        if(obj instanceof CollectionEntry)
+        if (obj instanceof CollectionEntry)
         {
             CollectionEntry e = (CollectionEntry) obj;
-            if(this.scry_id != null && e.getId() != null)
+            if (this.scry_id != null && e.getId() != null)
             {
                 return this.scry_id.equals(e.getId()) && this.isFoil() == e.isFoil();
             }
@@ -112,7 +112,7 @@ class CollectionEntry
 
     public String getIdString()
     {
-        if(scry_id != null)
+        if (scry_id != null)
         {
             return scry_id.toString();
         }
@@ -122,12 +122,12 @@ class CollectionEntry
     public String toTSV()
     {
         return String.format(
-            "%s\t%s\t%s\t%s\t%s",
-            getIdString(),
-            name,
-            setCode,
-            ""+isFoil,
-            ""+count
+                "%s\t%s\t%s\t%s\t%s",
+                getIdString(),
+                name,
+                setCode,
+                "" + isFoil,
+                "" + count
         );
     }
 
@@ -135,11 +135,11 @@ class CollectionEntry
     {
         String[] cells = s.replaceAll("[\n\r]$", "").split("\t");
         return new CollectionEntry(
-            cells[0],
-            cells[1],
-            cells[2],
-            Boolean.parseBoolean(cells[3]),
-            Integer.parseInt(cells[4])
+                cells[0],
+                cells[1],
+                cells[2],
+                Boolean.parseBoolean(cells[3]),
+                Integer.parseInt(cells[4])
         );
     }
 }

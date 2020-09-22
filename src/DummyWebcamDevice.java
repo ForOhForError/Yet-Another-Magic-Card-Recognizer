@@ -1,19 +1,14 @@
 import com.github.sarxos.webcam.WebcamDevice;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import javax.imageio.ImageIO;
-
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Dimension;
-
-class DummyWebcamDevice implements WebcamDevice {
+class DummyWebcamDevice implements WebcamDevice
+{
 
     private BufferedImage buffer;
     private BufferedImage display;
@@ -39,22 +34,25 @@ class DummyWebcamDevice implements WebcamDevice {
 
     boolean open;
 
-    public DummyWebcamDevice() {
+    public DummyWebcamDevice()
+    {
         time = System.currentTimeMillis();
         buffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         display = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         g = buffer.createGraphics();
-        try {
+        try
+        {
             bounce = ImageIO.read(new File("res/YamCR.png"))
-                .getScaledInstance(BOUNCE_SIZE2, BOUNCE_SIZE2, BufferedImage.SCALE_SMOOTH);
-        } catch (IOException e) {
+                    .getScaledInstance(BOUNCE_SIZE2, BOUNCE_SIZE2, BufferedImage.SCALE_SMOOTH);
+        } catch (IOException e)
+        {
             bounce = null;
         }
         Random r = new Random();
-        xvel = (r.nextDouble()-0.5)*MAX_VEL*2;
-        yvel = (r.nextDouble()-0.5)*MAX_VEL*2;
+        xvel = (r.nextDouble() - 0.5) * MAX_VEL * 2;
+        yvel = (r.nextDouble() - 0.5) * MAX_VEL * 2;
         dimensions = new Dimension[1];
-        dimensions[0] = new Dimension(display.getWidth(),display.getHeight());
+        dimensions[0] = new Dimension(display.getWidth(), display.getHeight());
         open = false;
     }
 
@@ -98,7 +96,7 @@ class DummyWebcamDevice implements WebcamDevice {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, WIDTH, HEIGHT);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.drawImage(bounce, (int)bounceX-BOUNCE_SIZE, (int)bounceY-BOUNCE_SIZE, null);
+        g.drawImage(bounce, (int) bounceX - BOUNCE_SIZE, (int) bounceY - BOUNCE_SIZE, null);
 
         display.getGraphics().drawImage(buffer, 0, 0, null);
     }
@@ -106,26 +104,26 @@ class DummyWebcamDevice implements WebcamDevice {
     private void update()
     {
         long now = System.currentTimeMillis();
-        double delta = (now-time)/1000.0;
+        double delta = (now - time) / 1000.0;
         time = now;
-        bounceX += xvel*delta;
-        bounceY += yvel*delta;
-        if(bounceX > WIDTH - BOUNCE_SIZE)
+        bounceX += xvel * delta;
+        bounceY += yvel * delta;
+        if (bounceX > WIDTH - BOUNCE_SIZE)
         {
             bounceX = WIDTH - BOUNCE_SIZE;
             xvel = -xvel;
         }
-        if(bounceX < BOUNCE_SIZE)
+        if (bounceX < BOUNCE_SIZE)
         {
             bounceX = BOUNCE_SIZE;
             xvel = -xvel;
         }
-        if(bounceY > HEIGHT - BOUNCE_SIZE)
+        if (bounceY > HEIGHT - BOUNCE_SIZE)
         {
             bounceY = HEIGHT - BOUNCE_SIZE;
             yvel = -yvel;
         }
-        if(bounceY < BOUNCE_SIZE)
+        if (bounceY < BOUNCE_SIZE)
         {
             bounceY = BOUNCE_SIZE;
             yvel = -yvel;
@@ -141,12 +139,14 @@ class DummyWebcamDevice implements WebcamDevice {
     }
 
     @Override
-    public void dispose() {
+    public void dispose()
+    {
         return;
     }
 
     @Override
-    public boolean isOpen() {
+    public boolean isOpen()
+    {
         return open;
     }
 

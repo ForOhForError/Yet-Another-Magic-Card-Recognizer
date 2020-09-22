@@ -1,9 +1,7 @@
-import java.util.ArrayList;
-
 import javax.swing.event.MouseInputListener;
-
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 abstract class AreaRecognitionStrategy implements MouseInputListener
 {
@@ -20,7 +18,7 @@ abstract class AreaRecognitionStrategy implements MouseInputListener
     public abstract SettingsEntry getSettingsEntry();
 
     public String toString()
-	{
-		return getStratDisplayName();
+    {
+        return getStratDisplayName();
     }
 }

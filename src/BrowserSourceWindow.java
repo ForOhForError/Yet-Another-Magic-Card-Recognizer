@@ -1,20 +1,10 @@
-import java.text.NumberFormat;
-
-import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import javax.swing.text.NumberFormatter;
-
-import java.awt.datatransfer.StringSelection;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.text.NumberFormat;
 
 class BrowserSourceWindow extends JFrame
 {
@@ -30,7 +20,7 @@ class BrowserSourceWindow extends JFrame
         JPanel top = new JPanel();
         top.setBorder(new EmptyBorder(5, 5, 5, 5));
         top.setLayout(new FlowLayout());
-		top.setPreferredSize(new Dimension(300,100));
+        top.setPreferredSize(new Dimension(300, 100));
 
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(false);
@@ -47,7 +37,7 @@ class BrowserSourceWindow extends JFrame
         portField.setPreferredSize(d);
 
         JTextField addressField = new JTextField(10);
-        addressField.setText((String)SavedConfig.getProperty("browser_source.address", "localhost"));
+        addressField.setText((String) SavedConfig.getProperty("browser_source.address", "localhost"));
 
         JButton start = new JButton("Start Server");
         JButton stop = new JButton("Stop Server");
@@ -61,13 +51,14 @@ class BrowserSourceWindow extends JFrame
         stop.setEnabled(false);
 
 
-        start.addActionListener(e -> {
-            Integer port = (Integer)portField.getValue();
+        start.addActionListener(e ->
+        {
+            Integer port = (Integer) portField.getValue();
             String addr = addressField.getText();
             SavedConfig.putProperty("browser_source.port", port);
             SavedConfig.putProperty("browser_source.address", addr);
             SavedConfig.writeOut();
-            if(server.start(addr, port))
+            if (server.start(addr, port))
             {
                 start.setEnabled(false);
                 portField.setEnabled(false);
@@ -76,7 +67,8 @@ class BrowserSourceWindow extends JFrame
             }
         });
 
-        stop.addActionListener(e -> {
+        stop.addActionListener(e ->
+        {
             server.stop();
             start.setEnabled(true);
             portField.setEnabled(true);
@@ -84,8 +76,9 @@ class BrowserSourceWindow extends JFrame
             stop.setEnabled(false);
         });
 
-        copy.addActionListener(e -> {
-            Integer port = (Integer)portField.getValue();
+        copy.addActionListener(e ->
+        {
+            Integer port = (Integer) portField.getValue();
             String addr = addressField.getText();
             setClipboard(String.format("http://%s:%d/card-view.html", addr, port));
         });

@@ -17,21 +17,21 @@ class StrategySelect
         registerAreaStrategy(new RadiusAreaStrat());
     }
 
-    public static void registerStrategy(RecognitionStrategy strat) 
+    public static void registerStrategy(RecognitionStrategy strat)
     {
         strats.add(strat);
     }
 
-    public static void registerAreaStrategy(AreaRecognitionStrategy strat) 
+    public static void registerAreaStrategy(AreaRecognitionStrategy strat)
     {
         areaStrats.add(strat);
     }
 
-    public static RecognitionStrategy getStrat(String id) 
+    public static RecognitionStrategy getStrat(String id)
     {
-        for(RecognitionStrategy strat : strats)
+        for (RecognitionStrategy strat : strats)
         {
-            if(strat.getStratName().equals(id))
+            if (strat.getStratName().equals(id))
             {
                 return strat;
             }
@@ -39,11 +39,11 @@ class StrategySelect
         return null;
     }
 
-    public static AreaRecognitionStrategy getAreaStrat(String id) 
+    public static AreaRecognitionStrategy getAreaStrat(String id)
     {
-        for(AreaRecognitionStrategy strat : areaStrats)
+        for (AreaRecognitionStrategy strat : areaStrats)
         {
-            if(strat.getStratName().equals(id))
+            if (strat.getStratName().equals(id))
             {
                 return strat;
             }

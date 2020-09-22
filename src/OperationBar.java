@@ -1,5 +1,4 @@
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
+import javax.swing.*;
 
 class OperationBar extends JProgressBar
 {
@@ -19,18 +18,18 @@ class OperationBar extends JProgressBar
 
     public synchronized boolean setTask(String name, int max)
     {
-        if(max==0)
+        if (max == 0)
         {
             return true;
         }
-        if(!inProgress)
+        if (!inProgress)
         {
             setMaximum(max);
             taskName = name;
             subtaskName = "";
             taskMax = max;
             taskProgress = 0;
-            inProgress=true;
+            inProgress = true;
             updateDisplay();
             return true;
         }
@@ -40,7 +39,7 @@ class OperationBar extends JProgressBar
 
     public void setSubtaskName(String name)
     {
-        if(taskMax != 0)
+        if (taskMax != 0)
         {
             subtaskName = name;
             updateDisplay();
@@ -50,11 +49,10 @@ class OperationBar extends JProgressBar
     public synchronized void progressTask()
     {
         taskProgress += 1;
-        if(taskProgress == taskMax)
+        if (taskProgress == taskMax)
         {
             endTask();
-        }
-        else
+        } else
         {
             setValue(taskProgress);
             updateDisplay();
@@ -63,18 +61,16 @@ class OperationBar extends JProgressBar
 
     private void updateDisplay()
     {
-        if(inProgress)
-        {  
-            if(subtaskName.length() > 0)
+        if (inProgress)
+        {
+            if (subtaskName.length() > 0)
             {
                 setString(String.format("%s: %d/%d - %s...", taskName, taskProgress, taskMax, subtaskName));
-            }
-            else
+            } else
             {
                 setString(String.format("%s: %d/%d...", taskName, taskProgress, taskMax));
             }
-        }
-        else
+        } else
         {
             setString("");
         }
