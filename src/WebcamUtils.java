@@ -46,6 +46,11 @@ public class WebcamUtils
                 JOptionPane.PLAIN_MESSAGE, null,
                 pcams.toArray(), Webcam.getDefault());
 
+        if(pw == null)
+        {
+            return null;
+        }
+
         Webcam w = pw.get();
 
         if (w == null)
@@ -104,8 +109,17 @@ public class WebcamUtils
             {
                 if (cam.getName().equals(prefCamName))
                 {
-                    cam.setViewSize(prefCamRes);
-                    return cam;
+                    try
+                    {
+                        cam.setViewSize(prefCamRes);
+                        return cam;
+                    }
+                    catch (IllegalArgumentException ex)
+                    {
+                        cam.setCustomViewSizes(prefCamRes);
+                        cam.setViewSize(prefCamRes);
+                        return cam;
+                    }
                 }
             }
         }
