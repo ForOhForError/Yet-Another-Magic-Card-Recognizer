@@ -60,7 +60,7 @@ public class BrowserSourceServer
             Configuration config = new Configuration();
             config.setHostname(address);
             config.setPort(socketPort);
-            config.setTransports(Transport.byName("websocket"));
+            config.setTransports(Transport.WEBSOCKET);
 
             socketServer = new SocketIOServer(config);
             socketServer.addEventListener("card_image", Object.class, new DataListener<Object>()
