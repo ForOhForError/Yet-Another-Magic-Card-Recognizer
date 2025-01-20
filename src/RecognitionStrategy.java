@@ -186,6 +186,7 @@ public abstract class RecognitionStrategy
         jo.put("name", card.getName());
         jo.put("set", card.getSetCode());
         jo.put("scryfall-id", card.getScryfallUUID().toString());
+        jo.put("price", card.getPrices());
         return jo;
     }
 
