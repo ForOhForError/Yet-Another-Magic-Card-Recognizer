@@ -4,6 +4,10 @@ import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 
 import javax.imageio.ImageIO;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.ServerSocket;
@@ -29,6 +33,7 @@ public class BrowserSourceServer
             CardImageMessage msg = new CardImageMessage();
             msg.auto = auto;
             msg.src = imageUrl;
+            msg.json = dc.getJSON();
             socketServer.getBroadcastOperations().sendEvent("card_image", msg);
         }
     }
@@ -60,7 +65,7 @@ public class BrowserSourceServer
             Configuration config = new Configuration();
             config.setHostname(address);
             config.setPort(socketPort);
-            config.setTransports(Transport.byName("websocket"));
+            config.setTransports(Transport.WEBSOCKET);
 
             socketServer = new SocketIOServer(config);
             socketServer.addEventListener("card_image", Object.class, new DataListener<Object>()
@@ -99,6 +104,8 @@ class CardImageMessage
 {
     public boolean auto;
     public String src;
+    public JSONObject json;
+    public String id;
 }
 
 class HttpServer extends NanoHTTPD
