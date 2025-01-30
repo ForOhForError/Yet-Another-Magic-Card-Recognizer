@@ -1,6 +1,7 @@
 on:
   release:
     types: [created]
+  workflow_dispatch:
 name: Handle Release
 jobs:
   generate:
@@ -12,6 +13,8 @@ jobs:
         with:
           java-version: '8'
           distribution: 'temurin'
+      - name: Permit build script
+        run: chmod +x package-release.sh
       - name: Build
         run: ./package-release.sh
       - name: Upload Release Asset
