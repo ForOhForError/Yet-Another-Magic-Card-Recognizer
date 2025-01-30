@@ -5,6 +5,7 @@ name: Handle Release
 jobs:
   generate:
     name: Create release-artifacts
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
